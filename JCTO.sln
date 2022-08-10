@@ -5,7 +5,18 @@ VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JCTO.Api", "JCTO.Api\JCTO.Api.csproj", "{7192EDFD-BE03-44AE-888D-AAEC63ABEADC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JCTO.Domain", "JCTO.Domain\JCTO.Domain.csproj", "{05C0EB8A-FDDC-42DF-9728-9641857FB5C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JCTO.Domain", "JCTO.Domain\JCTO.Domain.csproj", "{05C0EB8A-FDDC-42DF-9728-9641857FB5C6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3E3E9ED4-A6CD-4A26-B40D-93F1734A65DF}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JCTO.Data", "JCTO.Data\JCTO.Data.csproj", "{E22A4D89-C76D-4C91-9A25-184F4F6CE866}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JCTO.Services", "JCTO.Services\JCTO.Services.csproj", "{8534C668-9383-4D41-8835-DA30BEC5C23D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JCTO.Tests", "JCTO.Tests\JCTO.Tests.csproj", "{C7E454A0-76BB-497B-ACE9-93CC024EFE92}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +32,18 @@ Global
 		{05C0EB8A-FDDC-42DF-9728-9641857FB5C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05C0EB8A-FDDC-42DF-9728-9641857FB5C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05C0EB8A-FDDC-42DF-9728-9641857FB5C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E22A4D89-C76D-4C91-9A25-184F4F6CE866}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E22A4D89-C76D-4C91-9A25-184F4F6CE866}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E22A4D89-C76D-4C91-9A25-184F4F6CE866}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E22A4D89-C76D-4C91-9A25-184F4F6CE866}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8534C668-9383-4D41-8835-DA30BEC5C23D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8534C668-9383-4D41-8835-DA30BEC5C23D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8534C668-9383-4D41-8835-DA30BEC5C23D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8534C668-9383-4D41-8835-DA30BEC5C23D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7E454A0-76BB-497B-ACE9-93CC024EFE92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7E454A0-76BB-497B-ACE9-93CC024EFE92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7E454A0-76BB-497B-ACE9-93CC024EFE92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7E454A0-76BB-497B-ACE9-93CC024EFE92}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

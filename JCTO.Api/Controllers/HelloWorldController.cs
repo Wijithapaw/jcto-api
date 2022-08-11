@@ -22,6 +22,10 @@ namespace JCTO.Api.Controllers
         [HttpGet("{name}")]
         public string Get(string name)
         {
+            if (name == "1") throw new JCTOValidationException("Validation Error");
+
+            if (name == "2") throw new JCTOConcurrencyException("Order");
+
             return "Hello World! - " + name;
         }
     }

@@ -37,7 +37,7 @@ namespace JCTO.Api.Middlewares
                     logger.LogWarning(ex.Message);
 
                     statusCode = HttpStatusCode.Conflict;
-                    errorObj.ErrorMessage = $"{concurrencyEx.Entity} you are trying to update is outdated. Please refresh it and update again";
+                    errorObj.ErrorMessage = $"'{concurrencyEx.Entity}', you are updating is outdated. Please refresh the '{concurrencyEx.Entity}' and update again.";
                 }
                 else if (ex is JCTOException)
                 {

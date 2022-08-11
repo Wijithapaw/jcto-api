@@ -5,6 +5,8 @@ using JCTO.Domain.Entities;
 using JCTO.Domain.Entities.Base;
 using Microsoft.EntityFrameworkCore;
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+
 namespace JCTO.Data
 {
     public class JctoDbContext : DbContext, IJctoDbContext 
@@ -24,7 +26,6 @@ namespace JCTO.Data
             //Indexes
             builder.Entity<User>().HasIndex(u => u.Email).IsUnique();
         }
-
 
         public DbSet<User> Users { get; set; }
 

@@ -7,5 +7,6 @@ namespace JCTO.Domain.Services
         Task<List<UserDto>> GetAllAsync();
         Task<UserDto?> GetAsync(Guid id);
         Task<EntityUpdateResult> UpdateAsync(Guid id, UserDto userDto);
+        Task<EntityCreateResult> RegisterAsync(UserDto userDto);
     }
 }

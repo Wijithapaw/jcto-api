@@ -1,10 +1,16 @@
 using JCTO.Api.Middlewares;
+using JCTO.Data;
+using JCTO.Domain;
 using JCTO.Domain.ConfigSettings;
 using JCTO.Domain.Dtos;
+using JCTO.Domain.Services;
+using JCTO.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using System.IdentityModel.Tokens.Jwt;
 
@@ -12,8 +18,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((ctx, lc) => lc.ReadFrom.Configuration(ctx.Configuration));
 
+builder.Services.AddDbContext<JctoDbContext>(options =>
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 // Add services to the container.
 builder.Services.AddScoped<IUserContext, UserContext>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IJctoDbContext>(s => s.GetRequiredService<JctoDbContext>());
 
 builder.Services.AddControllers(options =>
 {
@@ -26,7 +37,33 @@ builder.Services.AddControllers(options =>
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(option =>
+{
+    option.SwaggerDoc("v1", new OpenApiInfo { Title = "JCTO API", Version = "v1" });
+    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter a valid token",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
+    option.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type=ReferenceType.SecurityScheme,
+                    Id="Bearer"
+                }
+            },
+            new string[]{}
+        }
+    });
+});
 
 //Aws cognito Identity configuration
 var cognitoSettings = builder.Configuration.GetSection("AwsCognitoSettings").Get<AwsCognitoSettings>();
@@ -70,6 +107,12 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<JctoDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
 
 app.Map("/healthz", () => "ok");
 

@@ -1,6 +1,7 @@
 ﻿using JCTO.Domain;
 using JCTO.Domain.CustomExceptions;
 using JCTO.Domain.Dtos;
+using JCTO.Domain.Entities;
 using JCTO.Domain.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -42,6 +43,23 @@ namespace JCTO.Services
                 }).FirstOrDefaultAsync();
 
             return user;
+        }
+
+        public async Task<EntityCreateResult> RegisterAsync(UserDto userDto)
+        {
+            var user = new User
+            {
+                //Id = userDto.Id,
+                Email = userDto.Email,
+                FirstName = userDto.FirstName,
+                LastName = userDto.LastName,
+            };
+
+            _dbContext.Users.Add(user);
+
+            await _dbContext.SaveChangesAsync();
+
+            return new EntityCreateResult { Id = user.Id!.Value, ConcurrencyKey = user.ConcurrencyKey!.Value };
         }
 
         public async Task<EntityUpdateResult> UpdateAsync(Guid id, UserDto userDto)

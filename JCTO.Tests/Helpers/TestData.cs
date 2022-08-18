@@ -22,5 +22,21 @@ namespace JCTO.Tests.Helpers
                 return users;
             }
         }
+
+        internal static class Customers
+        {
+            internal static Customer[] GetCustomers()
+            {
+                var customers = new Customer[]
+                {
+                    EntityHelper.CreateCustomer("JVC"),
+                    EntityHelper.CreateCustomer("JKCS"),
+                    EntityHelper.CreateCustomer("Mobil"),
+                    EntityHelper.CreateCustomer("EXPO", false),
+                };
+
+                return customers;
+            }
+        }
     }
 }

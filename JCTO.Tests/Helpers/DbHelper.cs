@@ -23,13 +23,13 @@ namespace JCTO.Tests.Helpers
             return connection;
         }
 
-        private static DbContextOptions<JctoDbContext> GetSqliteContextOptions(SqliteConnection connection)
+        private static DbContextOptions<DataContext> GetSqliteContextOptions(SqliteConnection connection)
         {
-            var options = new DbContextOptionsBuilder<JctoDbContext>()
+            var options = new DbContextOptionsBuilder<DataContext>()
                    .UseSqlite(connection)
                    .Options;
 
-            using (var context = new JctoDbContext(options, GetUserContext()))
+            using (var context = new DataContext(options, GetUserContext()))
             {
                 context.Database.EnsureCreated();
             }
@@ -39,7 +39,7 @@ namespace JCTO.Tests.Helpers
 
         public static IUserContext GetUserContext() => new UserContext { UserId = UNIT_TEST_USER_ID };
 
-        private static async Task CreateUnitTestUserAsync(IJctoDbContext dbContext)
+        private static async Task CreateUnitTestUserAsync(IDataContext dbContext)
         {
             dbContext.Users.Add(new User
             {
@@ -58,9 +58,9 @@ namespace JCTO.Tests.Helpers
         /// <param name="funcTextExecutionAsync(IDataContext context)"> Place the main tst logic inside here. </param>
         /// <param name="funcValidationsAsync(IDataContext context)"> Use this method for additional validations against a fresh data context. This is optional. </param>
         /// <returns></returns>
-        public static async Task ExecuteTestAsync(Func<IJctoDbContext, Task> funcSetupTestDataAsync,
-            Func<IJctoDbContext, Task> funcTextExecutionAsync,
-            Func<IJctoDbContext, Task>? funcValidationsAsync = null)
+        public static async Task ExecuteTestAsync(Func<IDataContext, Task> funcSetupTestDataAsync,
+            Func<IDataContext, Task> funcTextExecutionAsync,
+            Func<IDataContext, Task>? funcValidationsAsync = null)
         {
             using (var connection = GetSqliteConnection())
             {
@@ -68,7 +68,7 @@ namespace JCTO.Tests.Helpers
 
                 if (funcSetupTestDataAsync != null)
                 {
-                    using (IJctoDbContext context = new JctoDbContext(options, GetUserContext()))
+                    using (IDataContext context = new DataContext(options, GetUserContext()))
                     {
                         await CreateUnitTestUserAsync(context);
 
@@ -76,14 +76,14 @@ namespace JCTO.Tests.Helpers
                     }
                 }
 
-                using (IJctoDbContext context = new JctoDbContext(options, GetUserContext()))
+                using (IDataContext context = new DataContext(options, GetUserContext()))
                 {
                     await funcTextExecutionAsync(context);
                 }
 
                 if (funcValidationsAsync != null)
                 {
-                    using (IJctoDbContext context = new JctoDbContext(options, GetUserContext()))
+                    using (IDataContext context = new DataContext(options, GetUserContext()))
                     {
                         await funcValidationsAsync(context);
                     }

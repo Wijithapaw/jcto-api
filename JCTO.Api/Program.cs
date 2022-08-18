@@ -18,13 +18,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((ctx, lc) => lc.ReadFrom.Configuration(ctx.Configuration));
 
-builder.Services.AddDbContext<JctoDbContext>(options =>
+builder.Services.AddDbContext<DataContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.
 builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IJctoDbContext>(s => s.GetRequiredService<JctoDbContext>());
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IDataContext>(s => s.GetRequiredService<DataContext>());
 
 builder.Services.AddControllers(options =>
 {
@@ -110,7 +111,7 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<JctoDbContext>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<DataContext>();
     await dbContext.Database.MigrateAsync();
 }
 

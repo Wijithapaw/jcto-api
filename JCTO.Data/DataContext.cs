@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JCTO.Data
 {
-    public class JctoDbContext : DbContext, IJctoDbContext 
+    public class DataContext : DbContext, IDataContext 
     {
         private readonly IUserContext _userContext;
 
-        public JctoDbContext(DbContextOptions<JctoDbContext> options, IUserContext userContext)
+        public DataContext(DbContextOptions<DataContext> options, IUserContext userContext)
            : base(options)
         {
             _userContext = userContext;
@@ -25,9 +25,11 @@ namespace JCTO.Data
 
             //Indexes
             builder.Entity<User>().HasIndex(u => u.Email).IsUnique();
+            builder.Entity<Customer>().HasIndex(c => c.Name).IsUnique();
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Customer> Customers { get; set; }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {

@@ -18,5 +18,14 @@ namespace JCTO.Tests.Helpers
                 Email = email
             };
         }
+
+        public static Customer CreateCustomer(string name, bool active = true)
+        {
+            return new Customer
+            {
+                Name = name,
+                Active = active
+            };
+        }
     }
 }

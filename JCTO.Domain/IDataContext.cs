@@ -3,9 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JCTO.Domain
 {
-    public interface IJctoDbContext : IDisposable
+    public interface IDataContext : IDisposable
     {
         DbSet<User> Users { get; set; }
+        DbSet<Customer> Customers { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken));
     }

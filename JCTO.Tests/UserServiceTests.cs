@@ -14,11 +14,11 @@ namespace JCTO.Tests
             public async Task WhenUsersExists_ReturnAll()
             {
                 await DbHelper.ExecuteTestAsync(
-                   async (IJctoDbContext dbContext) =>
+                   async (IDataContext dbContext) =>
                    {
                        await SetupTestDataAsync(dbContext);
                    },
-                   async (IJctoDbContext dbContext) =>
+                   async (IDataContext dbContext) =>
                    {
                        var userSvc = new UserService(dbContext);
 
@@ -35,11 +35,11 @@ namespace JCTO.Tests
             public async Task WhenUsersExists_UpdatesSuccessfully()
             {
                 await DbHelper.ExecuteTestAsync(
-                   async (IJctoDbContext dbContext) =>
+                   async (IDataContext dbContext) =>
                    {
                        await SetupTestDataAsync(dbContext);
                    },
-                   async (IJctoDbContext dbContext) =>
+                   async (IDataContext dbContext) =>
                    {
                        var userSvc = new UserService(dbContext);
 
@@ -58,11 +58,11 @@ namespace JCTO.Tests
             public async Task WhenThereIsConcurencyViolation_ThrowsException()
             {
                 await DbHelper.ExecuteTestAsync(
-                   async (IJctoDbContext dbContext) =>
+                   async (IDataContext dbContext) =>
                    {
                        await SetupTestDataAsync(dbContext);
                    },
-                   async (IJctoDbContext dbContext) =>
+                   async (IDataContext dbContext) =>
                    {
                        var userSvc = new UserService(dbContext);
 
@@ -83,7 +83,7 @@ namespace JCTO.Tests
             }
         }
 
-        private static async Task SetupTestDataAsync(IJctoDbContext dbContext)
+        private static async Task SetupTestDataAsync(IDataContext dbContext)
         {
             dbContext.Users.AddRange(TestData.Users.GetUsers());
 

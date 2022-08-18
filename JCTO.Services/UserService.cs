@@ -9,9 +9,9 @@ namespace JCTO.Services
 {
     public class UserService : IUserService
     {
-        private readonly IJctoDbContext _dbContext;
+        private readonly IDataContext _dbContext;
 
-        public UserService(IJctoDbContext dbContext)
+        public UserService(IDataContext dbContext)
         {
             _dbContext = dbContext;
         }

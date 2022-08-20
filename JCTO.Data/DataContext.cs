@@ -26,10 +26,12 @@ namespace JCTO.Data
             //Indexes
             builder.Entity<User>().HasIndex(u => u.Email).IsUnique();
             builder.Entity<Customer>().HasIndex(c => c.Name).IsUnique();
+            builder.Entity<Product>().HasIndex(c => c.Code).IsUnique();
         }
 
         public DbSet<User> Users { get; set; }
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<Product> Products { get; set; }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {

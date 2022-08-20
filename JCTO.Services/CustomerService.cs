@@ -37,5 +37,19 @@ namespace JCTO.Services
 
             return customerStocks;
         }
+
+        public async Task<List<ListItem>> GetProductListItemsAsync()
+        {
+            var products = await _dataContext.Products
+                .Where(p => !p.Inactive)
+                .OrderBy(p => p.SortOrder)
+                .Select(p => new ListItem
+                {
+                    Id = p.Id.ToString(),
+                    Label = p.Code
+                }).ToListAsync();
+
+            return products;
+        }
     }
 }

@@ -11,5 +11,6 @@ namespace JCTO.Domain.Services
     {
         Task<List<CustomerStockDto>> GetAllCustomerStocksAsync();
         Task<List<ListItem>> GetAllCustomersListItemsAsync();
+        Task<List<ListItem>> GetProductListItemsAsync();
     }
 }

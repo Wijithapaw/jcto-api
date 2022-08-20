@@ -51,6 +51,32 @@ namespace JCTO.Tests
             }
         }
 
+        public class GetProductListItems
+        {
+            [Fact]
+            public async Task WhenProductsExists_ReturnAllActive()
+            {
+                await DbHelper.ExecuteTestAsync(
+                   async (IDataContext dbContext) =>
+                   {
+                       dbContext.Products.AddRange(TestData.Products.GetProducts());
+                       await dbContext.SaveChangesAsync();
+                   },
+                   async (IDataContext dbContext) =>
+                   {
+                       var customerSvc = new CustomerService(dbContext);
+
+                       var products = await customerSvc.GetProductListItemsAsync();
+
+                       Assert.Equal(3, products.Count);
+
+                       Assert.Contains(products, p => p.Label == "GO");
+                       Assert.Contains(products, p => p.Label == "380_LSFO");
+                       Assert.Contains(products, p => p.Label == "380_HSFO");
+                   });
+            }
+        }
+
         private static async Task SetupTestDataAsync(IDataContext dbContext)
         {
             dbContext.Customers.AddRange(TestData.Customers.GetCustomers());

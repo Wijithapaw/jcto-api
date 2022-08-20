@@ -38,5 +38,21 @@ namespace JCTO.Tests.Helpers
                 return customers;
             }
         }
+
+        internal static class Products
+        {
+            internal static Product[] GetProducts()
+            {
+                var products = new Product[]
+                {
+                    EntityHelper.CreateProduct("GO"),
+                    EntityHelper.CreateProduct("380_LSFO"),
+                    EntityHelper.CreateProduct("380_HSFO"),
+                    EntityHelper.CreateProduct("380_HSFO_OLD", true),
+                };
+
+                return products;
+            }
+        }
     }
 }

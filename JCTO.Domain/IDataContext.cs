@@ -7,6 +7,7 @@ namespace JCTO.Domain
     {
         DbSet<User> Users { get; set; }
         DbSet<Customer> Customers { get; set; }
+        DbSet<Product> Products { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken));
     }

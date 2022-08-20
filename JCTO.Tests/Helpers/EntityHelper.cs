@@ -27,5 +27,14 @@ namespace JCTO.Tests.Helpers
                 Active = active
             };
         }
+
+        public static Product CreateProduct(string code, bool inactive = false)
+        {
+            return new Product
+            {
+                Code = code,
+                Inactive = inactive
+            };
+        }
     }
 }

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JCTO.Services
 {
-    public class UserService : IUserService
+    public class UserService : BaseService, IUserService
     {
         private readonly IDataContext _dbContext;
 
@@ -59,7 +59,7 @@ namespace JCTO.Services
 
             await _dbContext.SaveChangesAsync();
 
-            return new EntityCreateResult { Id = user.Id!.Value, ConcurrencyKey = user.ConcurrencyKey!.Value };
+            return GetEntityCreateResult(user);
         }
 
         public async Task<EntityUpdateResult> UpdateAsync(Guid id, UserDto userDto)
@@ -76,7 +76,7 @@ namespace JCTO.Services
 
             await _dbContext.SaveChangesAsync();
 
-            return new EntityUpdateResult { ConcurrencyKey = user.ConcurrencyKey!.Value };
+            return GetEntityUpdateResult(user);
         }
     }
 }

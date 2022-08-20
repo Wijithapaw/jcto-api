@@ -2,6 +2,6 @@
 {
     public interface IConcurrencyHandledEntity
     {
-        public Guid? ConcurrencyKey { get; set; }
+        public Guid ConcurrencyKey { get; set; }
     }
 }

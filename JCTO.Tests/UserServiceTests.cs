@@ -48,7 +48,7 @@ namespace JCTO.Tests
                        var oldConcurrencyKey = user.ConcurrencyKey;
 
                        var userDto = DtoHelper.CreateUserDto("Kusal New", "Mendis", "kusal@yopmail.com", oldConcurrencyKey);
-                       var result = await userSvc.UpdateAsync(user.Id!.Value, userDto);
+                       var result = await userSvc.UpdateAsync(user.Id, userDto);
 
                        Assert.NotEqual(result.ConcurrencyKey, oldConcurrencyKey);
                    });
@@ -71,12 +71,12 @@ namespace JCTO.Tests
                        var oldConcurrencyKey = user.ConcurrencyKey;
 
                        var userDto = DtoHelper.CreateUserDto("Kusal New", "Mendis", "kusal@yopmail.com", oldConcurrencyKey);
-                       var result = await userSvc.UpdateAsync(user.Id!.Value, userDto);
+                       var result = await userSvc.UpdateAsync(user.Id, userDto);
 
                        Assert.NotEqual(result.ConcurrencyKey, oldConcurrencyKey);
 
                        userDto.FirstName = "Kusal New 2";
-                       var ex = await Assert.ThrowsAsync<JCTOConcurrencyException>(() => userSvc.UpdateAsync(user.Id.Value, userDto));
+                       var ex = await Assert.ThrowsAsync<JCTOConcurrencyException>(() => userSvc.UpdateAsync(user.Id, userDto));
 
                        Assert.Equal("Concurrency violation of Entity: User", ex.Message);
                    });

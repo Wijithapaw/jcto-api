@@ -3,6 +3,7 @@ using System;
 using JCTO.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JCTO.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class JctoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220820094154_Create_Table_Entries")]
+    partial class Create_Table_Entries
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,14 +26,16 @@ namespace JCTO.Data.Migrations
 
             modelBuilder.Entity("JCTO.Domain.Entities.Customer", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ConcurrencyKey")
+                    b.Property<Guid?>("ConcurrencyKey")
+                        .IsRequired()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
+                        .IsRequired()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -40,7 +44,8 @@ namespace JCTO.Data.Migrations
                     b.Property<bool>("Inactive")
                         .HasColumnType("boolean");
 
-                    b.Property<Guid>("LastUpdatedById")
+                    b.Property<Guid?>("LastUpdatedById")
+                        .IsRequired()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("LastUpdatedDateUtc")
@@ -65,14 +70,16 @@ namespace JCTO.Data.Migrations
 
             modelBuilder.Entity("JCTO.Domain.Entities.Entry", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ConcurrencyKey")
+                    b.Property<Guid?>("ConcurrencyKey")
+                        .IsRequired()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
+                        .IsRequired()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -82,7 +89,7 @@ namespace JCTO.Data.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("EntryDate")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("EntryNo")
                         .IsRequired()
@@ -92,7 +99,8 @@ namespace JCTO.Data.Migrations
                     b.Property<double>("InitialQualtity")
                         .HasColumnType("double precision");
 
-                    b.Property<Guid>("LastUpdatedById")
+                    b.Property<Guid?>("LastUpdatedById")
+                        .IsRequired()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("LastUpdatedDateUtc")
@@ -122,17 +130,19 @@ namespace JCTO.Data.Migrations
 
             modelBuilder.Entity("JCTO.Domain.Entities.EntryTransaction", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<double>("Amount")
                         .HasColumnType("double precision");
 
-                    b.Property<Guid>("ConcurrencyKey")
+                    b.Property<Guid?>("ConcurrencyKey")
+                        .IsRequired()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
+                        .IsRequired()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -141,7 +151,8 @@ namespace JCTO.Data.Migrations
                     b.Property<Guid>("EntryId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("LastUpdatedById")
+                    b.Property<Guid?>("LastUpdatedById")
+                        .IsRequired()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("LastUpdatedDateUtc")
@@ -157,17 +168,16 @@ namespace JCTO.Data.Migrations
 
                     b.HasIndex("CreatedById");
 
-                    b.HasIndex("LastUpdatedById");
+                    b.HasIndex("EntryId");
 
-                    b.HasIndex("EntryId", "Type")
-                        .HasFilter("\"Type\" = 0");
+                    b.HasIndex("LastUpdatedById");
 
                     b.ToTable("EntryTransaction");
                 });
 
             modelBuilder.Entity("JCTO.Domain.Entities.Product", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
@@ -176,10 +186,12 @@ namespace JCTO.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<Guid>("ConcurrencyKey")
+                    b.Property<Guid?>("ConcurrencyKey")
+                        .IsRequired()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
+                        .IsRequired()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -188,7 +200,8 @@ namespace JCTO.Data.Migrations
                     b.Property<bool>("Inactive")
                         .HasColumnType("boolean");
 
-                    b.Property<Guid>("LastUpdatedById")
+                    b.Property<Guid?>("LastUpdatedById")
+                        .IsRequired()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("LastUpdatedDateUtc")
@@ -211,14 +224,16 @@ namespace JCTO.Data.Migrations
 
             modelBuilder.Entity("JCTO.Domain.Entities.User", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<Guid?>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ConcurrencyKey")
+                    b.Property<Guid?>("ConcurrencyKey")
+                        .IsRequired()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("CreatedById")
+                    b.Property<Guid?>("CreatedById")
+                        .IsRequired()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDateUtc")
@@ -239,7 +254,8 @@ namespace JCTO.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<Guid>("LastUpdatedById")
+                    b.Property<Guid?>("LastUpdatedById")
+                        .IsRequired()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("LastUpdatedDateUtc")

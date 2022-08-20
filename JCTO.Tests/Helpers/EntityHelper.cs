@@ -1,4 +1,5 @@
 ﻿using JCTO.Domain.Entities;
+using JCTO.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +35,29 @@ namespace JCTO.Tests.Helpers
             {
                 Code = code,
                 Inactive = inactive
+            };
+        }
+
+        public static Entry CreateEntry(string entryNo, Guid customerId, Guid productId, double initialQuantity, DateTime entryDate, EntryStatus entryStatus)
+        {
+            return new Entry
+            {
+                EntryNo = entryNo,
+                CustomerId = customerId,
+                ProductId = productId,
+                InitialQualtity = initialQuantity,
+                EntryDate = entryDate,
+                Status = entryStatus
+            };
+        }
+
+        public static EntryTransaction CreateEntryTransaction(EntryTransactionType type, double amount)
+        {
+            return new EntryTransaction
+            {
+                Amount = amount,
+                Type = type,
+                TransactionDateTimeUtc = DateTime.UtcNow,
             };
         }
     }

@@ -1,5 +1,7 @@
 ﻿using JCTO.Domain.CustomExceptions;
 using JCTO.Domain.Dtos;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using System.Net;
 
 namespace JCTO.Api.Middlewares
@@ -38,6 +40,19 @@ namespace JCTO.Api.Middlewares
 
                     statusCode = HttpStatusCode.Conflict;
                     errorObj.ErrorMessage = $"'{concurrencyEx.Entity}', you are updating is outdated. Please refresh the '{concurrencyEx.Entity}' and update again.";
+                }
+                else if (ex is DbUpdateException)
+                {
+                    var dbEx = (DbUpdateException)ex;
+                    if(dbEx.InnerException != null && dbEx.InnerException is PostgresException)
+                    {
+                        var pgEx = (PostgresException)ex.InnerException!;
+                        if(!string.IsNullOrEmpty(pgEx.ConstraintName))
+                        {
+                            statusCode = HttpStatusCode.BadRequest;
+                            errorObj.ErrorMessage = $"Duplicate {pgEx.ConstraintName.Split('_').Last()}";
+                        }
+                    }
                 }
                 else if (ex is JCTOException)
                 {

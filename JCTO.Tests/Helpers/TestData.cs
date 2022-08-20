@@ -1,4 +1,5 @@
 ﻿using JCTO.Domain.Entities;
+using JCTO.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,6 +53,24 @@ namespace JCTO.Tests.Helpers
                 };
 
                 return products;
+            }
+        }
+
+        internal static class Entries
+        {
+            internal static List<Entry> GetEntries(Guid customerId, Guid productId)
+            {
+                var e1 = EntityHelper.CreateEntry("1001", customerId, productId, 1000.250, new DateTime(2022, 8, 20), EntryStatus.Active);
+                var e1Txns = new List<EntryTransaction>
+                {
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.In, 1000.250),
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.In, 1000.250)
+                };
+                e1.Transactions = e1Txns;
+
+                var entries = new List<Entry> { e1 };
+
+                return entries;
             }
         }
     }

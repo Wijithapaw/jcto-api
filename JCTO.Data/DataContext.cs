@@ -26,12 +26,23 @@ namespace JCTO.Data
             //Indexes
             builder.Entity<User>().HasIndex(u => u.Email).IsUnique();
             builder.Entity<Customer>().HasIndex(c => c.Name).IsUnique();
-            builder.Entity<Product>().HasIndex(c => c.Code).IsUnique();
+            builder.Entity<Product>().HasIndex(p => p.Code).IsUnique();
+            builder.Entity<Entry>().HasIndex(e => e.EntryNo).IsUnique();
+            builder.Entity<EntryTransaction>().HasIndex(t => new { t.EntryId, t.Type }).HasFilter("\"Type\" = 0");
+
+
+            foreach (var property in builder.Model.GetEntityTypes()
+                 .SelectMany(t => t.GetProperties())
+                 .Where(p => (p.ClrType == typeof(DateTime) || p.ClrType == typeof(DateTime?)) && !p.Name.EndsWith("Utc")))
+            {
+                property.SetColumnType("timestamp without time zone");
+            }
         }
 
         public DbSet<User> Users { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<Entry> Entries { get; set; }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -57,7 +68,7 @@ namespace JCTO.Data
 
             foreach (var entry in ChangeTracker.Entries<IConcurrencyHandledEntity>().Where(e => e.State == EntityState.Modified))
             {
-                if (entry.OriginalValues["ConcurrencyKey"]?.ToString() != entry.Entity.ConcurrencyKey?.ToString())
+                if (entry.OriginalValues["ConcurrencyKey"].ToString() != entry.Entity.ConcurrencyKey.ToString())
                 {
                     throw new JCTOConcurrencyException(entry.Entity.ToString()!);
                 }

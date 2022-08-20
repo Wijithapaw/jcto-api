@@ -1,4 +1,5 @@
 ﻿using JCTO.Domain.Dtos;
+using JCTO.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,20 @@ namespace JCTO.Tests.Helpers
                 FirstName = firstName,
                 LastName = lastName,
                 Email = email,
-                ConcurrencyKey = concurrencyKey
+                ConcurrencyKey = concurrencyKey ?? Guid.NewGuid(),
+            };
+        }
+
+        internal static EntryDto CreateEntryDto(string entryNo, Guid customerId, Guid productId, DateTime entryDate, EntryStatus entryStatus, double initialQuantity)
+        {
+            return new EntryDto
+            {
+                EntryNo= entryNo,
+                CustomerId = customerId,
+                ProductId = productId,
+                EntryDate = entryDate,
+                Status= entryStatus,
+                InitialQuantity= initialQuantity
             };
         }
     }

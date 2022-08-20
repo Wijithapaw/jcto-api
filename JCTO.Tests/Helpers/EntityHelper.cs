@@ -19,12 +19,12 @@ namespace JCTO.Tests.Helpers
             };
         }
 
-        public static Customer CreateCustomer(string name, bool active = true)
+        public static Customer CreateCustomer(string name, bool inactive = false)
         {
             return new Customer
             {
                 Name = name,
-                Active = active
+                Inactive = inactive
             };
         }
 

@@ -17,7 +17,7 @@ namespace JCTO.Services
         public async Task<List<ListItem>> GetAllCustomersListItemsAsync()
         {
             var listItems = await _dataContext.Customers
-               .Where(c => c.Active)
+               .Where(c => !c.Inactive)
                .Select(c => new ListItem { Id = c.Id.ToString(), Label = c.Name })
                .ToListAsync();
 
@@ -27,7 +27,7 @@ namespace JCTO.Services
         public async Task<List<CustomerStockDto>> GetAllCustomerStocksAsync()
         {
             var customerStocks = await _dataContext.Customers
-                .Where(c => c.Active)
+                .Where(c => !c.Inactive)
                 .Select(c => new CustomerStockDto
                 {
                     CustomerId = c.Id,

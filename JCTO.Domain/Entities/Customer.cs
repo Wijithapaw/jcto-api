@@ -8,6 +8,6 @@ namespace JCTO.Domain.Entities
         [Required]
         [MaxLength(50)]
         public string? Name { get; set; }
-        public bool Active { get; set; }
+        public bool Inactive { get; set; }
     }
 }

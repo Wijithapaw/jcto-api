@@ -32,7 +32,7 @@ namespace JCTO.Tests.Helpers
                     EntityHelper.CreateCustomer("JVC"),
                     EntityHelper.CreateCustomer("JKCS"),
                     EntityHelper.CreateCustomer("Mobil"),
-                    EntityHelper.CreateCustomer("EXPO", false),
+                    EntityHelper.CreateCustomer("EXPO", true),
                 };
 
                 return customers;

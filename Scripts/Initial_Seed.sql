@@ -2,14 +2,14 @@
 --select * from "Users"
 
 insert into "Customers" 
-("Id", "Name", "Active", "CreatedById", "CreatedDateUtc", "LastUpdatedById", "LastUpdatedDateUtc", "ConcurrencyKey")
+("Id", "Name", "Inactive", "CreatedById", "CreatedDateUtc", "LastUpdatedById", "LastUpdatedDateUtc", "ConcurrencyKey")
 values
-('a336b227-644b-44e8-b6f1-6b9261a3fb80', 'JKCS', true, 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74'),
-('a336b227-644b-44e8-b6f1-6b9261a3fb81', 'EXPO', true, 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74'),
-('a336b227-644b-44e8-b6f1-6b9261a3fb82', 'ABC', true, 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74'),
-('a336b227-644b-44e8-b6f1-6b9261a3fb83', 'XYZ', true, 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74'),
-('a336b227-644b-44e8-b6f1-6b9261a3fb84', 'PQR', true, 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74'),
-('a336b227-644b-44e8-b6f1-6b9261a3fb85', 'STU', true, 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74')
+('a336b227-644b-44e8-b6f1-6b9261a3fb80', 'JKCS', false, 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74'),
+('a336b227-644b-44e8-b6f1-6b9261a3fb81', 'EXPO', false, 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74'),
+('a336b227-644b-44e8-b6f1-6b9261a3fb82', 'ABC', false, 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74'),
+('a336b227-644b-44e8-b6f1-6b9261a3fb83', 'XYZ', false, 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74'),
+('a336b227-644b-44e8-b6f1-6b9261a3fb84', 'PQR', false, 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74'),
+('a336b227-644b-44e8-b6f1-6b9261a3fb85', 'STU', false, 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74')
 
 --select * from "Customers"
 

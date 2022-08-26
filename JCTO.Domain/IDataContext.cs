@@ -9,6 +9,8 @@ namespace JCTO.Domain
         DbSet<Customer> Customers { get; set; }
         DbSet<Product> Products { get; set; }
         DbSet<Entry> Entries { get; set; }
+        DbSet<EntryTransaction> EntryTransactions { get; set; }
+        DbSet<Order> Orders { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken));
     }

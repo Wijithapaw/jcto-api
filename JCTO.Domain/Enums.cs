@@ -16,4 +16,16 @@ namespace JCTO.Domain.Enums
         In = 0,
         Out = 1,
     }
+
+    public enum OrderStatus
+    {
+        Undelivered = 0,
+        Delivered = 1,
+    }
+
+    public enum BuyerType
+    {
+        Barge = 0,
+        Local = 1,
+    }
 }

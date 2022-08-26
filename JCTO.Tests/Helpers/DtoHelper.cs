@@ -33,5 +33,29 @@ namespace JCTO.Tests.Helpers
                 InitialQuantity= initialQuantity
             };
         }
+
+        internal static OrderDto CreateOrderDto(Guid id, Guid customerId, Guid productId, string orderNo, DateTime orderDate, double quantity,
+            string buyer, OrderStatus status, string obPrefix, string tankNo, BuyerType buyerType, string xBondNo, string remarks,
+            List<OrderStockReleaseEntry> releaseEntries, List<BowserEntry> bowserEntries)
+        {
+            return new OrderDto
+            {
+                Id = id,
+                CustomerId = customerId,
+                ProductId = productId,
+                OrderNo = orderNo,
+                OrderDate = orderDate,
+                Quantity = quantity,
+                Buyer = buyer,
+                BuyerType = buyerType,
+                Status = status,
+                ObRefPrefix = obPrefix,
+                TankNo = tankNo,
+                XBondNo = xBondNo,
+                Remarks = remarks,
+                ReleaseEntries = releaseEntries,
+                BowserEntries = bowserEntries
+            };
+        }
     }
 }

@@ -29,6 +29,7 @@ namespace JCTO.Data
             builder.Entity<Product>().HasIndex(p => p.Code).IsUnique();
             builder.Entity<Entry>().HasIndex(e => e.EntryNo).IsUnique();
             builder.Entity<EntryTransaction>().HasIndex(t => new { t.EntryId, t.Type }).HasFilter("\"Type\" = 0");
+            builder.Entity<Order>().HasIndex(o => o.OrderNo).IsUnique();
 
 
             foreach (var property in builder.Model.GetEntityTypes()
@@ -43,6 +44,8 @@ namespace JCTO.Data
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Entry> Entries { get; set; }
+        public DbSet<EntryTransaction> EntryTransactions { get; set; }
+        public DbSet<Order> Orders { get; set; }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {

@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JCTO.Data
 {
-    public class DataContext : DbContext, IDataContext 
+    public class DataContext : DbContext, IDataContext
     {
         private readonly IUserContext _userContext;
 
@@ -29,7 +29,7 @@ namespace JCTO.Data
             builder.Entity<Product>().HasIndex(p => p.Code).IsUnique();
             builder.Entity<Entry>().HasIndex(e => e.EntryNo).IsUnique();
             builder.Entity<EntryTransaction>().HasIndex(t => new { t.EntryId, t.Type }).HasFilter("\"Type\" = 0");
-            builder.Entity<Order>().HasIndex(o => o.OrderNo).IsUnique();
+            builder.Entity<Order>().HasIndex(o => new { o.OrderDate, o.OrderNo }).IsUnique();
 
 
             foreach (var property in builder.Model.GetEntityTypes()
@@ -47,7 +47,7 @@ namespace JCTO.Data
         public DbSet<EntryTransaction> EntryTransactions { get; set; }
         public DbSet<Order> Orders { get; set; }
 
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             if (_userContext != null)
             {
@@ -75,11 +75,11 @@ namespace JCTO.Data
                 {
                     throw new JCTOConcurrencyException(entry.Entity.ToString()!);
                 }
-                
+
                 entry.Entity.ConcurrencyKey = Guid.NewGuid();
             }
 
-            return base.SaveChangesAsync(cancellationToken);
+            return await base.SaveChangesAsync(cancellationToken);
         }
     }
 }

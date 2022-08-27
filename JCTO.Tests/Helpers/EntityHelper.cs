@@ -38,7 +38,7 @@ namespace JCTO.Tests.Helpers
             };
         }
 
-        public static Entry CreateEntry(string entryNo, Guid customerId, Guid productId, double initialQuantity, DateTime entryDate, EntryStatus entryStatus)
+        public static Entry CreateEntry(string entryNo, Guid customerId, Guid productId, double initialQuantity, double remainingQuantity, DateTime entryDate, EntryStatus entryStatus)
         {
             return new Entry
             {
@@ -46,16 +46,19 @@ namespace JCTO.Tests.Helpers
                 CustomerId = customerId,
                 ProductId = productId,
                 InitialQualtity = initialQuantity,
+                RemainingQuantity = remainingQuantity,
                 EntryDate = entryDate,
                 Status = entryStatus
             };
         }
 
-        public static EntryTransaction CreateEntryTransaction(EntryTransactionType type, double amount)
+        public static EntryTransaction CreateEntryTransaction(EntryTransactionType type, string obRef, double quantity, double deliveredQuantity)
         {
             return new EntryTransaction
             {
-                Amount = amount,
+                ObRef = obRef,
+                Quantity = quantity,
+                DeliveredQuantity = deliveredQuantity,
                 Type = type,
                 TransactionDateTimeUtc = DateTime.UtcNow,
             };

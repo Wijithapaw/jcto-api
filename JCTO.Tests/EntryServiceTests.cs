@@ -57,7 +57,7 @@ namespace JCTO.Tests
 
                       var txn = newEntry.Transactions.First();
 
-                      Assert.Equal(1000.1234, txn.Amount);
+                      Assert.Equal(1000.1234, txn.Quantity);
                       Assert.Equal(id, txn.EntryId);
                       Assert.NotEqual(DateTime.MinValue, txn.TransactionDateTimeUtc);
                   });

@@ -12,7 +12,10 @@ namespace JCTO.Domain.Entities
         public Guid? OrderId { get; set; }
         [Required]
         public DateTime TransactionDateTimeUtc { get; set; }
-        public double Amount { get; set; }
+        [MaxLength(50)]
+        public string ObRef { get; set; }
+        public double Quantity { get; set; }
+        public double DeliveredQuantity { get; set; }
         public EntryTransactionType Type { get; set; }
 
         public virtual Entry Entry { get; set; }

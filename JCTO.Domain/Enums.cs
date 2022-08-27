@@ -26,6 +26,6 @@ namespace JCTO.Domain.Enums
     public enum BuyerType
     {
         Barge = 0,
-        Local = 1,
+        Bowser = 1,
     }
 }

@@ -25,18 +25,18 @@ namespace JCTO.Tests.Helpers
         {
             return new EntryDto
             {
-                EntryNo= entryNo,
+                EntryNo = entryNo,
                 CustomerId = customerId,
                 ProductId = productId,
                 EntryDate = entryDate,
-                Status= entryStatus,
-                InitialQuantity= initialQuantity
+                Status = entryStatus,
+                InitialQuantity = initialQuantity
             };
         }
 
         internal static OrderDto CreateOrderDto(Guid id, Guid customerId, Guid productId, string orderNo, DateTime orderDate, double quantity,
-            string buyer, OrderStatus status, string obPrefix, string tankNo, BuyerType buyerType, string xBondNo, string remarks,
-            List<OrderStockReleaseEntry> releaseEntries, List<BowserEntry> bowserEntries)
+            string buyer, OrderStatus status, string obPrefix, string tankNo, BuyerType buyerType, string xBondNo, string? remarks,
+            List<OrderStockReleaseEntryDto> releaseEntries, List<BowserEntryDto> bowserEntries)
         {
             return new OrderDto
             {

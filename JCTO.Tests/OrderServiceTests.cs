@@ -30,13 +30,12 @@ namespace JCTO.Tests
             string buyer, OrderStatus status, string obPrefix, string tankNo, BuyerType buyerType,
             string xBondNo, string remarks, string expectedError)
             {
-                Guid id = Guid.Empty;
                 var customerId = Guid.Empty;
                 var productId = Guid.Empty;
 
-                var releaseEntries = new List<OrderStockReleaseEntry>
+                var releaseEntries = new List<OrderStockReleaseEntryDto>
                 {
-                    new OrderStockReleaseEntry { Id=Guid.NewGuid(), EntryNo="10001", ObRef="xyz", Quantity = 110, DeliveredQuantity=100.1250 }
+                    new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="10001", ObRef="xyz", Quantity = 110, DeliveredQuantity=100.1250 }
                 };
 
                 await DbHelper.ExecuteTestAsync(
@@ -49,14 +48,256 @@ namespace JCTO.Tests
                   },
                   async (IDataContext dbContext) =>
                   {
-                      var orderSvc = new OrderService(dbContext);
+                      var orderSvc = CreateService(dbContext);
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, customerId, productId, orderNo, orderDate, quantity,
-                          buyer, status, obPrefix, tankNo, buyerType, xBondNo, remarks, releaseEntries, new List<BowserEntry>());
+                          buyer, status, obPrefix, tankNo, buyerType, xBondNo, remarks, releaseEntries, new List<BowserEntryDto>());
 
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
 
                       Assert.Equal(expectedError, ex.Message);
+                  });
+            }
+
+            [Fact]
+            public async Task WhenCustomerIsNotMatchingInEntries_ThrowsException()
+            {
+                var jkcs_customerId = Guid.Empty;
+                var go_productId = Guid.Empty;
+
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+
+                      jkcs_customerId = await GetCustomerIdAsync(dbContext, "JKCS");
+                      go_productId = await GetProductIdAsync(dbContext, "GO");
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      var releaseEntries = new List<OrderStockReleaseEntryDto>
+                      {
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 120, DeliveredQuantity=100.1250 }
+                      };
+
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jkcs_customerId, go_productId, "1001",
+                          new DateTime(2022, 8, 27), 100.1250, "Dialog",
+                          OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
+                          "", null, releaseEntries, new List<BowserEntryDto>());
+
+                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
+
+                      Assert.Equal("Customer miss-matching entries: 1001", ex.Message);
+                  });
+            }
+
+            [Fact]
+            public async Task WhenProductOsNotMatchingInEntries_ThrowsException()
+            {
+                var jvc_customerId = Guid.Empty;
+                var lsfo_productId = Guid.Empty;
+
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+
+                      jvc_customerId = await GetCustomerIdAsync(dbContext, "JVC");
+                      lsfo_productId = await GetProductIdAsync(dbContext, "380_LSFO");
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      var releaseEntries = new List<OrderStockReleaseEntryDto>
+                      {
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 120, DeliveredQuantity=100.1250 }
+                      };
+
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lsfo_productId, "1001",
+                          new DateTime(2022, 8, 27), 100.1250, "Dialog",
+                          OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
+                          "", null, releaseEntries, new List<BowserEntryDto>());
+
+                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
+
+                      Assert.Equal("Product miss-matching entries: 1001", ex.Message);
+                  });
+            }
+
+            [Fact]
+            public async Task WhenThereAreInvalidEntryNos_ThrowsException()
+            {
+                var jvc_customerId = Guid.Empty;
+                var go_productId = Guid.Empty;
+
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+
+                      jvc_customerId = await GetCustomerIdAsync(dbContext, "JVC");
+                      go_productId = await GetProductIdAsync(dbContext, "GO");
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      var releaseEntries = new List<OrderStockReleaseEntryDto>
+                      {
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ObRef="xyz", Quantity = 120, DeliveredQuantity=100.1250 }
+                      };
+
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
+                          new DateTime(2022, 8, 27), 100.1250, "Dialog",
+                          OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
+                          "", null, releaseEntries, new List<BowserEntryDto>());
+
+                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
+
+                      Assert.Equal("Invalid entries: 2001", ex.Message);
+                  });
+            }
+
+            [Fact]
+            public async Task WhenThereAreMultipleInvalidEntryNos_ThrowsException()
+            {
+                var jvc_customerId = Guid.Empty;
+                var go_productId = Guid.Empty;
+
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+
+                      jvc_customerId = await GetCustomerIdAsync(dbContext, "JVC");
+                      go_productId = await GetProductIdAsync(dbContext, "GO");
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      var releaseEntries = new List<OrderStockReleaseEntryDto>
+                      {
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 120, DeliveredQuantity=100 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="3001", ObRef="xyz", Quantity = 120, DeliveredQuantity=100 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ObRef="xyz", Quantity = 120, DeliveredQuantity=100 }
+                      };
+
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
+                          new DateTime(2022, 8, 27), 300, "Dialog",
+                          OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
+                          "", null, releaseEntries, new List<BowserEntryDto>());
+
+                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
+
+                      Assert.Equal("Invalid entries: 2001|3001", ex.Message);
+                  });
+            }
+
+            [Fact]
+            public async Task WhenRequestedQuantitiesAreGreaterThanRemainingQuantity_ThrowsException()
+            {
+                var jvc_customerId = Guid.Empty;
+                var go_productId = Guid.Empty;
+
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+
+                      jvc_customerId = await GetCustomerIdAsync(dbContext, "JVC");
+                      go_productId = await GetProductIdAsync(dbContext, "GO");
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      var releaseEntries = new List<OrderStockReleaseEntryDto>
+                      {
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 1500, DeliveredQuantity=1200 },
+                      };
+
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
+                          new DateTime(2022, 8, 27), 1200, "Dialog",
+                          OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
+                          "", null, releaseEntries, new List<BowserEntryDto>());
+
+                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
+
+                      Assert.Equal("Remaining quantity: 1000.25 of Entry: 1001 not sufficient to deliver requested quantity: 1200", ex.Message);
+                  });
+            }
+
+            [Fact]
+            public async Task WhenThereAreMultipleIssuesWithEntries_ThrowsException()
+            {
+                var jkcs_customerId = Guid.Empty;
+                var lsfo_productId = Guid.Empty;
+
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+
+                      jkcs_customerId = await GetCustomerIdAsync(dbContext, "JKCS");
+                      lsfo_productId = await GetProductIdAsync(dbContext, "380_LSFO");
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      var releaseEntries = new List<OrderStockReleaseEntryDto>
+                      {
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 1500, DeliveredQuantity=1200 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="3001", ObRef="xyz", Quantity = 120, DeliveredQuantity=100 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ObRef="xyz", Quantity = 120, DeliveredQuantity=100 }
+                      };
+
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jkcs_customerId, lsfo_productId, "1001",
+                          new DateTime(2022, 8, 27), 1400, "Dialog",
+                          OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
+                          "", null, releaseEntries, new List<BowserEntryDto>());
+
+                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
+
+                      Assert.Equal("Invalid entries: 2001|3001, Product miss-matching entries: 1001, Customer miss-matching entries: 1001, Remaining quantity: 1000.25 of Entry: 1001 not sufficient to deliver requested quantity: 1200", ex.Message);
+                  });
+            }
+
+            [Fact]
+            public async Task WhenPassingCorrectData_CreatedSuccessfully()
+            {
+                var jvc_customerId = Guid.Empty;
+                var go_productId = Guid.Empty;
+
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+
+                      jvc_customerId = await GetCustomerIdAsync(dbContext, "JVC");
+                      go_productId = await GetProductIdAsync(dbContext, "GO");
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      var releaseEntries = new List<OrderStockReleaseEntryDto>
+                      {
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 120, DeliveredQuantity=120 }
+                      };
+
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
+                          new DateTime(2022, 8, 27), 120, "Dialog",
+                          OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
+                          "", null, releaseEntries, new List<BowserEntryDto>());
+
+                      var result = await orderSvc.CreateAsync(dto);
+
+                      Assert.NotNull(result.Id);
                   });
             }
         }
@@ -72,6 +313,13 @@ namespace JCTO.Tests
 
             dbContext.Entries.AddRange(TestData.Entries.GetEntries(customerId, productId));
             await dbContext.SaveChangesAsync();
+        }
+
+        private static OrderService CreateService(IDataContext dataContext)
+        {
+            var entryService = new EntryService(dataContext);
+            var orderSvc = new OrderService(dataContext, entryService);
+            return orderSvc;
         }
 
         private static async Task<Guid> GetCustomerIdAsync(IDataContext dataContext, string name)

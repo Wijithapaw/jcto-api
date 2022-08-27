@@ -17,11 +17,11 @@ namespace JCTO.Domain.Dtos
         public BuyerType BuyerType { get; set; }
         public string? XBondNo { get; set; }
         public string? Remarks { get; set; }
-        public List<OrderStockReleaseEntry> ReleaseEntries { get; set; } = new List<OrderStockReleaseEntry>();
-        public List<BowserEntry> BowserEntries { get; set; } = new List<BowserEntry>();
+        public List<OrderStockReleaseEntryDto> ReleaseEntries { get; set; } = new List<OrderStockReleaseEntryDto>();
+        public List<BowserEntryDto> BowserEntries { get; set; } = new List<BowserEntryDto>();
     }
 
-    public class OrderStockReleaseEntry
+    public class OrderStockReleaseEntryDto
     {
         public Guid Id { get; set; }
         public string? EntryNo { get; set; }
@@ -30,7 +30,7 @@ namespace JCTO.Domain.Dtos
         public double DeliveredQuantity { get; set; }
     }
 
-    public class BowserEntry
+    public class BowserEntryDto
     {
         public Guid Id { get; set; }
         public double Capacity { get; set; }

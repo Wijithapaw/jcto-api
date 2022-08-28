@@ -1,6 +1,7 @@
 ﻿using JCTO.Domain;
 using JCTO.Domain.CustomExceptions;
 using JCTO.Domain.Dtos;
+using JCTO.Domain.Dtos.Base;
 using JCTO.Domain.Entities;
 using JCTO.Domain.Enums;
 using JCTO.Domain.Services;
@@ -58,6 +59,46 @@ namespace JCTO.Services
             UpdateRemainingAmount(entry, newTxns);
 
             return newTxns;
+        }
+
+        public async Task<PagedResultsDto<EntryListItemDto>> SearchEntriesAsync(EntrySearchDto filter)
+        {
+            filter.EntryNo = filter.EntryNo?.ToLower().Trim() ?? "";
+
+            var entries = await _dataContext.Entries
+                .Where(e => (filter.CustomerId == null || filter.CustomerId == e.CustomerId)
+                    && (filter.ProductId == null || filter.ProductId == e.ProductId)
+                    && (filter.From == null || e.EntryDate >= filter.From)
+                    && (filter.To == null || e.EntryDate <= filter.To)
+                    && (!filter.ActiveEntriesOnly || e.Status == EntryStatus.Active)
+                    && (filter.EntryNo == "" || e.EntryNo.ToLower().Contains(filter.EntryNo)))
+                .OrderBy(o => o.EntryDate)
+                .ThenBy(o => o.EntryNo)
+                .Select(e => new EntryListItemDto
+                {
+                    Id = e.Id,
+                    EntryDate = e.EntryDate,
+                    EntryNo = e.EntryNo,
+                    Customer = e.Customer.Name,
+                    Product = e.Product.Code,
+                    InitialQuantity = e.InitialQualtity,
+                    RemainingQuantity = e.RemainingQuantity,
+                    Status = e.Status,
+                    Transactions = e.Transactions
+                        .Where(t => t.Type == EntryTransactionType.Out)
+                        .OrderBy(t => t.Order.OrderDate)
+                        .ThenBy(t => t.Order.OrderNo)
+                        .Select(t => new EntryTransactionDto
+                        {
+                            OrderNo = t.Order.OrderNo,
+                            OrderDate = t.Order.OrderDate,
+                            ObRef = t.ObRef,
+                            Quantity = -1 * t.Quantity,
+                            DeliveredQuantity = -1 * t.DeliveredQuantity
+                        }).ToList()
+                }).GetPagedListAsync(filter);
+
+            return entries;
         }
 
         private async Task<Entry> GetEntryByEntryNoAsync(string entryNo)

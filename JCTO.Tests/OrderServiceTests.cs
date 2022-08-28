@@ -492,8 +492,8 @@ namespace JCTO.Tests
                       Assert.NotEqual(Guid.Empty, txn1.Id);
                       Assert.Equal("ref-10", txn1.ObRef);
                       Assert.Equal("1002", txn1.EntryNo);
-                      Assert.Equal(-200.250, txn1.Quantity);
-                      Assert.Equal(-199.500, txn1.DeliveredQuantity);
+                      Assert.Equal(200.250, txn1.Quantity);
+                      Assert.Equal(199.500, txn1.DeliveredQuantity);
 
                       //Bowser Entries
                       Assert.Single(order.BowserEntries);

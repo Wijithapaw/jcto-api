@@ -26,6 +26,7 @@ builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IEntryService, EntryService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IDataContext>(s => s.GetRequiredService<DataContext>());
 
 builder.Services.AddControllers(options =>

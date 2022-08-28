@@ -43,8 +43,8 @@ namespace JCTO.Tests
                   {
                       await SetupTestDataAsync(dbContext);
 
-                      customerId = await GetCustomerIdAsync(dbContext, "JVC");
-                      productId = await GetProductIdAsync(dbContext, "GO");
+                      customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                      productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -70,8 +70,8 @@ namespace JCTO.Tests
                   {
                       await SetupTestDataAsync(dbContext);
 
-                      jkcs_customerId = await GetCustomerIdAsync(dbContext, "JKCS");
-                      go_productId = await GetProductIdAsync(dbContext, "GO");
+                      jkcs_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JKCS");
+                      go_productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -104,8 +104,8 @@ namespace JCTO.Tests
                   {
                       await SetupTestDataAsync(dbContext);
 
-                      jvc_customerId = await GetCustomerIdAsync(dbContext, "JVC");
-                      lsfo_productId = await GetProductIdAsync(dbContext, "380_LSFO");
+                      jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                      lsfo_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -138,8 +138,8 @@ namespace JCTO.Tests
                   {
                       await SetupTestDataAsync(dbContext);
 
-                      jvc_customerId = await GetCustomerIdAsync(dbContext, "JVC");
-                      go_productId = await GetProductIdAsync(dbContext, "GO");
+                      jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                      go_productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -172,8 +172,8 @@ namespace JCTO.Tests
                   {
                       await SetupTestDataAsync(dbContext);
 
-                      jvc_customerId = await GetCustomerIdAsync(dbContext, "JVC");
-                      go_productId = await GetProductIdAsync(dbContext, "GO");
+                      jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                      go_productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -208,8 +208,8 @@ namespace JCTO.Tests
                   {
                       await SetupTestDataAsync(dbContext);
 
-                      jvc_customerId = await GetCustomerIdAsync(dbContext, "JVC");
-                      go_productId = await GetProductIdAsync(dbContext, "GO");
+                      jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                      go_productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -232,6 +232,40 @@ namespace JCTO.Tests
             }
 
             [Fact]
+            public async Task WhenThereAreCompletedEntriesSelected_ThrowsException()
+            {
+                var jkcs_customerId = Guid.Empty;
+                var lsfo_productId = Guid.Empty;
+
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+
+                      jkcs_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JKCS");
+                      lsfo_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      var releaseEntries = new List<OrderStockReleaseEntryDto>
+                      {
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1102", ObRef="abc", Quantity = 15, DeliveredQuantity=10 },
+                      };
+
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jkcs_customerId, lsfo_productId, "2001",
+                          new DateTime(2022, 8, 27), 10, "Mobitel",
+                          OrderStatus.Undelivered, "OB-2", "100", BuyerType.Barge,
+                          "", null, releaseEntries, new List<BowserEntryDto>());
+
+                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
+
+                      Assert.Equal("Completed entries: 1102 cannot be used", ex.Message);
+                  });
+            }
+
+            [Fact]
             public async Task WhenThereAreMultipleIssuesWithEntries_ThrowsException()
             {
                 var jkcs_customerId = Guid.Empty;
@@ -242,8 +276,8 @@ namespace JCTO.Tests
                   {
                       await SetupTestDataAsync(dbContext);
 
-                      jkcs_customerId = await GetCustomerIdAsync(dbContext, "JKCS");
-                      lsfo_productId = await GetProductIdAsync(dbContext, "380_LSFO");
+                      jkcs_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JKCS");
+                      lsfo_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -267,9 +301,11 @@ namespace JCTO.Tests
                   });
             }
 
+
             [Fact]
             public async Task WhenPassingCorrectData_CreatedSuccessfully()
             {
+                var id = Guid.Empty;
                 var jvc_customerId = Guid.Empty;
                 var go_productId = Guid.Empty;
 
@@ -278,8 +314,8 @@ namespace JCTO.Tests
                   {
                       await SetupTestDataAsync(dbContext);
 
-                      jvc_customerId = await GetCustomerIdAsync(dbContext, "JVC");
-                      go_productId = await GetProductIdAsync(dbContext, "GO");
+                      jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                      go_productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -290,29 +326,242 @@ namespace JCTO.Tests
                           new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 120, DeliveredQuantity=120 }
                       };
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1",
                           new DateTime(2022, 8, 27), 120, "Dialog",
                           OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
-                          "", null, releaseEntries, new List<BowserEntryDto>());
+                          "", "First order", releaseEntries, new List<BowserEntryDto>());
 
                       var result = await orderSvc.CreateAsync(dto);
 
-                      Assert.NotNull(result.Id);
+                      id = result.Id;
+                  },
+                   async (IDataContext dbContext) =>
+                   {
+                       var order = await dbContext.Orders.FindAsync(id);
+                       var orderTxns = await dbContext.EntryTransactions.Where(t => t.OrderId == id).ToListAsync();
+                       var entry = await dbContext.Entries.Where(e => e.EntryNo == "1001").FirstAsync();
+
+                       Assert.NotNull(order);
+                       Assert.Single(orderTxns);
+                       Assert.NotNull(entry);
+
+                       //Order
+                       Assert.Equal("1", order.OrderNo);
+                       Assert.Equal(120, order.Quantity);
+                       Assert.Equal("Dialog", order.Buyer);
+                       Assert.Equal(BuyerType.Barge, order.BuyerType);
+                       Assert.Equal(OrderStatus.Undelivered, order.Status);
+                       Assert.Equal("100", order.TankNo);
+                       Assert.Equal(jvc_customerId, order.CustomerId);
+                       Assert.Equal(go_productId, order.ProductId);
+                       Assert.Equal("First order", order.Remarks);
+                       Assert.Equal(new DateTime(2022, 8, 27), order.OrderDate);
+                       Assert.Equal("OB-1", order.ObRefPrefix);
+
+                       //Entry Transactions
+                       var txn1 = orderTxns.First();
+
+                       Assert.Equal("xyz", txn1.ObRef);
+                       Assert.Equal(entry.Id, txn1.EntryId);
+                       Assert.Equal(-120, txn1.Quantity);
+                       Assert.Equal(-120, txn1.DeliveredQuantity);
+                       Assert.Equal(EntryTransactionType.Out, txn1.Type);
+
+                       //Entry
+                       Assert.Equal(1000.250, entry.InitialQualtity);
+                       Assert.Equal(880.250, entry.RemainingQuantity);
+                       Assert.Equal(EntryStatus.Active, entry.Status);
+                   });
+            }
+
+            [Fact]
+            public async Task WhenEntryRemQtyIsZeroEntryMardAsCompleted_CreatedSuccessfully()
+            {
+                var id = Guid.Empty;
+                var jvc_customerId = Guid.Empty;
+                var go_productId = Guid.Empty;
+
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+
+                      jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                      go_productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      var releaseEntries = new List<OrderStockReleaseEntryDto>
+                      {
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 1200, DeliveredQuantity=1000.250 }
+                      };
+
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1",
+                          new DateTime(2022, 8, 27), 1000.250, "Dialog",
+                          OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
+                          "", "First order", releaseEntries, new List<BowserEntryDto>());
+
+                      var result = await orderSvc.CreateAsync(dto);
+
+                      id = result.Id;
+                  },
+                   async (IDataContext dbContext) =>
+                   {
+                       var order = await dbContext.Orders.FindAsync(id);
+                       var orderTxns = await dbContext.EntryTransactions.Where(t => t.OrderId == id).ToListAsync();
+                       var entry = await dbContext.Entries.Where(e => e.EntryNo == "1001").FirstAsync();
+
+                       Assert.NotNull(order);
+                       Assert.Single(orderTxns);
+                       Assert.NotNull(entry);
+
+                       //Order
+                       Assert.Equal("1", order.OrderNo);
+                       Assert.Equal(1000.250, order.Quantity);
+                       Assert.Equal("Dialog", order.Buyer);
+                       Assert.Equal(BuyerType.Barge, order.BuyerType);
+                       Assert.Equal(OrderStatus.Undelivered, order.Status);
+                       Assert.Equal("100", order.TankNo);
+                       Assert.Equal(jvc_customerId, order.CustomerId);
+                       Assert.Equal(go_productId, order.ProductId);
+                       Assert.Equal("First order", order.Remarks);
+                       Assert.Equal(new DateTime(2022, 8, 27), order.OrderDate);
+                       Assert.Equal("OB-1", order.ObRefPrefix);
+
+                       //Entry Transactions
+                       var txn1 = orderTxns.First();
+
+                       Assert.Equal("xyz", txn1.ObRef);
+                       Assert.Equal(entry.Id, txn1.EntryId);
+                       Assert.Equal(-1200, txn1.Quantity);
+                       Assert.Equal(-1000.250, txn1.DeliveredQuantity);
+                       Assert.Equal(EntryTransactionType.Out, txn1.Type);
+
+                       //Entry
+                       Assert.Equal(1000.250, entry.InitialQualtity);
+                       Assert.Equal(0, entry.RemainingQuantity);
+                       Assert.Equal(EntryStatus.Completed, entry.Status);
+                   });
+            }
+        }
+
+        public class Get
+        {
+            [Fact]
+            public async Task WhenOrderExists_ReturnsCorrectData()
+            {
+                var id = Guid.Empty;
+                var jvc_customerId = Guid.Empty;
+                var lsfo_productId = Guid.Empty;
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+                      id = await EntityHelper.GetOrderIdAsync(dbContext, "1501");
+                      jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                      lsfo_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      var order = await orderSvc.GetOrderAsync(id);
+
+                      //Order
+                      Assert.NotNull(order);
+
+                      Assert.Equal("1501", order.OrderNo);
+                      Assert.Equal(199.5, order.Quantity);
+                      Assert.Equal("Exex", order.Buyer);
+                      Assert.Equal(BuyerType.Bowser, order.BuyerType);
+                      Assert.Equal(OrderStatus.Delivered, order.Status);
+                      Assert.Equal("110", order.TankNo);
+                      Assert.Equal(jvc_customerId, order.CustomerId);
+                      Assert.Equal(lsfo_productId, order.ProductId);
+                      Assert.Equal("Test 123", order.Remarks);
+                      Assert.Equal(new DateTime(2022, 8, 27), order.OrderDate);
+                      Assert.Equal("OB/2022", order.ObRefPrefix);
+
+                      //Entry Transactions
+                      Assert.Single(order.ReleaseEntries);
+
+                      var txn1 = order.ReleaseEntries.First();
+
+                      Assert.NotEqual(Guid.Empty, txn1.Id);
+                      Assert.Equal("ref-10", txn1.ObRef);
+                      Assert.Equal("1002", txn1.EntryNo);
+                      Assert.Equal(-200.250, txn1.Quantity);
+                      Assert.Equal(-199.500, txn1.DeliveredQuantity);
+
+                      //Bowser Entries
+                      Assert.Single(order.BowserEntries);
+
+                      var b1 = order.BowserEntries.First();
+
+                      Assert.NotEqual(Guid.Empty, b1.Id);
+                      Assert.Equal(13600, b1.Capacity);
+                      Assert.Equal(2, b1.Count);
+                  });
+            }
+
+            [Fact]
+            public async Task WhenOrderNotExists_ReturnsNull()
+            {
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      var order = await orderSvc.GetOrderAsync(Guid.NewGuid());
+
+                      Assert.Null(order);
+                  });
+            }
+        }
+
+        public class Search
+        {
+            [Fact]
+            public async Task WhenNoFilters_ReturnAll()
+            {
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      var orders = await orderSvc.SearchOrdersAsync(new OrderSearchDto() { Page = 1, PageSize = 100 });
+
+                      Assert.NotNull(orders);
+                      Assert.True(orders.Total > 0);
+                      Assert.Equal(orders.Total, orders.Items.Count);
+
+                      var order = orders.Items.First(o => o.OrderNo == "1501");
+
+                      Assert.Equal("1501", order.OrderNo);
+                      Assert.Equal(199.5, order.Quantity);
+                      Assert.Equal("Exex", order.Buyer);
+                      Assert.Equal(BuyerType.Bowser, order.BuyerType);
+                      Assert.Equal(OrderStatus.Delivered, order.Status);
+                      Assert.Equal("JVC", order.Customer);
+                      Assert.Equal("380_LSFO", order.Product);
+                      Assert.Equal(new DateTime(2022, 8, 27), order.OrderDate);
                   });
             }
         }
 
         private static async Task SetupTestDataAsync(IDataContext dbContext)
         {
-            dbContext.Customers.AddRange(TestData.Customers.GetCustomers());
-            dbContext.Products.AddRange(TestData.Products.GetProducts());
-            await dbContext.SaveChangesAsync();
-
-            var customerId = await GetCustomerIdAsync(dbContext, "JVC");
-            var productId = await GetProductIdAsync(dbContext, "GO");
-
-            dbContext.Entries.AddRange(TestData.Entries.GetEntries(customerId, productId));
-            await dbContext.SaveChangesAsync();
+            await TestData.Orders.SetupOrderAndEntryTestDataAsync(dbContext);
         }
 
         private static OrderService CreateService(IDataContext dataContext)
@@ -320,16 +569,6 @@ namespace JCTO.Tests
             var entryService = new EntryService(dataContext);
             var orderSvc = new OrderService(dataContext, entryService);
             return orderSvc;
-        }
-
-        private static async Task<Guid> GetCustomerIdAsync(IDataContext dataContext, string name)
-        {
-            return (await dataContext.Customers.FirstAsync(c => c.Name == name)).Id;
-        }
-
-        private static async Task<Guid> GetProductIdAsync(IDataContext dataContext, string code)
-        {
-            return (await dataContext.Products.FirstAsync(c => c.Code == code)).Id;
         }
     }
 }

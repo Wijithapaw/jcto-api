@@ -7,12 +7,12 @@ namespace JCTO.Domain.Entities
     {
         [Required]
         [MaxLength(200)]
-        public string? Email { get; set; }
+        public string Email { get; set; }
         [Required]
         [MaxLength(50)]
-        public string? FirstName { get; set; }
+        public string FirstName { get; set; }
         [Required]
         [MaxLength(50)]
-        public string? LastName { get; set; }
+        public string LastName { get; set; }
     }
 }

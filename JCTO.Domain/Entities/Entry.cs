@@ -13,7 +13,7 @@ namespace JCTO.Domain.Entities
         public Guid ProductId { get; set; }
         [Required]
         [MaxLength(50)]
-        public string? EntryNo { get; set; }
+        public string EntryNo { get; set; }
         public double InitialQualtity { get; set; }
         public double RemainingQuantity { get; set; }
         public DateTime EntryDate { get; set; }

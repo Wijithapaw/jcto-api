@@ -1,8 +1,9 @@
-﻿using JCTO.Domain.Enums;
+﻿using JCTO.Domain.Dtos.Base;
+using JCTO.Domain.Enums;
 
 namespace JCTO.Domain.Dtos
 {
-    public class OrderDto
+    public class OrderDto : ConcurrencyHandledDto
     {
         public Guid Id { get; set; }
         public Guid CustomerId { get; set; }

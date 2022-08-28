@@ -1,5 +1,7 @@
-﻿using JCTO.Domain.Entities;
+﻿using JCTO.Domain;
+using JCTO.Domain.Entities;
 using JCTO.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,7 +54,7 @@ namespace JCTO.Tests.Helpers
             };
         }
 
-        public static EntryTransaction CreateEntryTransaction(EntryTransactionType type, string obRef, double quantity, double deliveredQuantity)
+        public static EntryTransaction CreateEntryTransaction(EntryTransactionType type, string obRef, double quantity, double deliveredQuantity, Guid? orderId = null)
         {
             return new EntryTransaction
             {
@@ -61,7 +63,53 @@ namespace JCTO.Tests.Helpers
                 DeliveredQuantity = deliveredQuantity,
                 Type = type,
                 TransactionDateTimeUtc = DateTime.UtcNow,
+                OrderId = orderId
             };
+        }
+
+        public static Order CreateOrder(Guid customerId, Guid productId, DateTime orderDate, string orderNo,
+            string buyer, BuyerType buyerType, string tankNo, string obPrefix, OrderStatus status, double quantity,
+            string remarks, List<BowserEntry> bowserEntries)
+        {
+            return new Order
+            {
+                CustomerId = customerId,
+                ProductId = productId,
+                OrderDate = orderDate,
+                OrderNo = orderNo,
+                Buyer = buyer,
+                ObRefPrefix = obPrefix,
+                BuyerType = buyerType,
+                TankNo = tankNo,
+                Status = status,
+                Remarks = remarks,
+                Quantity = quantity,
+                BowserEntries = bowserEntries,
+            };
+        }
+
+        public static BowserEntry CreateBowserEntry(double capacity, double count)
+        {
+            return new BowserEntry
+            {
+                Capacity = capacity,
+                Count = count,
+            };
+        }
+
+        public static async Task<Guid> GetCustomerIdAsync(IDataContext dataContext, string name)
+        {
+            return (await dataContext.Customers.FirstAsync(c => c.Name == name)).Id;
+        }
+
+        public static async Task<Guid> GetOrderIdAsync(IDataContext dataContext, string orderNo)
+        {
+            return (await dataContext.Orders.FirstAsync(o => o.OrderNo == orderNo)).Id;
+        }
+
+        public static async Task<Guid> GetProductIdAsync(IDataContext dataContext, string code)
+        {
+            return (await dataContext.Products.FirstAsync(c => c.Code == code)).Id;
         }
     }
 }

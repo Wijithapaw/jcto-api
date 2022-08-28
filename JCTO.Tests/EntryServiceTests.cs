@@ -22,8 +22,8 @@ namespace JCTO.Tests
                   {
                       await SetupTestDataAsync(dbContext);
 
-                      customerId = await GetCustomerIdAsync(dbContext, "JVC");
-                      productId = await GetProductIdAsync(dbContext, "GO");
+                      customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                      productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -75,8 +75,8 @@ namespace JCTO.Tests
                   {
                       var entrySvc = new EntryService(dbContext);
 
-                      var customerId = await GetCustomerIdAsync(dbContext, "JVC");
-                      var productId = await GetProductIdAsync(dbContext, "GO");
+                      var customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                      var productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
 
                       var entryDto = DtoHelper.CreateEntryDto("1001", customerId, productId, new DateTime(2022, 8, 20), EntryStatus.Active, 1000);
 
@@ -87,25 +87,7 @@ namespace JCTO.Tests
 
         private static async Task SetupTestDataAsync(IDataContext dbContext)
         {
-            dbContext.Customers.AddRange(TestData.Customers.GetCustomers());
-            dbContext.Products.AddRange(TestData.Products.GetProducts());
-            await dbContext.SaveChangesAsync();
-
-            var customerId = await GetCustomerIdAsync(dbContext, "JVC");
-            var productId = await GetProductIdAsync(dbContext, "GO");
-
-            dbContext.Entries.AddRange(TestData.Entries.GetEntries(customerId, productId));
-            await dbContext.SaveChangesAsync();
-        }
-
-        private static async Task<Guid> GetCustomerIdAsync(IDataContext dataContext, string name)
-        {
-            return (await dataContext.Customers.FirstAsync(c => c.Name == name)).Id;
-        }
-
-        private static async Task<Guid> GetProductIdAsync(IDataContext dataContext, string code)
-        {
-            return (await dataContext.Products.FirstAsync(c => c.Code == code)).Id;
+            await TestData.Orders.SetupOrderAndEntryTestDataAsync(dbContext);
         }
     }
 }

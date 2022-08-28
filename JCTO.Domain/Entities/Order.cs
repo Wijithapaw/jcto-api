@@ -28,7 +28,7 @@ namespace JCTO.Domain.Entities
         public string TankNo { get; set; }
         public BuyerType BuyerType { get; set; }
         [MaxLength(1000)]
-        public string? Remarks { get; set; }
+        public string Remarks { get; set; }
 
         public virtual Customer Customer { get; set; }
         public virtual Product Product { get; set; }

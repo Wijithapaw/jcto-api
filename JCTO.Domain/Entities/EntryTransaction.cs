@@ -12,6 +12,7 @@ namespace JCTO.Domain.Entities
         public Guid? OrderId { get; set; }
         [Required]
         public DateTime TransactionDateTimeUtc { get; set; }
+        [Required]
         [MaxLength(50)]
         public string ObRef { get; set; }
         public double Quantity { get; set; }

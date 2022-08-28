@@ -77,6 +77,7 @@ namespace JCTO.Services
                 throw new JCTOValidationException($"Cant create order. Insufficient amount remaining in Entry: {entry.EntryNo}");
 
             entry.RemainingQuantity = remainingQty;
+            entry.Status = remainingQty == 0 ? EntryStatus.Completed : EntryStatus.Active;
         }
     }
 }

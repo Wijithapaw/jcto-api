@@ -12,7 +12,7 @@ namespace JCTO.Domain.Entities
     {
         [Required]
         [MaxLength(50)]
-        public string? Code { get; set; }
+        public string Code { get; set; }
         public bool Inactive { get; set; }
         public int SortOrder { get; set; }
     }

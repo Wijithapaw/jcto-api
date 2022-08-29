@@ -28,29 +28,6 @@ namespace JCTO.Tests
             }
         }
 
-        public class GetAllCustomerStocks
-        {
-            [Fact]
-            public async Task WhenCustomersExists_ReturnAllStocks()
-            {
-                await DbHelper.ExecuteTestAsync(
-                   async (IDataContext dbContext) =>
-                   {
-                       await SetupTestDataAsync(dbContext);
-                   },
-                   async (IDataContext dbContext) =>
-                   {
-                       var customerSvc = new CustomerService(dbContext);
-
-                       var customerStocks = await customerSvc.GetAllCustomerStocksAsync();
-
-                       Assert.Equal(3, customerStocks.Count);
-
-                       //TODO: Add more assertions when real stocks are there.
-                   });
-            }
-        }
-
         public class GetProductListItems
         {
             [Fact]

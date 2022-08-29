@@ -92,6 +92,7 @@ namespace JCTO.Services
                         {
                             OrderNo = t.Order.OrderNo,
                             OrderDate = t.Order.OrderDate,
+                            OrderStatus = t.Order.Status,
                             ObRef = t.ObRef,
                             Quantity = -1 * t.Quantity,
                             DeliveredQuantity = -1 * t.DeliveredQuantity
@@ -118,7 +119,6 @@ namespace JCTO.Services
                 throw new JCTOValidationException($"Cant create order. Insufficient amount remaining in Entry: {entry.EntryNo}");
 
             entry.RemainingQuantity = remainingQty;
-            entry.Status = remainingQty == 0 ? EntryStatus.Completed : EntryStatus.Active;
         }
     }
 }

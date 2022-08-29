@@ -1,5 +1,6 @@
 ﻿using JCTO.Domain;
 using JCTO.Domain.Dtos;
+using JCTO.Domain.Enums;
 using JCTO.Domain.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,19 +22,44 @@ namespace JCTO.Services
                .Select(c => new ListItem { Id = c.Id.ToString(), Label = c.Name })
                .ToListAsync();
 
-            return listItems;            
+            return listItems;
         }
 
         public async Task<List<CustomerStockDto>> GetAllCustomerStocksAsync()
         {
-            var customerStocks = await _dataContext.Customers
+            var customerStocksRaw = await _dataContext.Customers
                 .Where(c => !c.Inactive)
-                .Select(c => new CustomerStockDto
+                .Select(c => new
                 {
                     CustomerId = c.Id,
                     CustomerName = c.Name,
-                    Stocks = new List<ProductStockDto>()
+                    Stocks = c.Entries
+                        .Where(e => e.Status == EntryStatus.Active)
+                        .GroupBy(e => e.ProductId)
+                        .Select(g => new
+                        {
+                            UndeliveredStock = g.SelectMany(en => en.Transactions)
+                                .Where(t => t.Type == EntryTransactionType.Out
+                                    && t.Order.Status == OrderStatus.Undelivered)
+                                .Select(t => t.DeliveredQuantity * -1)
+                                .ToArray(),
+                            ProductId = g.Key,
+                            RemainingStock = g.Select(en => en.RemainingQuantity).ToArray(),
+
+                        }).ToList()
                 }).ToListAsync();
+
+            var customerStocks = customerStocksRaw.Select(cs => new CustomerStockDto
+            {
+                CustomerId = cs.CustomerId,
+                CustomerName = cs.CustomerName,
+                Stocks = cs.Stocks.Select(s => new ProductStockDto
+                {
+                    ProductId = s.ProductId,
+                    RemainingStock = s.RemainingStock.Sum(),
+                    UndeliveredStock = s.UndeliveredStock.Sum(),
+                }).ToList()
+            }).ToList();
 
             return customerStocks;
         }

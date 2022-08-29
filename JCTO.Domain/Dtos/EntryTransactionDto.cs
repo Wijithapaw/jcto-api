@@ -1,4 +1,6 @@
-﻿namespace JCTO.Domain.Dtos
+﻿using JCTO.Domain.Enums;
+
+namespace JCTO.Domain.Dtos
 {
     public class EntryTransactionDto
     {
@@ -7,5 +9,6 @@
         public string ObRef { get; set; }
         public double Quantity { get; set; }
         public double DeliveredQuantity { get; set; }
+        public OrderStatus OrderStatus { get; set; }
     }
 }

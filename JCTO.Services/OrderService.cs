@@ -32,7 +32,7 @@ namespace JCTO.Services
                 OrderDate = dto.OrderDate,
                 OrderNo = dto.OrderNo,
                 Buyer = dto.Buyer,
-                Status = dto.Status,
+                Status = OrderStatus.Undelivered,
                 Quantity = dto.Quantity,
                 ObRefPrefix = dto.ObRefPrefix,
                 TankNo = dto.TankNo,

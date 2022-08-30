@@ -27,7 +27,7 @@ namespace JCTO.Services
 
         public async Task<List<CustomerStockDto>> GetAllCustomerStocksAsync()
         {
-            var customerStocksRaw = await _dataContext.Customers
+            var customerStocks = await _dataContext.Customers
                 .Where(c => !c.Inactive)
                 .Select(c => new
                 {
@@ -38,28 +38,25 @@ namespace JCTO.Services
                         .GroupBy(e => e.ProductId)
                         .Select(g => new
                         {
-                            UndeliveredStock = g.SelectMany(en => en.Transactions)
+                            UndeliveredStocks = g.SelectMany(en => en.Transactions)
                                 .Where(t => t.Type == EntryTransactionType.Out
                                     && t.Order.Status == OrderStatus.Undelivered)
                                 .Select(t => t.DeliveredQuantity * -1)
                                 .ToArray(),
                             ProductId = g.Key,
-                            RemainingStock = g.Select(en => en.RemainingQuantity).ToArray(),
-
+                            RemainingStocks = g.Select(en => en.RemainingQuantity).ToArray(),
                         }).ToList()
-                }).ToListAsync();
-
-            var customerStocks = customerStocksRaw.Select(cs => new CustomerStockDto
-            {
-                CustomerId = cs.CustomerId,
-                CustomerName = cs.CustomerName,
-                Stocks = cs.Stocks.Select(s => new ProductStockDto
+                }).Select(cs => new CustomerStockDto
                 {
-                    ProductId = s.ProductId,
-                    RemainingStock = s.RemainingStock.Sum(),
-                    UndeliveredStock = s.UndeliveredStock.Sum(),
-                }).ToList()
-            }).ToList();
+                    CustomerId = cs.CustomerId,
+                    CustomerName = cs.CustomerName,
+                    Stocks = cs.Stocks.Select(s => new ProductStockDto
+                    {
+                        ProductId = s.ProductId,
+                        RemainingStock = s.RemainingStocks.Sum(),
+                        UndeliveredStock = s.UndeliveredStocks.Sum()
+                    }).ToList()
+                }).ToListAsync();
 
             return customerStocks;
         }

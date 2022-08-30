@@ -68,7 +68,7 @@ namespace JCTO.Tests.Helpers
                 {
                     EntityHelper.CreateEntryTransaction(EntryTransactionType.In, string.Empty, 500, 500),
                     EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, "ref-10", -200.250, -199.500, orderId1),
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, "ref-11", -100, -95, orderId2)
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, "ref-11", -100, 0, orderId2)
                 };
                 e2.Transactions = e2Txns;
 
@@ -83,8 +83,8 @@ namespace JCTO.Tests.Helpers
                 var e4Txns = new List<EntryTransaction>
                 {
                     EntityHelper.CreateEntryTransaction(EntryTransactionType.In, string.Empty, 750, 750),
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, "ref-101", -500, -500, orderId3),
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, "ref-112", -300, -250, orderId2)
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, "ref-101", -500, 0, orderId3),
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, "ref-112", -300, 0, orderId2)
                 };
                 e4.Transactions = e4Txns;
 

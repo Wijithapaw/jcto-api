@@ -170,7 +170,10 @@ namespace JCTO.Services
             }
             else
             {
-                if (order.ReleaseEntries.Sum(e => e.DeliveredQuantity) != order.Quantity)
+                if (order.Status == OrderStatus.Undelivered && order.ReleaseEntries.Sum(e => e.Quantity) != order.Quantity)
+                    errors.Add("Sum of release Quantities not equal to overall Quantity");
+
+                if (order.Status == OrderStatus.Delivered && order.ReleaseEntries.Sum(e => e.DeliveredQuantity) != order.Quantity)
                     errors.Add("Sum of Delivered Quantities not equal to overall Quantity");
 
                 if (order.ReleaseEntries.Any(e => e.DeliveredQuantity > e.Quantity))
@@ -250,7 +253,7 @@ namespace JCTO.Services
                 .Select(e => new
                 {
                     EntryNo = e.Key,
-                    Quantity = e.Sum(r => r.DeliveredQuantity)
+                    Quantity = e.Sum(r => order.Status == OrderStatus.Delivered ? r.DeliveredQuantity : r.Quantity)
                 }).ToArray();
 
             foreach (var reqQty in reqQtysFromEntries)

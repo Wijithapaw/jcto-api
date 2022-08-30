@@ -112,7 +112,7 @@ namespace JCTO.Services
 
         private void UpdateRemainingAmount(Entry entry, List<EntryTransaction> txns)
         {
-            var totalGoingOut = txns.Sum(t => t.DeliveredQuantity);
+            var totalGoingOut = txns.Sum(t => t.Quantity);
             var remainingQty = entry.RemainingQuantity + totalGoingOut;
 
             if (remainingQty < 0)

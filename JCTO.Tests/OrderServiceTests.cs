@@ -19,13 +19,13 @@ namespace JCTO.Tests
         public class Create
         {
             [Theory]
-            [InlineData("1001", "2022-8-26", 111, "Dialog", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, "", null, "Sum of Delivered Quantities not equal to overall Quantity")]
-            [InlineData("1001", null, 100.125, "Dialog", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, "", null, "Order Date not found")]
-            [InlineData("", "2022-8-26", 100.125, "Dialog", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, "", null, "Order No. not found")]
-            [InlineData("1001", "2022-8-26", 100.125, "", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, "", null, "Buyer not found")]
-            [InlineData("1001", "2022-8-26", 100.125, "Dialog", OrderStatus.Undelivered, "", "", BuyerType.Barge, "", null, "OBRef not found, Tank No. not found")]
-            [InlineData("1001", "2022-8-26", 0, "Dialog", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, "", null, "Quantity must be > 0, Sum of Delivered Quantities not equal to overall Quantity")]
-            [InlineData("1001", "2022-8-26", 0, "", OrderStatus.Undelivered, "", "", BuyerType.Barge, "", null, "Buyer not found, Quantity must be > 0, OBRef not found, Tank No. not found, Sum of Delivered Quantities not equal to overall Quantity")]
+            [InlineData("1001", "2022-8-26", 111, "Dialog", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, "", null, "Sum of release Quantities not equal to overall Quantity")]
+            [InlineData("1001", null, 110, "Dialog", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, "", null, "Order Date not found")]
+            [InlineData("", "2022-8-26", 110, "Dialog", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, "", null, "Order No. not found")]
+            [InlineData("1001", "2022-8-26", 110, "", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, "", null, "Buyer not found")]
+            [InlineData("1001", "2022-8-26", 110, "Dialog", OrderStatus.Undelivered, "", "", BuyerType.Barge, "", null, "OBRef not found, Tank No. not found")]
+            [InlineData("1001", "2022-8-26", 0, "Dialog", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, "", null, "Quantity must be > 0, Sum of release Quantities not equal to overall Quantity")]
+            [InlineData("1001", "2022-8-26", 0, "", OrderStatus.Undelivered, "", "", BuyerType.Barge, "", null, "Buyer not found, Quantity must be > 0, OBRef not found, Tank No. not found, Sum of release Quantities not equal to overall Quantity")]
             public async Task WhenPassingValidData_CreateSuccessfully(string orderNo, DateTime orderDate, double quantity,
             string buyer, OrderStatus status, string obPrefix, string tankNo, BuyerType buyerType,
             string xBondNo, string remarks, string expectedError)
@@ -35,7 +35,7 @@ namespace JCTO.Tests
 
                 var releaseEntries = new List<OrderStockReleaseEntryDto>
                 {
-                    new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="10001", ObRef="xyz", Quantity = 110, DeliveredQuantity=100.1250 }
+                    new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="10001", ObRef="xyz", Quantity = 110, DeliveredQuantity=0 }
                 };
 
                 await DbHelper.ExecuteTestAsync(
@@ -79,7 +79,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 120, DeliveredQuantity=100.1250 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jkcs_customerId, go_productId, "1001",
@@ -113,7 +113,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 120, DeliveredQuantity=100.1250 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lsfo_productId, "1001",
@@ -147,7 +147,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ObRef="xyz", Quantity = 120, DeliveredQuantity=100.1250 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
@@ -181,13 +181,13 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 120, DeliveredQuantity=100 },
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="3001", ObRef="xyz", Quantity = 120, DeliveredQuantity=100 },
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ObRef="xyz", Quantity = 120, DeliveredQuantity=100 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 120, DeliveredQuantity=0 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="3001", ObRef="xyz", Quantity = 120, DeliveredQuantity=0 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
-                          new DateTime(2022, 8, 27), 300, "Dialog",
+                          new DateTime(2022, 8, 27), 360, "Dialog",
                           OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
                           "", null, releaseEntries, new List<BowserEntryDto>());
 
@@ -217,17 +217,17 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 1500, DeliveredQuantity=1200 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 1500, DeliveredQuantity=0 },
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
-                          new DateTime(2022, 8, 27), 1200, "Dialog",
+                          new DateTime(2022, 8, 27), 1500, "Dialog",
                           OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
                           "", null, releaseEntries, new List<BowserEntryDto>());
 
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
 
-                      Assert.Equal("Remaining quantity: 1000.25 of Entry: 1001 not sufficient to deliver requested quantity: 1200", ex.Message);
+                      Assert.Equal("Remaining quantity: 1000.25 of Entry: 1001 not sufficient to deliver requested quantity: 1500", ex.Message);
                   });
             }
 
@@ -251,11 +251,11 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1102", ObRef="abc", Quantity = 15, DeliveredQuantity=10 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1102", ObRef="abc", Quantity = 15, DeliveredQuantity=0 },
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jkcs_customerId, lsfo_productId, "2001",
-                          new DateTime(2022, 8, 27), 10, "Mobitel",
+                          new DateTime(2022, 8, 27), 15, "Mobitel",
                           OrderStatus.Undelivered, "OB-2", "100", BuyerType.Barge,
                           "", null, releaseEntries, new List<BowserEntryDto>());
 
@@ -285,19 +285,19 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 1500, DeliveredQuantity=1200 },
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="3001", ObRef="xyz", Quantity = 120, DeliveredQuantity=100 },
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ObRef="xyz", Quantity = 120, DeliveredQuantity=100 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 1500, DeliveredQuantity=0 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="3001", ObRef="xyz", Quantity = 120, DeliveredQuantity=0 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jkcs_customerId, lsfo_productId, "1001",
-                          new DateTime(2022, 8, 27), 1400, "Dialog",
+                          new DateTime(2022, 8, 27), 1740, "Dialog",
                           OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
                           "", null, releaseEntries, new List<BowserEntryDto>());
 
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
 
-                      Assert.Equal("Invalid entries: 2001|3001, Product miss-matching entries: 1001, Customer miss-matching entries: 1001, Remaining quantity: 1000.25 of Entry: 1001 not sufficient to deliver requested quantity: 1200", ex.Message);
+                      Assert.Equal("Invalid entries: 2001|3001, Product miss-matching entries: 1001, Customer miss-matching entries: 1001, Remaining quantity: 1000.25 of Entry: 1001 not sufficient to deliver requested quantity: 1500", ex.Message);
                   });
             }
 
@@ -395,7 +395,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 1200, DeliveredQuantity=1000.250 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 1000.250, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1",
@@ -435,14 +435,14 @@ namespace JCTO.Tests
 
                        Assert.Equal("xyz", txn1.ObRef);
                        Assert.Equal(entry.Id, txn1.EntryId);
-                       Assert.Equal(-1200, txn1.Quantity);
-                       Assert.Equal(-1000.250, txn1.DeliveredQuantity);
+                       Assert.Equal(-1000.250, txn1.Quantity);
+                       Assert.Equal(0, txn1.DeliveredQuantity);
                        Assert.Equal(EntryTransactionType.Out, txn1.Type);
 
                        //Entry
                        Assert.Equal(1000.250, entry.InitialQualtity);
                        Assert.Equal(0, entry.RemainingQuantity);
-                       Assert.Equal(EntryStatus.Completed, entry.Status);
+                       Assert.Equal(EntryStatus.Active, entry.Status);
                    });
             }
         }

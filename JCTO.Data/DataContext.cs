@@ -28,9 +28,8 @@ namespace JCTO.Data
             builder.Entity<Customer>().HasIndex(c => c.Name).IsUnique();
             builder.Entity<Product>().HasIndex(p => p.Code).IsUnique();
             builder.Entity<Entry>().HasIndex(e => e.EntryNo).IsUnique();
-            builder.Entity<EntryTransaction>().HasIndex(t => new { t.EntryId, t.Type }).HasFilter("\"Type\" = 0");
+            builder.Entity<EntryTransaction>().HasIndex(t => new { t.ApprovalType, t.ApprovalRef }).HasFilter("\"Type\" = 0 AND \"ApprovalType\" in (1,2)");
             builder.Entity<Order>().HasIndex(o => new { o.OrderDate, o.OrderNo }).IsUnique();
-
 
             foreach (var property in builder.Model.GetEntityTypes()
                  .SelectMany(t => t.GetProperties())

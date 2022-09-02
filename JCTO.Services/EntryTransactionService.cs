@@ -5,7 +5,7 @@ namespace JCTO.Services
 {
     public static class EntryTransactionService
     {
-        public static EntryTransaction GetEntryTransaction(EntryTransactionType type, Guid id, Guid entryId, string obRef, double quantity, double deliveredQuantity)
+        public static EntryTransaction GetEntryTransaction(EntryTransactionType type, Guid id, Guid entryId, DateTime transactionDate, string obRef, double quantity, double deliveredQuantity)
         {
             var txn = new EntryTransaction
             {
@@ -15,7 +15,7 @@ namespace JCTO.Services
                 DeliveredQuantity = SignAmount(type, deliveredQuantity),
                 ObRef = obRef,
                 Type = type,
-                TransactionDateTimeUtc = DateTime.UtcNow,
+                TransactionDate = transactionDate,
             };
 
             return txn;

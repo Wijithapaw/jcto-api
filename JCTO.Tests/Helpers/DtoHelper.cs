@@ -57,5 +57,18 @@ namespace JCTO.Tests.Helpers
                 BowserEntries = bowserEntries
             };
         }
+
+        internal static EntryApprovalDto CreateEntryApprovalDto(Guid entryId, ApprovalType approvalType,
+            string approvalRef, DateTime date, double qty)
+        {
+            return new EntryApprovalDto
+            {
+                EntryId = entryId,
+                ApprovalRef = approvalRef,
+                Type = approvalType,
+                ApprovalDate = date,
+                Quantity = qty
+            };
+        }
     }
 }

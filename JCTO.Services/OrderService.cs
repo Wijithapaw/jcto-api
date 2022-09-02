@@ -49,7 +49,7 @@ namespace JCTO.Services
             var orderReleaseTxns = new List<EntryTransaction>();
             foreach (var txns in entryTxnsGrp)
             {
-                var entryTxns = await _entryService.CreateOrderEntryTransactionsAsync(txns.EntryNo, txns.entries);
+                var entryTxns = await _entryService.CreateOrderEntryTransactionsAsync(txns.EntryNo, dto.OrderDate, txns.entries);
                 orderReleaseTxns.AddRange(entryTxns);
             }
 

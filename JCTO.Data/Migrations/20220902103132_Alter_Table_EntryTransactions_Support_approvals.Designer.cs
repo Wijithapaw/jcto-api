@@ -3,6 +3,7 @@ using System;
 using JCTO.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JCTO.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class JctoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220902103132_Alter_Table_EntryTransactions_Support_approvals")]
+    partial class Alter_Table_EntryTransactions_Support_approvals
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,6 +201,7 @@ namespace JCTO.Data.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ObRef")
+                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 

@@ -301,7 +301,6 @@ namespace JCTO.Tests
                   });
             }
 
-
             [Fact]
             public async Task WhenPassingCorrectData_CreatedSuccessfully()
             {
@@ -323,7 +322,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 120, DeliveredQuantity=120 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1",
@@ -364,7 +363,7 @@ namespace JCTO.Tests
                        Assert.Equal("xyz", txn1.ObRef);
                        Assert.Equal(entry.Id, txn1.EntryId);
                        Assert.Equal(-120, txn1.Quantity);
-                       Assert.Equal(-120, txn1.DeliveredQuantity);
+                       Assert.Equal(0, txn1.DeliveredQuantity);
                        Assert.Equal(EntryTransactionType.Out, txn1.Type);
 
                        //Entry

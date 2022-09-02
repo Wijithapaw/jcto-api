@@ -36,11 +36,6 @@ namespace JCTO.Services
                 Status = dto.Status,
             };
 
-            newEntry.Transactions = new List<EntryTransaction>
-            {
-                EntryTransactionService.GetEntryTransaction(EntryTransactionType.In, Guid.NewGuid(), Guid.Empty, string.Empty, dto.InitialQuantity, dto.InitialQuantity)
-            };
-
             _dataContext.Entries.Add(newEntry);
 
             await _dataContext.SaveChangesAsync();
@@ -48,13 +43,15 @@ namespace JCTO.Services
             return GetEntityCreateResult(newEntry);
         }
 
-        public async Task<List<EntryTransaction>> CreateOrderEntryTransactionsAsync(string entryNo, List<OrderStockReleaseEntryDto> releaseEntries)
+        public async Task<List<EntryTransaction>> CreateOrderEntryTransactionsAsync(string entryNo, DateTime orderDate, List<OrderStockReleaseEntryDto> releaseEntries)
         {
             var entry = await GetEntryByEntryNoAsync(entryNo);
 
             var newTxns = releaseEntries
-                .Select(e => EntryTransactionService.GetEntryTransaction(EntryTransactionType.Out, e.Id, entry.Id, e.ObRef, e.Quantity, e.DeliveredQuantity))
+                .Select(e => EntryTransactionService.GetEntryTransaction(EntryTransactionType.Out, e.Id, entry.Id, orderDate, e.ObRef, e.Quantity, e.DeliveredQuantity))
                 .ToList();
+
+            newTxns.ForEach(t => t.Entry = entry);
 
             UpdateRemainingAmount(entry, newTxns);
 
@@ -102,10 +99,59 @@ namespace JCTO.Services
             return entries;
         }
 
+        public async Task<EntityCreateResult> AddApprovalAsync(EntryApprovalDto dto)
+        {
+            await ValidateEntryApprovalAsync(dto);
+
+            var entryTxn = new EntryTransaction
+            {
+                ApprovalType = dto.Type,
+                ApprovalRef = dto.ApprovalRef,
+                TransactionDate = dto.ApprovalDate,
+                Quantity = dto.Quantity,
+                DeliveredQuantity = dto.Quantity,
+                Type = EntryTransactionType.Approval,
+                EntryId = dto.EntryId,
+            };
+
+            _dataContext.EntryTransactions.Add(entryTxn);
+            await _dataContext.SaveChangesAsync();
+
+            return GetEntityCreateResult(entryTxn);
+        }
+
+        private async Task ValidateEntryApprovalAsync(EntryApprovalDto dto)
+        {
+            var errors = new List<string>();
+            if ((dto.Type == ApprovalType.Rebond || dto.Type == ApprovalType.XBond) && string.IsNullOrWhiteSpace(dto.ApprovalRef))
+            {
+                errors.Add("Approval Ref. is required for Xbond and Rebond approvals");
+            }
+
+            var quantityToBeApproved = await _dataContext.Entries
+                .Where(e => e.Id == dto.EntryId)
+                .Select(e => new
+                {
+                    IninitalQty = e.InitialQualtity,
+                    ApprovedQty = e.Transactions.Where(t => t.Type == EntryTransactionType.Approval).Sum(t => t.Quantity)
+                }).Select(e => e.IninitalQty - e.ApprovedQty).FirstAsync();
+
+            if (dto.Quantity > quantityToBeApproved)
+            {
+                errors.Add("Approving quantity is greater than remaining amount to approve");
+            }
+
+            if (errors.Any())
+            {
+                throw new JCTOValidationException(string.Join(", ", errors));
+            }
+        }
+
         private async Task<Entry> GetEntryByEntryNoAsync(string entryNo)
         {
             var entry = await _dataContext.Entries
                 .Where(e => e.EntryNo == entryNo)
+                .Include(e => e.Transactions)
                 .FirstAsync();
             return entry;
         }

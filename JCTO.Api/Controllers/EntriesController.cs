@@ -28,5 +28,11 @@ namespace JCTO.Api.Controllers
         {
             return await _entryService.SearchEntriesAsync(filter);
         }
+
+        [HttpPost("Approve")]
+        public async Task<EntityCreateResult> ApproveEntry(EntryApprovalDto dto)
+        {
+            return await _entryService.AddApprovalAsync(dto);
+        }
     }
 }

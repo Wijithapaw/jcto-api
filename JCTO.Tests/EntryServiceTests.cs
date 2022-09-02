@@ -1,4 +1,5 @@
 ﻿using JCTO.Domain;
+using JCTO.Domain.CustomExceptions;
 using JCTO.Domain.Dtos;
 using JCTO.Domain.Enums;
 using JCTO.Services;
@@ -53,14 +54,6 @@ namespace JCTO.Tests
                       Assert.Equal("10001", newEntry.EntryNo);
                       Assert.Equal(new DateTime(2022, 8, 20), newEntry.EntryDate);
                       Assert.Equal(EntryStatus.Active, newEntry.Status);
-
-                      Assert.Single(newEntry.Transactions);
-
-                      var txn = newEntry.Transactions.First();
-
-                      Assert.Equal(1000.1234, txn.Quantity);
-                      Assert.Equal(id, txn.EntryId);
-                      Assert.NotEqual(DateTime.MinValue, txn.TransactionDateTimeUtc);
                   });
             }
 
@@ -123,6 +116,35 @@ namespace JCTO.Tests
                       Assert.Equal(199.500, tr1.DeliveredQuantity);
                       Assert.Equal(new DateTime(2022, 8, 27), tr1.OrderDate);
                       Assert.Equal("1501", tr1.OrderNo);
+                  });
+            }
+        }
+
+        public class AddApproval
+        {
+            [Theory]
+            [InlineData(ApprovalType.Rebond, null, "2022-8-31", 100, "Approval Ref. is required for Xbond and Rebond approvals")]
+            [InlineData(ApprovalType.Rebond, "50010", "2022-8-31", 200, "Approving quantity is greater than remaining amount to approve")]
+            [InlineData(ApprovalType.Rebond, null, "2022-8-31", 200, "Approval Ref. is required for Xbond and Rebond approvals, Approving quantity is greater than remaining amount to approve")]
+            public async Task WhenNoFilters_ReturnAll(ApprovalType approvalType, string approvalRef, DateTime date, double qty, string expectedError)
+            {
+                var entryId = Guid.Empty;
+
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+                      entryId = await EntityHelper.GetEntryIdAsync(dbContext, "1002");
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var entrySvc = new EntryService(dbContext);
+
+                      var dto = DtoHelper.CreateEntryApprovalDto(entryId, approvalType, approvalRef, date, qty);
+
+                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => entrySvc.AddApprovalAsync(dto));
+
+                      Assert.Equal(ex.Message, expectedError);
                   });
             }
         }

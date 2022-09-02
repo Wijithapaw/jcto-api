@@ -54,7 +54,8 @@ namespace JCTO.Tests.Helpers
             };
         }
 
-        public static EntryTransaction CreateEntryTransaction(EntryTransactionType type, string obRef, double quantity, double deliveredQuantity, Guid? orderId = null)
+        public static EntryTransaction CreateEntryTransaction(EntryTransactionType type, DateTime txnDate, string obRef,
+            double quantity, double deliveredQuantity, ApprovalType approvalType, string approvalRef = null, Guid? orderId = null)
         {
             return new EntryTransaction
             {
@@ -62,8 +63,10 @@ namespace JCTO.Tests.Helpers
                 Quantity = quantity,
                 DeliveredQuantity = deliveredQuantity,
                 Type = type,
-                TransactionDateTimeUtc = DateTime.UtcNow,
-                OrderId = orderId
+                TransactionDate = DateTime.UtcNow,
+                OrderId = orderId,
+                ApprovalType = approvalType,
+                ApprovalRef = approvalRef,
             };
         }
 
@@ -100,6 +103,11 @@ namespace JCTO.Tests.Helpers
         public static async Task<Guid> GetCustomerIdAsync(IDataContext dataContext, string name)
         {
             return (await dataContext.Customers.FirstAsync(c => c.Name == name)).Id;
+        }
+
+        public static async Task<Guid> GetEntryIdAsync(IDataContext dataContext, string entryNo)
+        {
+            return (await dataContext.Entries.FirstAsync(c => c.EntryNo == entryNo)).Id;
         }
 
         public static async Task<Guid> GetOrderIdAsync(IDataContext dataContext, string orderNo)

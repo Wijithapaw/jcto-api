@@ -59,32 +59,32 @@ namespace JCTO.Tests.Helpers
                 var e1 = EntityHelper.CreateEntry("1001", customerId1, productId1, 1000.250, 1000.250, new DateTime(2022, 8, 20), EntryStatus.Active);
                 var e1Txns = new List<EntryTransaction>
                 {
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.In, string.Empty, 1000.250, 1000.250),
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Approval, new DateTime(2022, 8, 21), string.Empty, 1000.250, 1000.250, ApprovalType.Rebond, "50000"),
                 };
                 e1.Transactions = e1Txns;
 
                 var e2 = EntityHelper.CreateEntry("1002", customerId1, productId2, 500, 205.5, new DateTime(2022, 8, 28), EntryStatus.Active);
                 var e2Txns = new List<EntryTransaction>
                 {
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.In, string.Empty, 500, 500),
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, "ref-10", -200.250, -199.500, orderId1),
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, "ref-11", -100, 0, orderId2)
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Approval, new DateTime(2022, 8, 28), string.Empty, 350, 350, ApprovalType.XBond, "60000"),
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, new DateTime(2022, 8, 27), "ref-10", -200.250, -199.500, ApprovalType.XBond, null, orderId1),
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, new DateTime(2022, 8, 28), "ref-11", -100, 0, ApprovalType.XBond, null, orderId2)
                 };
                 e2.Transactions = e2Txns;
 
                 var e3 = EntityHelper.CreateEntry("1101", customerId2, productId1, 750, 750, new DateTime(2022, 8, 20), EntryStatus.Active);
                 var e3Txns = new List<EntryTransaction>
                 {
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.In, string.Empty, 750, 750),
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Approval, new DateTime(2022, 8, 20), string.Empty, 750, 750, ApprovalType.Letter),
                 };
                 e3.Transactions = e3Txns;
 
                 var e4 = EntityHelper.CreateEntry("1102", customerId2, productId2, 750, 0, new DateTime(2022, 8, 20), EntryStatus.Completed);
                 var e4Txns = new List<EntryTransaction>
                 {
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.In, string.Empty, 750, 750),
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, "ref-101", -500, 0, orderId3),
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, "ref-112", -300, 0, orderId2)
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Approval, new DateTime(2022, 8, 20), string.Empty, 650, 650, ApprovalType.Rebond, "50001"),
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, new DateTime(2022, 8, 29), "ref-101", -500, 0, ApprovalType.Rebond, null, orderId3),
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, new DateTime(2022, 8, 28), "ref-112", -100, 0, ApprovalType.Rebond, null, orderId2)
                 };
                 e4.Transactions = e4Txns;
 

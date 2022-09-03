@@ -18,7 +18,7 @@ namespace JCTO.Domain.Entities
         [MaxLength(50)]
         public string ObRef { get; set; }
         public double Quantity { get; set; }
-        public double DeliveredQuantity { get; set; }
+        public double? DeliveredQuantity { get; set; }
         public Guid? OrderId { get; set; }
 
         public virtual Entry Entry { get; set; }

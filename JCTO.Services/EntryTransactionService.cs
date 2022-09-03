@@ -5,16 +5,19 @@ namespace JCTO.Services
 {
     public static class EntryTransactionService
     {
-        public static EntryTransaction GetEntryTransaction(EntryTransactionType type, Guid id, Guid entryId, DateTime transactionDate, string obRef, double quantity, double deliveredQuantity)
+        public static EntryTransaction GetEntryTransaction(EntryTransactionType type, Guid id, Guid entryId, DateTime transactionDate,
+            ApprovalType approvalType, string approvalRef, string obRef, double quantity, double? deliveredQuantity)
         {
             var txn = new EntryTransaction
             {
                 Id = id,
                 EntryId = entryId,
                 Quantity = SignAmount(type, quantity),
-                DeliveredQuantity = SignAmount(type, deliveredQuantity),
+                DeliveredQuantity = deliveredQuantity != null ? SignAmount(type, deliveredQuantity.Value) : null,
                 ObRef = obRef,
                 Type = type,
+                ApprovalType = approvalType,
+                ApprovalRef = approvalRef,
                 TransactionDate = transactionDate,
             };
 

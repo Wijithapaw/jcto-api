@@ -55,7 +55,7 @@ namespace JCTO.Tests.Helpers
         }
 
         public static EntryTransaction CreateEntryTransaction(EntryTransactionType type, DateTime txnDate, string obRef,
-            double quantity, double deliveredQuantity, ApprovalType approvalType, string approvalRef = null, Guid? orderId = null)
+            double quantity, double? deliveredQuantity, ApprovalType approvalType, string approvalRef = null, Guid? orderId = null)
         {
             return new EntryTransaction
             {
@@ -63,7 +63,7 @@ namespace JCTO.Tests.Helpers
                 Quantity = quantity,
                 DeliveredQuantity = deliveredQuantity,
                 Type = type,
-                TransactionDate = DateTime.UtcNow,
+                TransactionDate = txnDate,
                 OrderId = orderId,
                 ApprovalType = approvalType,
                 ApprovalRef = approvalRef,

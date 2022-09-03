@@ -48,7 +48,7 @@ namespace JCTO.Services
             var entry = await GetEntryByEntryNoAsync(entryNo);
 
             var newTxns = releaseEntries
-                .Select(e => EntryTransactionService.GetEntryTransaction(EntryTransactionType.Out, e.Id, entry.Id, orderDate, e.ObRef, e.Quantity, e.DeliveredQuantity))
+                .Select(e => EntryTransactionService.GetEntryTransaction(EntryTransactionType.Out, e.Id, entry.Id, orderDate, e.ApprovalType, string.Empty, e.ObRef, e.Quantity, null))
                 .ToList();
 
             newTxns.ForEach(t => t.Entry = entry);
@@ -82,37 +82,57 @@ namespace JCTO.Services
                     RemainingQuantity = e.RemainingQuantity,
                     Status = e.Status,
                     Transactions = e.Transactions
-                        .Where(t => t.Type == EntryTransactionType.Out)
-                        .OrderBy(t => t.Order.OrderDate)
-                        .ThenBy(t => t.Order.OrderNo)
+                        .OrderBy(t => t.TransactionDate)
+                        .ThenBy(t => t.CreatedDateUtc)
                         .Select(t => new EntryTransactionDto
                         {
-                            OrderNo = t.Order.OrderNo,
-                            OrderDate = t.Order.OrderDate,
-                            OrderStatus = t.Order.Status,
+                            OrderNo = t.Order != null ? t.Order.OrderNo : null,
+                            TransactionDate = t.TransactionDate,
+                            ApprovalType = t.ApprovalType,
+                            ApprovalRef = t.ApprovalRef,
+                            Type = t.Type,
+                            OrderStatus = t.Order != null ? t.Order.Status : null,
                             ObRef = t.ObRef,
-                            Quantity = -1 * t.Quantity,
-                            DeliveredQuantity = -1 * t.DeliveredQuantity
+                            Quantity = t.Quantity,
+                            DeliveredQuantity = t.DeliveredQuantity,
+
                         }).ToList()
                 }).GetPagedListAsync(filter);
 
             return entries;
         }
 
+        public async Task<EntryBalanceQtyDto> GetEntryBalanceQuantitiesAsync(string entryNo)
+        {
+            var balQty = await _dataContext.Entries
+                .Where(e => e.EntryNo == entryNo)
+                .Select(e => new EntryBalanceQtyDto
+                {
+                    Id = e.Id,
+                    EntryNo = e.EntryNo,
+                    RemainingQty = e.RemainingQuantity,
+                    InitialQty = e.InitialQualtity,
+                    Xbond = e.Transactions.Where(t => t.ApprovalType == ApprovalType.XBond)
+                            .Select(e => e.DeliveredQuantity ?? e.Quantity)
+                            .Sum(),
+                    Rebond = e.Transactions.Where(t => t.ApprovalType == ApprovalType.Rebond)
+                            .Select(e => e.DeliveredQuantity ?? e.Quantity)
+                            .Sum(),
+                    Letter = e.Transactions.Where(t => t.ApprovalType == ApprovalType.Letter)
+                            .Select(e => e.DeliveredQuantity ?? e.Quantity)
+                            .Sum()
+
+                }).FirstOrDefaultAsync();
+
+            return balQty;
+        }
+
         public async Task<EntityCreateResult> AddApprovalAsync(EntryApprovalDto dto)
         {
             await ValidateEntryApprovalAsync(dto);
 
-            var entryTxn = new EntryTransaction
-            {
-                ApprovalType = dto.Type,
-                ApprovalRef = dto.ApprovalRef,
-                TransactionDate = dto.ApprovalDate,
-                Quantity = dto.Quantity,
-                DeliveredQuantity = dto.Quantity,
-                Type = EntryTransactionType.Approval,
-                EntryId = dto.EntryId,
-            };
+            var entryTxn = EntryTransactionService.GetEntryTransaction(EntryTransactionType.Approval, Guid.Empty,
+                dto.EntryId, dto.ApprovalDate, dto.Type, dto.ApprovalRef, string.Empty, dto.Quantity, null);
 
             _dataContext.EntryTransactions.Add(entryTxn);
             await _dataContext.SaveChangesAsync();

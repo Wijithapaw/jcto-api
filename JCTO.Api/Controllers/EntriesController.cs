@@ -34,5 +34,11 @@ namespace JCTO.Api.Controllers
         {
             return await _entryService.AddApprovalAsync(dto);
         }
+
+        [HttpGet("{entryNo}/balance")]
+        public async Task<EntryBalanceQtyDto> GetEntryBalanceQuantities(string entryNo)
+        {
+            return await _entryService.GetEntryBalanceQuantitiesAsync(entryNo);
+        }
     }
 }

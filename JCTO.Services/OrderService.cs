@@ -90,7 +90,8 @@ namespace JCTO.Services
                         EntryNo = t.Entry.EntryNo,
                         ObRef = t.ObRef,
                         DeliveredQuantity = -1 * t.DeliveredQuantity,
-                        Quantity = -1 * t.Quantity
+                        Quantity = -1 * t.Quantity,
+                        ApprovalType = t.ApprovalType,
                     }).OrderBy(e => e.EntryNo).ToList(),
                     BowserEntries = o.BowserEntries.Select(b => new BowserEntryDto
                     {
@@ -178,6 +179,9 @@ namespace JCTO.Services
 
                 if (order.ReleaseEntries.Any(e => e.DeliveredQuantity > e.Quantity))
                     errors.Add("Stock release entries found having Delevered Quantity > Quantity");
+
+                if (order.ReleaseEntries.Any(e => !Enum.IsDefined(typeof(ApprovalType), e.ApprovalType)))
+                    errors.Add("Stock release entries found not having Approval Type");
             }
 
             if (order.BuyerType == BuyerType.Bowser)
@@ -210,7 +214,19 @@ namespace JCTO.Services
                     e.ProductId,
                     e.RemainingQuantity,
                     e.InitialQualtity,
-                    e.Status
+                    e.Status,
+                    RemQtys = new
+                    {
+                        Xbond = e.Transactions.Where(t => t.ApprovalType == ApprovalType.XBond)
+                            .Select(e => e.DeliveredQuantity ?? e.Quantity)
+                            .Sum(),
+                        Rebond = e.Transactions.Where(t => t.ApprovalType == ApprovalType.Rebond)
+                            .Select(e => e.DeliveredQuantity ?? e.Quantity)
+                            .Sum(),
+                        Letter = e.Transactions.Where(t => t.ApprovalType == ApprovalType.Letter)
+                            .Select(e => e.DeliveredQuantity ?? e.Quantity)
+                            .Sum()
+                    }
                 })
                 .ToListAsync();
 
@@ -247,20 +263,43 @@ namespace JCTO.Services
             if (customerMismatchs.Any())
                 errors.Add($"Customer miss-matching entries: {string.Join("|", customerMismatchs)}");
 
-            var reqQtysFromEntries = order.ReleaseEntries
-                .Where(re => !invalidEntries.Union(completedEntries).Contains(re.EntryNo))
-                .GroupBy(e => e.EntryNo)
-                .Select(e => new
-                {
-                    EntryNo = e.Key,
-                    Quantity = e.Sum(r => order.Status == OrderStatus.Delivered ? r.DeliveredQuantity : r.Quantity)
-                }).ToArray();
+            var reqQtysFromEntriesBonds = order.ReleaseEntries
+               .Where(re => !invalidEntries.Union(completedEntries).Contains(re.EntryNo))
+               .GroupBy(e => new { e.EntryNo, e.ApprovalType })
+               .Select(e => new
+               {
+                   EntryNo = e.Key.EntryNo,
+                   ApprovalType = e.Key.ApprovalType,
+                   Quantity = e.Sum(r => order.Status == OrderStatus.Delivered ? r.DeliveredQuantity.Value : r.Quantity)
+               }).ToArray();
+
+            var reqQtysFromEntries = reqQtysFromEntriesBonds
+               .GroupBy(e => e.EntryNo)
+               .Select(g => new
+               {
+                   EntryNo = g.Key,
+                   Quantity = g.Sum(e => e.Quantity)
+               }).ToArray();
 
             foreach (var reqQty in reqQtysFromEntries)
             {
                 var entry = entries.First(e => e.EntryNo == reqQty.EntryNo);
                 if (entry.RemainingQuantity < reqQty.Quantity)
                     errors.Add($"Remaining quantity: {entry.RemainingQuantity} of Entry: {reqQty.EntryNo} not sufficient to deliver requested quantity: {reqQty.Quantity}");
+            }
+
+            foreach (var reqBondQty in reqQtysFromEntriesBonds)
+            {
+                var entry = entries.First(e => e.EntryNo == reqBondQty.EntryNo);
+
+                if (reqBondQty.ApprovalType == ApprovalType.XBond && reqBondQty.Quantity > entry.RemQtys.Xbond)
+                    errors.Add($"Remaining Xbond amount ({entry.RemQtys.Xbond}) of entry ({reqBondQty.EntryNo}) is less than requested amount: {reqBondQty.Quantity}");
+
+                if (reqBondQty.ApprovalType == ApprovalType.Rebond && reqBondQty.Quantity > entry.RemQtys.Rebond)
+                    errors.Add($"Remaining Rebond amount ({entry.RemQtys.Rebond}) of entry ({reqBondQty.EntryNo}) is less than requested amount: {reqBondQty.Quantity}");
+
+                if (reqBondQty.ApprovalType == ApprovalType.Letter && reqBondQty.Quantity > entry.RemQtys.Letter)
+                    errors.Add($"Remaining Letter approved amount ({entry.RemQtys.Letter}) of entry ({reqBondQty.EntryNo}) is less than requested amount: {reqBondQty.Quantity}");
             }
 
             if (errors.Any())

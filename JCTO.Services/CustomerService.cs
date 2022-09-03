@@ -41,7 +41,7 @@ namespace JCTO.Services
                             UndeliveredStocks = g.SelectMany(en => en.Transactions)
                                 .Where(t => t.Type == EntryTransactionType.Out
                                     && t.Order.Status == OrderStatus.Undelivered)
-                                .Select(t => t.DeliveredQuantity * -1)
+                                .Select(t => t.Quantity * -1)
                                 .ToArray(),
                             ProductId = g.Key,
                             RemainingStocks = g.Select(en => en.RemainingQuantity).ToArray(),

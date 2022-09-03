@@ -103,18 +103,18 @@ namespace JCTO.Tests
 
                       Assert.Equal(new DateTime(2022, 8, 28), entry.EntryDate);
                       Assert.Equal(500, entry.InitialQuantity);
-                      Assert.Equal(205.5, entry.RemainingQuantity);
+                      Assert.Equal(200.5, entry.RemainingQuantity);
                       Assert.Equal("JVC", entry.Customer);
                       Assert.Equal("380_LSFO", entry.Product);
                       Assert.Equal(EntryStatus.Active, entry.Status);
 
-                      Assert.Equal(2, entry.Transactions.Count);
+                      Assert.Equal(3, entry.Transactions.Count);
 
                       var tr1 = entry.Transactions.First(t => t.ObRef == "ref-10");
 
-                      Assert.Equal(200.250, tr1.Quantity);
-                      Assert.Equal(199.500, tr1.DeliveredQuantity);
-                      Assert.Equal(new DateTime(2022, 8, 27), tr1.OrderDate);
+                      Assert.Equal(-200.250, tr1.Quantity);
+                      Assert.Equal(-199.500, tr1.DeliveredQuantity);
+                      Assert.Equal(new DateTime(2022, 8, 27), tr1.TransactionDate);
                       Assert.Equal("1501", tr1.OrderNo);
                   });
             }

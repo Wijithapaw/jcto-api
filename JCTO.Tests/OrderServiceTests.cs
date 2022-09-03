@@ -35,7 +35,7 @@ namespace JCTO.Tests
 
                 var releaseEntries = new List<OrderStockReleaseEntryDto>
                 {
-                    new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="10001", ObRef="xyz", Quantity = 110, DeliveredQuantity=0 }
+                    new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), ApprovalType=ApprovalType.Rebond, EntryNo="1001", ObRef="xyz", Quantity = 110, DeliveredQuantity=0 }
                 };
 
                 await DbHelper.ExecuteTestAsync(
@@ -79,7 +79,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), ApprovalType=ApprovalType.Rebond, EntryNo="1001", ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jkcs_customerId, go_productId, "1001",
@@ -113,7 +113,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lsfo_productId, "1001",
@@ -147,7 +147,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
@@ -181,9 +181,9 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 120, DeliveredQuantity=0 },
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="3001", ObRef="xyz", Quantity = 120, DeliveredQuantity=0 },
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="3001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
@@ -217,7 +217,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 1500, DeliveredQuantity=0 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 1500, DeliveredQuantity=0 },
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
@@ -227,9 +227,47 @@ namespace JCTO.Tests
 
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
 
-                      Assert.Equal("Remaining quantity: 1000.25 of Entry: 1001 not sufficient to deliver requested quantity: 1500", ex.Message);
+                      Assert.Equal("Remaining quantity: 1000.25 of Entry: 1001 not sufficient to deliver requested quantity: 1500, Remaining Rebond amount (1000.25) of entry (1001) is less than requested amount: 1500", ex.Message);
                   });
             }
+
+            [Theory]
+            //[InlineData("JVC", "380_LSFO", "1002", ApprovalType.XBond, 51, "Remaining Xbond amount (50.5) of entry (1002) is less than requested amount: 51")]
+            [InlineData("JKCS", "GO", "1101", ApprovalType.Letter, 701, "Remaining Letter approved amount (700) of entry (1101) is less than requested amount: 701")]
+            public async Task WhenRequestedQuantitiesAreGreaterThanRemainingQuantityOfBondTypes_ThrowsException(string customerCode, string productCode,
+                string entryNo, ApprovalType approvalType, double qty, string expectedError)
+            {
+                var customerId = Guid.Empty;
+                var productId = Guid.Empty;
+
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+
+                      customerId = await EntityHelper.GetCustomerIdAsync(dbContext, customerCode);
+                      productId = await EntityHelper.GetProductIdAsync(dbContext, productCode);
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      var releaseEntries = new List<OrderStockReleaseEntryDto>
+                      {
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo=entryNo, ApprovalType=approvalType, ObRef="xyz", Quantity = qty },
+                      };
+
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, customerId, productId, "1001",
+                          new DateTime(2022, 8, 27), qty, "Dialog",
+                          OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
+                          "", null, releaseEntries, new List<BowserEntryDto>());
+
+                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
+
+                      Assert.Equal(expectedError, ex.Message);
+                  });
+            }
+
 
             [Fact]
             public async Task WhenThereAreCompletedEntriesSelected_ThrowsException()
@@ -251,7 +289,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1102", ObRef="abc", Quantity = 15, DeliveredQuantity=0 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1102", ApprovalType=ApprovalType.Rebond, ObRef="abc", Quantity = 15, DeliveredQuantity=0 },
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jkcs_customerId, lsfo_productId, "2001",
@@ -285,9 +323,9 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 1500, DeliveredQuantity=0 },
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="3001", ObRef="xyz", Quantity = 120, DeliveredQuantity=0 },
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 1500, DeliveredQuantity=0 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="3001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jkcs_customerId, lsfo_productId, "1001",
@@ -297,7 +335,7 @@ namespace JCTO.Tests
 
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
 
-                      Assert.Equal("Invalid entries: 2001|3001, Product miss-matching entries: 1001, Customer miss-matching entries: 1001, Remaining quantity: 1000.25 of Entry: 1001 not sufficient to deliver requested quantity: 1500", ex.Message);
+                      Assert.Equal("Invalid entries: 2001|3001, Product miss-matching entries: 1001, Customer miss-matching entries: 1001, Remaining quantity: 1000.25 of Entry: 1001 not sufficient to deliver requested quantity: 1500, Remaining Rebond amount (1000.25) of entry (1001) is less than requested amount: 1500", ex.Message);
                   });
             }
 
@@ -322,7 +360,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1",
@@ -394,7 +432,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ObRef="xyz", Quantity = 1000.250, DeliveredQuantity=0 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 1000.250, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1",

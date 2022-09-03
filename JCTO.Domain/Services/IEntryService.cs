@@ -10,5 +10,6 @@ namespace JCTO.Domain.Services
         Task<List<EntryTransaction>> CreateOrderEntryTransactionsAsync(string entryNo, DateTime orderDate, List<OrderStockReleaseEntryDto> releaseEntries);
         Task<PagedResultsDto<EntryListItemDto>> SearchEntriesAsync(EntrySearchDto filter);
         Task<EntityCreateResult> AddApprovalAsync(EntryApprovalDto dto);
+        Task<EntryBalanceQtyDto> GetEntryBalanceQuantitiesAsync(string entryNo);
     }
 }

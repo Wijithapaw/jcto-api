@@ -7,8 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="ReportTemplates\" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\JCTO.Domain\JCTO.Domain.csproj" />
-    <ProjectReference Include="..\JCTO.Reports\JCTO.Reports.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="ReportTemplates\StockRelease.xls">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

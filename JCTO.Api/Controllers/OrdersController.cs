@@ -1,4 +1,5 @@
-﻿using JCTO.Domain.Dtos;
+﻿using JCTO.Domain.Constants;
+using JCTO.Domain.Dtos;
 using JCTO.Domain.Dtos.Base;
 using JCTO.Domain.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -45,15 +46,11 @@ namespace JCTO.Api.Controllers
 
         [HttpGet("{orderId}/StockRelease")]
         [AllowAnonymous]
-        public async Task<ActionResult> DownloadStockRelease(int orderId)
+        public async Task<ActionResult> DownloadStockRelease(Guid orderId)
         {
-            string rootPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            var bytes = await _orderService.GenerateStockReleaseAsync(orderId);
 
-            var filePath = Path.Combine(rootPath, "ReportTemplates/StockRelease.xls"); // Here, you should validate the request and the existance of the file.
-
-            var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
-
-            return File(bytes, "application/vnd.ms-excel", "StockRelease_Copy.xls");
+            return File(bytes, ReportContentTypes.XLSX, "StockRelease.xlsx");
         }
     }
 }

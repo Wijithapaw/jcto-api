@@ -8,5 +8,6 @@ namespace JCTO.Domain.Services
         Task<EntityCreateResult> CreateAsync(OrderDto dto);
         Task<PagedResultsDto<OrderListItemDto>> SearchOrdersAsync(OrderSearchDto filter);
         Task<OrderDto> GetOrderAsync(Guid id);
+        Task<byte[]> GenerateStockReleaseAsync(Guid orderId);
     }
 }

@@ -5,6 +5,7 @@ using JCTO.Domain.Dtos.Base;
 using JCTO.Domain.Entities;
 using JCTO.Domain.Enums;
 using JCTO.Domain.Services;
+using JCTO.Reports;
 using Microsoft.EntityFrameworkCore;
 
 namespace JCTO.Services
@@ -135,6 +136,16 @@ namespace JCTO.Services
                 }).GetPagedListAsync(filter);
 
             return orders;
+        }
+
+        public async Task<byte[]> GenerateStockReleaseAsync(Guid orderId)
+        {
+            var reportData = new StockReleaseReportDto
+            {
+
+            };
+
+            return await StockReleaseReport.GenerateAsync(reportData);
         }
 
         private void ValidateOrder(OrderDto order)

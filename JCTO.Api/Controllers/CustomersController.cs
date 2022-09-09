@@ -31,7 +31,6 @@ namespace JCTO.Api.Controllers
         [HttpGet("Products/ListItems")]
         public async Task<List<ListItem>> GetAllProductsListItems()
         {
-
             return await _customerService.GetProductListItemsAsync();
         }
     }

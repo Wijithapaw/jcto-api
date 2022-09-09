@@ -44,10 +44,10 @@ namespace JCTO.Api.Middlewares
                 else if (ex is DbUpdateException)
                 {
                     var dbEx = (DbUpdateException)ex;
-                    if(dbEx.InnerException != null && dbEx.InnerException is PostgresException)
+                    if (dbEx.InnerException != null && dbEx.InnerException is PostgresException)
                     {
                         var pgEx = (PostgresException)ex.InnerException!;
-                        if(!string.IsNullOrEmpty(pgEx.ConstraintName))
+                        if (!string.IsNullOrEmpty(pgEx.ConstraintName))
                         {
                             statusCode = HttpStatusCode.BadRequest;
                             errorObj.ErrorMessage = $"Duplicate {pgEx.ConstraintName.Split('_').Last()}";

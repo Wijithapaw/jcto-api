@@ -3,6 +3,7 @@ using System;
 using JCTO.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JCTO.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class JctoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220909074933_Create_Tables_Stocks")]
+    partial class Create_Tables_Stocks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -449,9 +451,6 @@ namespace JCTO.Data.Migrations
 
                     b.HasIndex("StockId");
 
-                    b.HasIndex("ToBondNo")
-                        .IsUnique();
-
                     b.ToTable("StockTransactions");
                 });
 
@@ -680,7 +679,7 @@ namespace JCTO.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("JCTO.Domain.Entities.Customer", "Customer")
-                        .WithMany("Stocks")
+                        .WithMany()
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -761,8 +760,6 @@ namespace JCTO.Data.Migrations
             modelBuilder.Entity("JCTO.Domain.Entities.Customer", b =>
                 {
                     b.Navigation("Entries");
-
-                    b.Navigation("Stocks");
                 });
 
             modelBuilder.Entity("JCTO.Domain.Entities.Entry", b =>

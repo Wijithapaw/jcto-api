@@ -29,9 +29,9 @@ namespace JCTO.Tests
                   },
                   async (IDataContext dbContext) =>
                   {
-                      var entrySvc = new EntryService(dbContext);
+                      var entrySvc = CreateService(dbContext);
 
-                      var entryDto = DtoHelper.CreateEntryDto("10001", customerId, productId, new DateTime(2022, 8, 20), EntryStatus.Active, 1000.1234);
+                      var entryDto = DtoHelper.CreateEntryDto("10001", customerId, productId, new DateTime(2022, 8, 20), EntryStatus.Active, 50.1234);
 
                       var entry = await entrySvc.CreateAsync(entryDto);
 
@@ -50,10 +50,23 @@ namespace JCTO.Tests
                       Assert.Equal(id, newEntry.Id);
                       Assert.Equal(customerId, newEntry.CustomerId);
                       Assert.Equal(productId, newEntry.ProductId);
-                      Assert.Equal(1000.1234, newEntry.InitialQualtity);
+                      Assert.Equal(50.1234, newEntry.InitialQualtity);
                       Assert.Equal("10001", newEntry.EntryNo);
                       Assert.Equal(new DateTime(2022, 8, 20), newEntry.EntryDate);
                       Assert.Equal(EntryStatus.Active, newEntry.Status);
+
+                      var stock = await dbContext.Stocks
+                        .Where(s => s.CustomerId == customerId && s.ProductId == productId)
+                        .Include(s => s.Transactions)
+                        .FirstAsync();
+
+                      Assert.Equal(49.8766, stock.RemainingQuantity);
+
+                      var drTxn = stock.Transactions.First(t => t.EntryId == newEntry.Id);
+
+                      Assert.Equal(StockTransactionType.Out, drTxn.Type);
+                      Assert.Equal(-50.1234, drTxn.Quantity);
+                      Assert.Equal(newEntry.EntryDate, drTxn.TransactionDate);
                   });
             }
 
@@ -67,12 +80,12 @@ namespace JCTO.Tests
                   },
                   async (IDataContext dbContext) =>
                   {
-                      var entrySvc = new EntryService(dbContext);
+                      var entrySvc = CreateService(dbContext);
 
                       var customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
                       var productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
 
-                      var entryDto = DtoHelper.CreateEntryDto("1001", customerId, productId, new DateTime(2022, 8, 20), EntryStatus.Active, 1000);
+                      var entryDto = DtoHelper.CreateEntryDto("1001", customerId, productId, new DateTime(2022, 8, 20), EntryStatus.Active, 100);
 
                       var ex = await Assert.ThrowsAsync<DbUpdateException>(() => entrySvc.CreateAsync(entryDto));
                   });
@@ -91,7 +104,7 @@ namespace JCTO.Tests
                   },
                   async (IDataContext dbContext) =>
                   {
-                      var entrySvc = new EntryService(dbContext);
+                      var entrySvc = CreateService(dbContext);
 
                       var entries = await entrySvc.SearchEntriesAsync(new EntrySearchDto() { Page = 1, PageSize = 100 });
 
@@ -138,7 +151,7 @@ namespace JCTO.Tests
                   },
                   async (IDataContext dbContext) =>
                   {
-                      var entrySvc = new EntryService(dbContext);
+                      var entrySvc = CreateService(dbContext);
 
                       var dto = DtoHelper.CreateEntryApprovalDto(entryId, approvalType, approvalRef, date, qty);
 
@@ -151,7 +164,16 @@ namespace JCTO.Tests
 
         private static async Task SetupTestDataAsync(IDataContext dbContext)
         {
-            await TestData.Orders.SetupOrderAndEntryTestDataAsync(dbContext);
+            await TestData.Stocks.CreateStockAsync(dbContext);
+            await TestData.Orders.SetupOrderAndEntryTestDataAsync(dbContext, true);
+        }
+
+        private static EntryService CreateService(IDataContext dbContext)
+        {
+            var stockSvc = new StockService(dbContext);
+            var entrySvc = new EntryService(dbContext, stockSvc);
+
+            return entrySvc;
         }
     }
 }

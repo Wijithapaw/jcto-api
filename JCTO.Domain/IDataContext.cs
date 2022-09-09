@@ -11,6 +11,8 @@ namespace JCTO.Domain
         DbSet<Entry> Entries { get; set; }
         DbSet<EntryTransaction> EntryTransactions { get; set; }
         DbSet<Order> Orders { get; set; }
+        DbSet<Stock> Stocks { get; set; }
+        DbSet<StockTransaction> StockTransactions { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken));
     }

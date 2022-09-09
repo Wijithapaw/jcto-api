@@ -17,10 +17,12 @@ namespace JCTO.Services
     public class EntryService : BaseService, IEntryService
     {
         private readonly IDataContext _dataContext;
+        private readonly IStockService _stockService;
 
-        public EntryService(IDataContext dataContext)
+        public EntryService(IDataContext dataContext, IStockService stockService)
         {
             _dataContext = dataContext;
+            _stockService = stockService;
         }
 
         public async Task<EntityCreateResult> CreateAsync(EntryDto dto)
@@ -35,6 +37,8 @@ namespace JCTO.Services
                 RemainingQuantity = dto.InitialQuantity,
                 Status = dto.Status,
             };
+
+            await _stockService.DebitForEntryAsync(dto.CustomerId, dto.ProductId, newEntry, dto.InitialQuantity, dto.EntryDate);
 
             _dataContext.Entries.Add(newEntry);
 

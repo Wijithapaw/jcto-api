@@ -401,7 +401,7 @@ namespace JCTO.Tests
                        Assert.Equal("xyz", txn1.ObRef);
                        Assert.Equal(entry.Id, txn1.EntryId);
                        Assert.Equal(-120, txn1.Quantity);
-                       Assert.Equal(0, txn1.DeliveredQuantity);
+                       Assert.Null(txn1.DeliveredQuantity);
                        Assert.Equal(EntryTransactionType.Out, txn1.Type);
 
                        //Entry
@@ -473,7 +473,7 @@ namespace JCTO.Tests
                        Assert.Equal("xyz", txn1.ObRef);
                        Assert.Equal(entry.Id, txn1.EntryId);
                        Assert.Equal(-1000.250, txn1.Quantity);
-                       Assert.Equal(0, txn1.DeliveredQuantity);
+                       Assert.Null(txn1.DeliveredQuantity);
                        Assert.Equal(EntryTransactionType.Out, txn1.Type);
 
                        //Entry
@@ -603,8 +603,9 @@ namespace JCTO.Tests
 
         private static OrderService CreateService(IDataContext dataContext)
         {
-            var entryService = new EntryService(dataContext);
-            var orderSvc = new OrderService(dataContext, entryService);
+            var stockSvc = new StockService(dataContext);
+            var entrySvc = new EntryService(dataContext, stockSvc);
+            var orderSvc = new OrderService(dataContext, entrySvc);
             return orderSvc;
         }
     }

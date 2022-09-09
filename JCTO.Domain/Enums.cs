@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace JCTO.Domain.Enums
+﻿namespace JCTO.Domain.Enums
 {
     public enum EntryStatus
     {
@@ -15,6 +9,12 @@ namespace JCTO.Domain.Enums
     {
         Approval = 0,
         Out = 1,
+    }
+
+    public enum StockTransactionType
+    {
+        In = 1,
+        Out = 2,
     }
 
     public enum OrderStatus

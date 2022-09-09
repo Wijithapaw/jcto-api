@@ -108,11 +108,14 @@ namespace JCTO.Tests.Helpers
                 return orders;
             }
 
-            internal static async Task SetupOrderAndEntryTestDataAsync(IDataContext dbContext)
+            internal static async Task SetupOrderAndEntryTestDataAsync(IDataContext dbContext, bool ignoreCustomerProdcuctCreation = false)
             {
-                dbContext.Customers.AddRange(Customers.GetCustomers());
-                dbContext.Products.AddRange(Products.GetProducts());
-                await dbContext.SaveChangesAsync();
+                if (!ignoreCustomerProdcuctCreation)
+                {
+                    dbContext.Customers.AddRange(Customers.GetCustomers());
+                    dbContext.Products.AddRange(Products.GetProducts());
+                    await dbContext.SaveChangesAsync();
+                }
 
                 var customerId1 = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
                 var customerId2 = await EntityHelper.GetCustomerIdAsync(dbContext, "JKCS");
@@ -127,6 +130,45 @@ namespace JCTO.Tests.Helpers
                 var orderId_1503 = await EntityHelper.GetOrderIdAsync(dbContext, "1503");
 
                 dbContext.Entries.AddRange(Entries.GetEntries(customerId1, productId1, customerId2, productId2, orderId_1501, orderId_1502, orderId_1503));
+                await dbContext.SaveChangesAsync();
+            }
+        }
+
+        internal class Stocks
+        {
+            internal static async Task CreateStockAsync(IDataContext dbContext)
+            {
+                dbContext.Customers.AddRange(Customers.GetCustomers());
+                dbContext.Products.AddRange(Products.GetProducts());
+                await dbContext.SaveChangesAsync();
+
+                var customerId1 = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                var customerId2 = await EntityHelper.GetCustomerIdAsync(dbContext, "JKCS");
+                var productId1 = await EntityHelper.GetProductIdAsync(dbContext, "GO");
+
+                var s1 = EntityHelper.CreateStock(customerId1, productId1, 100);
+                var s2 = EntityHelper.CreateStock(customerId2, productId1, 200);
+
+                var s1_dis = new List<StockTransaction>
+                {
+                    EntityHelper.CreateStockTransaction(Guid.Empty, null, 20, new DateTime(2022, 9, 1), StockTransactionType.In, "501"),
+                    EntityHelper.CreateStockTransaction(Guid.Empty, null, 50, new DateTime(2022, 9, 2), StockTransactionType.In, "502"),
+                    EntityHelper.CreateStockTransaction(Guid.Empty, null, 30, new DateTime(2022, 9, 3), StockTransactionType.In, "503")
+                };
+
+                s1.Transactions = s1_dis;
+
+                var s2_dis = new List<StockTransaction>
+                {
+                    EntityHelper.CreateStockTransaction(Guid.Empty, null, 20, new DateTime(2022, 9, 1), StockTransactionType.In, "510"),
+                    EntityHelper.CreateStockTransaction(Guid.Empty, null, 50, new DateTime(2022, 9, 2), StockTransactionType.In, "511"),
+                    EntityHelper.CreateStockTransaction(Guid.Empty, null, 30, new DateTime(2022, 9, 3), StockTransactionType.In, "512"),
+                    EntityHelper.CreateStockTransaction(Guid.Empty, null, 100, new DateTime(2022, 9, 6), StockTransactionType.In, "513")
+                };
+
+                s2.Transactions = s2_dis;
+
+                dbContext.Stocks.AddRange(new List<Stock> { s1, s2 });
                 await dbContext.SaveChangesAsync();
             }
         }

@@ -91,6 +91,32 @@ namespace JCTO.Tests.Helpers
             };
         }
 
+        public static Stock CreateStock(Guid customerId, Guid productId, double remainingQuantity)
+        {
+            var stock = new Stock
+            {
+                CustomerId = customerId,
+                ProductId = productId,
+                RemainingQuantity = remainingQuantity,
+            };
+            return stock;
+        }
+
+        public static StockTransaction CreateStockTransaction(Guid stockId, Guid? entryId, double quantity, DateTime date,
+            StockTransactionType type, string toBondNo)
+        {
+            var txn = new StockTransaction
+            {
+                StockId = stockId,
+                Quantity = quantity,
+                TransactionDate = date,
+                Type = type,
+                ToBondNo = toBondNo,
+                EntryId = entryId
+            };
+            return txn;
+        }
+
         public static BowserEntry CreateBowserEntry(double capacity, double count)
         {
             return new BowserEntry

@@ -10,6 +10,7 @@ namespace JCTO.Domain
         DbSet<Product> Products { get; set; }
         DbSet<Entry> Entries { get; set; }
         DbSet<EntryTransaction> EntryTransactions { get; set; }
+        DbSet<BowserEntry> BowserEntries { get; set; }
         DbSet<Order> Orders { get; set; }
         DbSet<Stock> Stocks { get; set; }
         DbSet<StockTransaction> StockTransactions { get; set; }

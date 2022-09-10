@@ -6,13 +6,7 @@ using JCTO.Domain.Enums;
 using JCTO.Services;
 using JCTO.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-#pragma warning disable xUnit1012 // Null should not be used for value type parameters
 namespace JCTO.Tests
 {
     public class OrderServiceTests
@@ -927,6 +921,63 @@ namespace JCTO.Tests
             }
 
             [Fact]
+            public async Task WhenDeliveredOrderMarkingAsNotDelivered_EntryBecomeActive()
+            {
+                var jvc_customerId = Guid.Empty;
+                var lfso_productId = Guid.Empty;
+                Order order = null;
+
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+
+                      jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                      lfso_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
+
+                      order = await dbContext.Orders
+                        .Where(o => o.OrderNo == "1501")
+                        .Include(o => o.Transactions).ThenInclude(t => t.Entry)
+                        .Include(o => o.BowserEntries)
+                        .SingleOrDefaultAsync();
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      var releaseEntries = order.Transactions.Select(t => new OrderStockReleaseEntryDto
+                      {
+                          Id = t.Id,
+                          EntryNo = t.Entry.EntryNo,
+                          ApprovalType = t.ApprovalType,
+                          ObRef = "ref-11-a",
+                          Quantity = Math.Abs(t.Quantity),
+                          DeliveredQuantity = t.DeliveredQuantity != null ? Math.Abs(t.DeliveredQuantity.Value) : null,
+                      }).ToList();
+
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, "1501",
+                          new DateTime(2022, 8, 28), 199.5, 190, "Mobitel",
+                          OrderStatus.Undelivered, "OB/2023", "100", BuyerType.Barge,
+                          "First order", releaseEntries, new List<BowserEntryDto>(), order.ConcurrencyKey);
+
+                      var result = await orderSvc.UpdateAsync(order.Id, dto);
+                  },
+                   async (IDataContext dbContext) =>
+                   {
+                       var updatedOrder = await dbContext.Orders.FindAsync(order.Id);
+                       var entry = await dbContext.Entries.Where(e => e.EntryNo == "1104").FirstAsync();
+
+                       Assert.NotNull(updatedOrder);
+                       Assert.NotNull(entry);
+
+                       //Old Entry
+                       Assert.Equal(10, entry.InitialQualtity);
+                       Assert.Equal(0, entry.RemainingQuantity);
+                       Assert.Equal(EntryStatus.Active, entry.Status);
+                   });
+            }
+
+            [Fact]
             public async Task WhenRemainingApprovedQtyIsNotSufficient_ThrowsException()
             {
                 var jvc_customerId = Guid.Empty;
@@ -1015,6 +1066,68 @@ namespace JCTO.Tests
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.UpdateAsync(order.Id, dto));
 
                       Assert.Equal("Remaining quantity: 320 of Entry: 1002 not sufficient to deliver requested quantity: 321, Remaining Xbond amount (170) of entry (1002) is less than requested amount: 321", ex.Message);
+                  });
+            }
+        }
+
+        public class Delete
+        {
+            [Fact]
+            public async Task WhenDeletingOrder_UpdateEntriesSuccessfully()
+            {
+                var orderId = Guid.Empty;
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+
+                      orderId = await EntityHelper.GetOrderIdAsync(dbContext, "1502");
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      await orderSvc.DeleteAsync(orderId);
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var order = await dbContext.Orders.FindAsync(orderId);
+                      var entry = await dbContext.Entries
+                           .Where(e => e.EntryNo == "1002")
+                           .Include(e => e.Transactions)
+                           .FirstAsync();
+
+                      Assert.Null(order);
+
+                      //Entry Transactions
+                      Assert.Equal(2, entry.Transactions.Count);
+                      Assert.DoesNotContain(entry.Transactions, t => t.ObRef == "ref-11");
+
+                      //Entry
+                      Assert.Equal(500, entry.InitialQualtity);
+                      Assert.Equal(320, entry.RemainingQuantity);
+                      Assert.Equal(EntryStatus.Active, entry.Status);
+                  });
+            }
+
+            [Fact]
+            public async Task WhenDeletingDeliveredOrder_ThrowsException()
+            {
+                var orderId = Guid.Empty;
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+
+                      orderId = await EntityHelper.GetOrderIdAsync(dbContext, "1501");
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.DeleteAsync(orderId));
+
+                      Assert.Equal("Delivered orders cannot be deleted", ex.Message);
                   });
             }
         }

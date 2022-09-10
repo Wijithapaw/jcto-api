@@ -210,6 +210,12 @@ namespace JCTO.Services
 
                     if (!allOrders.Any(o => o.Status == OrderStatus.Undelivered))
                         entry.Status = EntryStatus.Completed;
+                    else
+                        entry.Status = EntryStatus.Active;
+                }
+                else
+                {
+                    entry.Status = EntryStatus.Active;
                 }
             }
 

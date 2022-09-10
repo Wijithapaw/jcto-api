@@ -47,6 +47,7 @@ namespace JCTO.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<Entry> Entries { get; set; }
         public DbSet<EntryTransaction> EntryTransactions { get; set; }
+        public DbSet<BowserEntry> BowserEntries { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Stock> Stocks { get; set; }
         public DbSet<StockTransaction> StockTransactions { get; set; }

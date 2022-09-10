@@ -80,15 +80,20 @@ namespace JCTO.Services
         {
             dto.Id = id;
 
+            var order = await _dataContext.Orders
+               .Where(o => o.Id == id)
+               .Include(o => o.Transactions).ThenInclude(t => t.Entry)
+               .Include(o => o.BowserEntries)
+               .SingleOrDefaultAsync();
+
+            if (order.Status == OrderStatus.Delivered && dto.Status == OrderStatus.Delivered)
+                throw new JCTOValidationException("Delivered orders cannot be updated");
+
             ValidateOrder(dto);
 
-            await ValidateEntriesAsync(dto, true);
+            var orderMarkingUndelivered = order.Status == OrderStatus.Delivered && dto.Status == OrderStatus.Undelivered;
 
-            var order = await _dataContext.Orders
-                .Where(o => o.Id == id)
-                .Include(o => o.Transactions).ThenInclude(t => t.Entry)
-                .Include(o => o.BowserEntries)
-                .SingleOrDefaultAsync();
+            await ValidateEntriesAsync(dto, true, orderMarkingUndelivered);
 
             var oldAffectedEntryIds = order.Transactions.Select(t => t.Entry.Id).ToList();
 
@@ -128,6 +133,28 @@ namespace JCTO.Services
             await _entryService.UpdateRemainingAmountsAsync(allAffectedEntries);
 
             return GetEntityUpdateResult(order);
+        }
+
+        public async Task DeleteAsync(Guid id)
+        {
+            var order = await _dataContext.Orders
+                .Where(o => o.Id == id)
+                .Include(o => o.Transactions)
+                .Include(o => o.BowserEntries)
+                .SingleOrDefaultAsync();
+
+            if (order.Status == OrderStatus.Delivered)
+                throw new JCTOValidationException("Delivered orders cannot be deleted");
+
+            _dataContext.EntryTransactions.RemoveRange(order.Transactions);
+            _dataContext.BowserEntries.RemoveRange(order.BowserEntries);
+            _dataContext.Orders.Remove(order);
+
+            var affectedEntryIds = order.Transactions.Select(t => t.EntryId).ToList();
+
+            await _dataContext.SaveChangesAsync();
+
+            await _entryService.UpdateRemainingAmountsAsync(affectedEntryIds);
         }
 
         public async Task<OrderDto> GetOrderAsync(Guid id)
@@ -293,7 +320,7 @@ namespace JCTO.Services
             }
         }
 
-        private async Task ValidateEntriesAsync(OrderDto order, bool update = false)
+        private async Task ValidateEntriesAsync(OrderDto order, bool update = false, bool orderMarkingUndelivered = false)
         {
             var errors = new List<string>();
 
@@ -349,7 +376,7 @@ namespace JCTO.Services
                 .OrderBy(e => e)
                 .ToArray();
 
-            if (completedEntries.Any())
+            if (!orderMarkingUndelivered && completedEntries.Any())
                 errors.Add($"Completed entries: {string.Join("|", completedEntries)} cannot be used");
 
             var productMismatchs = entries

@@ -47,17 +47,17 @@ namespace JCTO.Services
             return GetEntityCreateResult(newEntry);
         }
 
-        public async Task<List<EntryTransaction>> CreateOrderEntryTransactionsAsync(string entryNo, DateTime orderDate, List<OrderStockReleaseEntryDto> releaseEntries)
+        public async Task<List<EntryTransaction>> CreateOrderEntryTransactionsAsync(string entryNo, Order order, List<OrderStockReleaseEntryDto> releaseEntries)
         {
             var entry = await GetEntryByEntryNoAsync(entryNo);
 
             var newTxns = releaseEntries
-                .Select(e => EntryTransactionService.GetEntryTransaction(EntryTransactionType.Out, e.Id, entry.Id, orderDate, e.ApprovalType, string.Empty, e.ObRef, e.Quantity, null))
+                .Select(e => EntryTransactionService.GetEntryTransaction(EntryTransactionType.Out, e.Id, entry, order, order.OrderDate,
+                                                                        e.ApprovalType, string.Empty, e.ObRef, e.Quantity,
+                                                                        order.Status == OrderStatus.Delivered ? e.DeliveredQuantity : null))
                 .ToList();
 
             newTxns.ForEach(t => t.Entry = entry);
-
-            UpdateRemainingAmount(entry, newTxns);
 
             return newTxns;
         }
@@ -136,7 +136,9 @@ namespace JCTO.Services
             await ValidateEntryApprovalAsync(dto);
 
             var entryTxn = EntryTransactionService.GetEntryTransaction(EntryTransactionType.Approval, Guid.Empty,
-                dto.EntryId, dto.ApprovalDate, dto.Type, dto.ApprovalRef, string.Empty, dto.Quantity, null);
+                null, null, dto.ApprovalDate, dto.Type, dto.ApprovalRef, string.Empty, dto.Quantity, null);
+
+            entryTxn.EntryId = dto.EntryId;
 
             _dataContext.EntryTransactions.Add(entryTxn);
             await _dataContext.SaveChangesAsync();
@@ -171,13 +173,47 @@ namespace JCTO.Services
             }
         }
 
-        private async Task<Entry> GetEntryByEntryNoAsync(string entryNo)
+        public async Task<Entry> GetEntryByEntryNoAsync(string entryNo)
         {
             var entry = await _dataContext.Entries
                 .Where(e => e.EntryNo == entryNo)
                 .Include(e => e.Transactions)
                 .FirstAsync();
             return entry;
+        }
+
+        public async Task UpdateRemainingAmountsAsync(List<Guid> entryIds)
+        {
+            var entries = await _dataContext.Entries
+                .Where(e => entryIds.Contains(e.Id))
+                .Include(e => e.Transactions).ThenInclude(t => t.Order)
+                .ToListAsync();
+
+            foreach (var entry in entries)
+            {
+                var totalDeliveringQty = entry.Transactions
+                    .Where(t => t.Type == EntryTransactionType.Out)
+                    .Select(t => t.DeliveredQuantity ?? t.Quantity)
+                    .Sum();
+
+                if (totalDeliveringQty > entry.InitialQualtity)
+                    throw new JCTOValidationException($"Cant create order. Insufficient amount remaining in Entry: {entry.EntryNo}");
+
+                entry.RemainingQuantity = entry.InitialQualtity + totalDeliveringQty; //totalDeliveringQty is minus here
+
+                if (entry.RemainingQuantity == 0)
+                {
+                    var allOrders = entry.Transactions
+                        .Where(t => t.Type == EntryTransactionType.Out)
+                        .Select(t => t.Order)
+                        .Distinct();
+
+                    if (!allOrders.Any(o => o.Status == OrderStatus.Undelivered))
+                        entry.Status = EntryStatus.Completed;
+                }
+            }
+
+            await _dataContext.SaveChangesAsync();
         }
 
         private void UpdateRemainingAmount(Entry entry, List<EntryTransaction> txns)

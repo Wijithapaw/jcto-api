@@ -13,10 +13,10 @@ namespace JCTO.Domain.Dtos
         public string Buyer { get; set; }
         public OrderStatus Status { get; set; }
         public double Quantity { get; set; }
+        public double? DeliveredQuantity { get; set; }
         public string ObRefPrefix { get; set; }
         public string TankNo { get; set; }
         public BuyerType BuyerType { get; set; }
-        public string XBondNo { get; set; }
         public string Remarks { get; set; }
         public List<OrderStockReleaseEntryDto> ReleaseEntries { get; set; } = new List<OrderStockReleaseEntryDto>();
         public List<BowserEntryDto> BowserEntries { get; set; } = new List<BowserEntryDto>();

@@ -71,7 +71,7 @@ namespace JCTO.Tests.Helpers
         }
 
         public static Order CreateOrder(Guid customerId, Guid productId, DateTime orderDate, string orderNo,
-            string buyer, BuyerType buyerType, string tankNo, string obPrefix, OrderStatus status, double quantity,
+            string buyer, BuyerType buyerType, string tankNo, string obPrefix, OrderStatus status, double quantity, double? deliveredQty,
             string remarks, List<BowserEntry> bowserEntries)
         {
             return new Order

@@ -20,6 +20,7 @@ namespace JCTO.Domain.Entities
         public string Buyer { get; set; }
         public OrderStatus Status { get; set; }
         public double Quantity { get; set; }
+        public double? DeliveredQuantity { get; set; }
         [Required]
         [MaxLength(50)]
         public string ObRefPrefix { get; set; }

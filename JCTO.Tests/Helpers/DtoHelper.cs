@@ -34,9 +34,9 @@ namespace JCTO.Tests.Helpers
             };
         }
 
-        internal static OrderDto CreateOrderDto(Guid id, Guid customerId, Guid productId, string orderNo, DateTime orderDate, double quantity,
-            string buyer, OrderStatus status, string obPrefix, string tankNo, BuyerType buyerType, string xBondNo, string? remarks,
-            List<OrderStockReleaseEntryDto> releaseEntries, List<BowserEntryDto> bowserEntries)
+        internal static OrderDto CreateOrderDto(Guid id, Guid customerId, Guid productId, string orderNo, DateTime orderDate,
+            double quantity, double? deliveredQuantity, string buyer, OrderStatus status, string obPrefix, string tankNo, BuyerType buyerType,
+            string remarks, List<OrderStockReleaseEntryDto> releaseEntries, List<BowserEntryDto> bowserEntries, Guid concurrencyKey)
         {
             return new OrderDto
             {
@@ -46,15 +46,16 @@ namespace JCTO.Tests.Helpers
                 OrderNo = orderNo,
                 OrderDate = orderDate,
                 Quantity = quantity,
+                DeliveredQuantity = deliveredQuantity,
                 Buyer = buyer,
                 BuyerType = buyerType,
                 Status = status,
                 ObRefPrefix = obPrefix,
                 TankNo = tankNo,
-                XBondNo = xBondNo,
                 Remarks = remarks,
                 ReleaseEntries = releaseEntries,
-                BowserEntries = bowserEntries
+                BowserEntries = bowserEntries,
+                ConcurrencyKey = concurrencyKey
             };
         }
 

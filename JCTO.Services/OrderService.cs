@@ -7,6 +7,7 @@ using JCTO.Domain.Enums;
 using JCTO.Domain.Services;
 using JCTO.Reports;
 using Microsoft.EntityFrameworkCore;
+using NumericWordsConversion;
 
 namespace JCTO.Services
 {
@@ -43,18 +44,9 @@ namespace JCTO.Services
 
             _dataContext.Orders.Add(order);
 
-            var entryTxnsGrp = dto.ReleaseEntries
-                .GroupBy(e => e.EntryNo)
-                .Select(g => new { EntryNo = g.Key, entries = g.ToList() });
+            var entryTxns = await CreateNewEntryTxnsAsync(dto.ReleaseEntries, order);
 
-            var orderReleaseTxns = new List<EntryTransaction>();
-            foreach (var txns in entryTxnsGrp)
-            {
-                var entryTxns = await _entryService.CreateOrderEntryTransactionsAsync(txns.EntryNo, dto.OrderDate, txns.entries);
-                orderReleaseTxns.AddRange(entryTxns);
-            }
-
-            order.Transactions = orderReleaseTxns;
+            _dataContext.EntryTransactions.AddRange(entryTxns);
 
             order.BowserEntries = dto.BowserEntries.Select(b => new BowserEntry
             {
@@ -62,9 +54,80 @@ namespace JCTO.Services
                 Count = b.Count,
             }).ToList();
 
+            await _entryService.UpdateRemainingAmountsAsync(entryTxns.Select(t => t.Entry.Id).ToList());
+
             await _dataContext.SaveChangesAsync();
 
             return GetEntityCreateResult(order);
+        }
+
+        private async Task<List<EntryTransaction>> CreateNewEntryTxnsAsync(List<OrderStockReleaseEntryDto> releaseEntries, Order order)
+        {
+            var entryTxnsGrp = releaseEntries
+                .GroupBy(e => e.EntryNo)
+                .Select(g => new { EntryNo = g.Key, entries = g.ToList() });
+
+            var orderReleaseTxns = new List<EntryTransaction>();
+            foreach (var txns in entryTxnsGrp)
+            {
+                var entryTxns = await _entryService.CreateOrderEntryTransactionsAsync(txns.EntryNo, order, txns.entries);
+                orderReleaseTxns.AddRange(entryTxns);
+            }
+            return orderReleaseTxns;
+        }
+
+        public async Task<EntityUpdateResult> UpdateAsync(Guid id, OrderDto dto)
+        {
+            dto.Id = id;
+
+            ValidateOrder(dto);
+
+            await ValidateEntriesAsync(dto, true);
+
+            var order = await _dataContext.Orders
+                .Where(o => o.Id == id)
+                .Include(o => o.Transactions).ThenInclude(t => t.Entry)
+                .Include(o => o.BowserEntries)
+                .SingleOrDefaultAsync();
+
+            var oldAffectedEntryIds = order.Transactions.Select(t => t.Entry.Id).ToList();
+
+            order.CustomerId = dto.CustomerId;
+            order.ProductId = dto.ProductId;
+            order.OrderDate = dto.OrderDate;
+            order.OrderNo = dto.OrderNo;
+            order.Buyer = dto.Buyer;
+            order.Status = dto.Status;
+            order.DeliveredQuantity = dto.Status == OrderStatus.Delivered ? dto.DeliveredQuantity : null;
+            order.Quantity = dto.Quantity;
+            order.ObRefPrefix = dto.ObRefPrefix;
+            order.TankNo = dto.TankNo;
+            order.BuyerType = dto.BuyerType;
+            order.Remarks = dto.Remarks;
+            order.ConcurrencyKey = dto.ConcurrencyKey;
+
+            //Delete Current release entries and create new ones
+            _dataContext.EntryTransactions.RemoveRange(order.Transactions);
+
+            var newEntryTxns = await CreateNewEntryTxnsAsync(dto.ReleaseEntries, order);
+            _dataContext.EntryTransactions.AddRange(newEntryTxns);
+
+            var newAffectedEntryIds = order.Transactions.Select(t => t.Entry.Id).ToList();
+
+            //Bowser entries
+            order.BowserEntries = dto.BowserEntries.Select(b => new BowserEntry
+            {
+                Capacity = b.Capacity,
+                Count = b.Count,
+            }).ToList();
+
+            var allAffectedEntries = newAffectedEntryIds.Union(oldAffectedEntryIds).Distinct().ToList();
+
+            await _dataContext.SaveChangesAsync();
+
+            await _entryService.UpdateRemainingAmountsAsync(allAffectedEntries);
+
+            return GetEntityUpdateResult(order);
         }
 
         public async Task<OrderDto> GetOrderAsync(Guid id)
@@ -132,6 +195,7 @@ namespace JCTO.Services
                     Customer = o.Customer.Name,
                     Product = o.Product.Code,
                     Quantity = o.Quantity,
+                    DeliveredQuantity = o.DeliveredQuantity,
                     Status = o.Status
                 }).GetPagedListAsync(filter);
 
@@ -140,10 +204,24 @@ namespace JCTO.Services
 
         public async Task<byte[]> GenerateStockReleaseAsync(Guid orderId)
         {
-            var reportData = new StockReleaseReportDto
-            {
+            var reportData = await _dataContext.Orders
+                .Where(o => o.Id == orderId)
+                .Select(o => new StockReleaseReportDto
+                {
+                    OrderNo = o.OrderNo,
+                    OrderDate = o.OrderDate.ToString("dd/MM/yyyy"),
+                    Customer = o.Customer.Name,
+                    Product = o.Product.Code,
+                    Buyer = o.Buyer,
+                    Quantity = o.DeliveredQuantity ?? o.Quantity,
+                    EntryNo = string.Join("/", o.Transactions.Select(t => t.Entry.EntryNo)),
+                    ObRef = o.ObRefPrefix + "/" + string.Join(", ", o.Transactions.Select(t => t.ObRef)),
+                    TankNo = o.TankNo,
+                    Remarks = o.BuyerType == BuyerType.Bowser ? string.Join('\n', o.BowserEntries.Select(b => $"{b.Capacity}Ltrs x {b.Count.ToString("00")}")) : "",
+                }).SingleOrDefaultAsync();
 
-            };
+            NumericWordsConverter converter = new NumericWordsConverter();
+            reportData.QuantityInText = $"{converter.ToWords((decimal)reportData.Quantity)} MT of {reportData.Product} only";
 
             return await StockReleaseReport.GenerateAsync(reportData);
         }
@@ -176,23 +254,29 @@ namespace JCTO.Services
             if (string.IsNullOrWhiteSpace(order.TankNo))
                 errors.Add("Tank No. not found");
 
+            if ((order.DeliveredQuantity ?? 0) > order.Quantity)
+                errors.Add("Delivered quantity is > original quantity");
+
             if (!order.ReleaseEntries.Any())
             {
                 errors.Add("Stock release entries not found");
             }
             else
             {
-                if (order.Status == OrderStatus.Undelivered && order.ReleaseEntries.Sum(e => e.Quantity) != order.Quantity)
+                if (order.ReleaseEntries.Sum(e => e.Quantity) != order.Quantity)
                     errors.Add("Sum of release Quantities not equal to overall Quantity");
-
-                if (order.Status == OrderStatus.Delivered && order.ReleaseEntries.Sum(e => e.DeliveredQuantity) != order.Quantity)
-                    errors.Add("Sum of Delivered Quantities not equal to overall Quantity");
-
-                if (order.ReleaseEntries.Any(e => e.DeliveredQuantity > e.Quantity))
-                    errors.Add("Stock release entries found having Delevered Quantity > Quantity");
 
                 if (order.ReleaseEntries.Any(e => !Enum.IsDefined(typeof(ApprovalType), e.ApprovalType)))
                     errors.Add("Stock release entries found not having Approval Type");
+
+                if (order.Status == OrderStatus.Delivered)
+                {
+                    if (order.ReleaseEntries.Sum(e => e.DeliveredQuantity) != order.DeliveredQuantity)
+                        errors.Add("Sum of Delivered Quantities not equal to overall Delivered Quantity");
+
+                    if (order.ReleaseEntries.Any(e => e.DeliveredQuantity > e.Quantity))
+                        errors.Add("Stock release entries found having Delevered Quantity > Quantity");
+                }
             }
 
             if (order.BuyerType == BuyerType.Bowser)
@@ -209,7 +293,7 @@ namespace JCTO.Services
             }
         }
 
-        private async Task ValidateEntriesAsync(OrderDto order)
+        private async Task ValidateEntriesAsync(OrderDto order, bool update = false)
         {
             var errors = new List<string>();
 
@@ -223,18 +307,28 @@ namespace JCTO.Services
                     e.EntryNo,
                     e.CustomerId,
                     e.ProductId,
-                    e.RemainingQuantity,
+                    RemainingQuantity = e.RemainingQuantity +
+                        (update ? e.Transactions
+                                      .Where(t => t.OrderId == order.Id)
+                                      .Select(e => e.DeliveredQuantity ?? e.Quantity)
+                                      .Sum() * -1 : 0),
                     e.InitialQualtity,
                     e.Status,
                     RemQtys = new
                     {
-                        Xbond = e.Transactions.Where(t => t.ApprovalType == ApprovalType.XBond)
+                        Xbond = e.Transactions
+                            .Where(t => t.ApprovalType == ApprovalType.XBond
+                                && (update == false || t.OrderId != order.Id))
                             .Select(e => e.DeliveredQuantity ?? e.Quantity)
                             .Sum(),
-                        Rebond = e.Transactions.Where(t => t.ApprovalType == ApprovalType.Rebond)
+                        Rebond = e.Transactions
+                            .Where(t => t.ApprovalType == ApprovalType.Rebond
+                                 && (update == false || t.OrderId != order.Id))
                             .Select(e => e.DeliveredQuantity ?? e.Quantity)
                             .Sum(),
-                        Letter = e.Transactions.Where(t => t.ApprovalType == ApprovalType.Letter)
+                        Letter = e.Transactions
+                            .Where(t => t.ApprovalType == ApprovalType.Letter
+                                 && (update == false || t.OrderId != order.Id))
                             .Select(e => e.DeliveredQuantity ?? e.Quantity)
                             .Sum()
                     }

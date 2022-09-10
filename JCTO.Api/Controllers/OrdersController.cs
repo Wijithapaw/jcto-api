@@ -28,8 +28,7 @@ namespace JCTO.Api.Controllers
         [HttpPut("{id}")]
         public async Task<EntityUpdateResult> Update(Guid id, OrderDto dto)
         {
-            await Task.Delay(100);
-            return new EntityUpdateResult { ConcurrencyKey = Guid.NewGuid() };
+            return await _orderService.UpdateAsync(id, dto);
         }
 
         [HttpGet("{id}")]

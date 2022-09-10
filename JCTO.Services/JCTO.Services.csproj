@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="NumericWordsConversion" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\JCTO.Domain\JCTO.Domain.csproj" />
     <ProjectReference Include="..\JCTO.Reports\JCTO.Reports.csproj" />
   </ItemGroup>

@@ -14,7 +14,7 @@ namespace JCTO.Services
                 Entry = entry,
                 Order = order,
                 Quantity = SignAmount(type, quantity),
-                DeliveredQuantity = order.Status == OrderStatus.Delivered ? SignAmount(type, deliveredQuantity.Value) : null,
+                DeliveredQuantity = order?.Status == OrderStatus.Delivered ? SignAmount(type, deliveredQuantity.Value) : null,
                 ObRef = obRef,
                 Type = type,
                 ApprovalType = approvalType,

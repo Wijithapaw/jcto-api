@@ -31,7 +31,7 @@ namespace JCTO.Tests
                   {
                       var entrySvc = CreateService(dbContext);
 
-                      var entryDto = DtoHelper.CreateEntryDto("10001", customerId, productId, new DateTime(2022, 8, 20), EntryStatus.Active, 50.1234);
+                      var entryDto = DtoHelper.CreateEntryDto("501", "10001", new DateTime(2022, 8, 20), EntryStatus.Active, 50.1234);
 
                       var entry = await entrySvc.CreateAsync(entryDto);
 
@@ -44,6 +44,7 @@ namespace JCTO.Tests
                       var newEntry = await dbContext.Entries
                         .Where(e => e.Id == id)
                         .Include(e => e.Transactions)
+                        .Include(e => e.StockTransaction)
                         .FirstAsync();
 
                       Assert.True(newEntry != null);
@@ -60,7 +61,7 @@ namespace JCTO.Tests
                         .Include(s => s.Transactions)
                         .FirstAsync();
 
-                      Assert.Equal(49.8766, stock.RemainingQuantity);
+                      Assert.Equal(1029.8766, stock.RemainingQuantity);
 
                       var drTxn = stock.Transactions.First(t => t.EntryId == newEntry.Id);
 
@@ -85,7 +86,7 @@ namespace JCTO.Tests
                       var customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
                       var productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
 
-                      var entryDto = DtoHelper.CreateEntryDto("1001", customerId, productId, new DateTime(2022, 8, 20), EntryStatus.Active, 100);
+                      var entryDto = DtoHelper.CreateEntryDto("501", "1001", new DateTime(2022, 8, 20), EntryStatus.Active, 100);
 
                       var ex = await Assert.ThrowsAsync<DbUpdateException>(() => entrySvc.CreateAsync(entryDto));
                   });
@@ -164,8 +165,7 @@ namespace JCTO.Tests
 
         private static async Task SetupTestDataAsync(IDataContext dbContext)
         {
-            await TestData.Stocks.CreateStockAsync(dbContext);
-            await TestData.Orders.SetupOrderAndEntryTestDataAsync(dbContext, true);
+            await TestData.Orders.SetupOrderAndEntryTestDataAsync(dbContext);
         }
 
         private static EntryService CreateService(IDataContext dbContext)

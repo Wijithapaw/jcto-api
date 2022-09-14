@@ -12,6 +12,7 @@ namespace JCTO.Domain.Dtos
         public Guid? CustomerId { get; set; }
         public Guid? ProductId { get; set; }
         public string EntryNo { get; set; }
+        public string ToBondNo { get; set; }
         public DateTime? From { get; set; }
         public DateTime? To { get; set; }
         public bool ActiveEntriesOnly { get; set; }

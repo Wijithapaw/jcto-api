@@ -3,6 +3,7 @@ using System;
 using JCTO.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JCTO.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class JctoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220913142919_Alter_Table_Entries_Linked_Discharges")]
+    partial class Alter_Table_Entries_Linked_Discharges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -148,6 +150,9 @@ namespace JCTO.Data.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("StockTransactionId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedById");
@@ -160,6 +165,8 @@ namespace JCTO.Data.Migrations
                     b.HasIndex("LastUpdatedById");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("StockTransactionId");
 
                     b.ToTable("Entries");
                 });
@@ -583,6 +590,12 @@ namespace JCTO.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("JCTO.Domain.Entities.StockTransaction", "StockTransaction")
+                        .WithMany()
+                        .HasForeignKey("StockTransactionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("CreatedBy");
 
                     b.Navigation("Customer");
@@ -590,6 +603,8 @@ namespace JCTO.Data.Migrations
                     b.Navigation("LastUpdatedBy");
 
                     b.Navigation("Product");
+
+                    b.Navigation("StockTransaction");
                 });
 
             modelBuilder.Entity("JCTO.Domain.Entities.EntryTransaction", b =>
@@ -727,8 +742,8 @@ namespace JCTO.Data.Migrations
                         .HasForeignKey("DischargeTransactionId");
 
                     b.HasOne("JCTO.Domain.Entities.Entry", "Entry")
-                        .WithOne("StockTransaction")
-                        .HasForeignKey("JCTO.Domain.Entities.StockTransaction", "EntryId");
+                        .WithMany()
+                        .HasForeignKey("EntryId");
 
                     b.HasOne("JCTO.Domain.Entities.User", "LastUpdatedBy")
                         .WithMany()
@@ -781,8 +796,6 @@ namespace JCTO.Data.Migrations
 
             modelBuilder.Entity("JCTO.Domain.Entities.Entry", b =>
                 {
-                    b.Navigation("StockTransaction");
-
                     b.Navigation("Transactions");
                 });
 

@@ -8,6 +8,6 @@ namespace JCTO.Domain.Services
     {
         Task<PagedResultsDto<StockDischargeListItemDto>> SearchStockDischargesAsync(StockDischargeSearchDto filter);
         Task<EntityCreateResult> TopupAsync(StockTopupDto dto);
-        Task DebitForEntryAsync(Guid customerId, Guid productId, Entry entry, double quantity, DateTime date);
+        Task<StockTransaction> DebitForEntryAsync(string toBondNo, double quantity, DateTime date);
     }
 }

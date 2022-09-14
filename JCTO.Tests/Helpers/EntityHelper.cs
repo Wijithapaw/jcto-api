@@ -40,7 +40,7 @@ namespace JCTO.Tests.Helpers
             };
         }
 
-        public static Entry CreateEntry(string entryNo, Guid customerId, Guid productId, double initialQuantity, double remainingQuantity, DateTime entryDate, EntryStatus entryStatus)
+        public static Entry CreateEntry(string entryNo, Guid customerId, Guid productId, double initialQuantity, double remainingQuantity, DateTime entryDate, EntryStatus entryStatus, StockTransaction stockTxn)
         {
             return new Entry
             {
@@ -50,7 +50,8 @@ namespace JCTO.Tests.Helpers
                 InitialQualtity = initialQuantity,
                 RemainingQuantity = remainingQuantity,
                 EntryDate = entryDate,
-                Status = entryStatus
+                Status = entryStatus,
+                StockTransaction = stockTxn
             };
         }
 
@@ -103,7 +104,7 @@ namespace JCTO.Tests.Helpers
         }
 
         public static StockTransaction CreateStockTransaction(Guid stockId, Guid? entryId, double quantity, DateTime date,
-            StockTransactionType type, string toBondNo)
+            StockTransactionType type, string toBondNo, StockTransaction dischargeTxn = null)
         {
             var txn = new StockTransaction
             {
@@ -112,7 +113,8 @@ namespace JCTO.Tests.Helpers
                 TransactionDate = date,
                 Type = type,
                 ToBondNo = toBondNo,
-                EntryId = entryId
+                EntryId = entryId,
+                DischargeTransaction = dischargeTxn
             };
             return txn;
         }
@@ -144,6 +146,11 @@ namespace JCTO.Tests.Helpers
         public static async Task<Guid> GetProductIdAsync(IDataContext dataContext, string code)
         {
             return (await dataContext.Products.FirstAsync(c => c.Code == code)).Id;
+        }
+
+        public static async Task<StockTransaction> GetStockTxnAsync(IDataContext dataContext, string toBondNo)
+        {
+            return await dataContext.StockTransactions.Where(t => t.ToBondNo == toBondNo).Include(t => t.Stock).FirstOrDefaultAsync();
         }
     }
 }

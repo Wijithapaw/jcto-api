@@ -27,19 +27,21 @@ namespace JCTO.Services
 
         public async Task<EntityCreateResult> CreateAsync(EntryDto dto)
         {
+            var stockTxn = await _stockService.DebitForEntryAsync(dto.ToBondNo, dto.InitialQuantity, dto.EntryDate);
+
             var newEntry = new Entry
             {
-                CustomerId = dto.CustomerId,
-                ProductId = dto.ProductId,
+                CustomerId = stockTxn.Stock.CustomerId,
+                ProductId = stockTxn.Stock.ProductId
                 EntryNo = dto.EntryNo,
                 EntryDate = dto.EntryDate,
                 InitialQualtity = dto.InitialQuantity,
                 RemainingQuantity = dto.InitialQuantity,
                 Status = dto.Status,
+                StockTransaction = stockTxn,
             };
 
-            await _stockService.DebitForEntryAsync(dto.CustomerId, dto.ProductId, newEntry, dto.InitialQuantity, dto.EntryDate);
-
+            _dataContext.StockTransactions.Add(stockTxn);
             _dataContext.Entries.Add(newEntry);
 
             await _dataContext.SaveChangesAsync();
@@ -65,6 +67,7 @@ namespace JCTO.Services
         public async Task<PagedResultsDto<EntryListItemDto>> SearchEntriesAsync(EntrySearchDto filter)
         {
             filter.EntryNo = filter.EntryNo?.ToLower().Trim() ?? "";
+            filter.ToBondNo = filter.ToBondNo?.ToLower().Trim() ?? "";
 
             var entries = await _dataContext.Entries
                 .Where(e => (filter.CustomerId == null || filter.CustomerId == e.CustomerId)
@@ -72,7 +75,8 @@ namespace JCTO.Services
                     && (filter.From == null || e.EntryDate >= filter.From)
                     && (filter.To == null || e.EntryDate <= filter.To)
                     && (!filter.ActiveEntriesOnly || e.Status == EntryStatus.Active)
-                    && (filter.EntryNo == "" || e.EntryNo.ToLower().Contains(filter.EntryNo)))
+                    && (filter.ToBondNo == "" || e.StockTransaction.DischargeTransaction.ToBondNo.ToLower() == filter.ToBondNo)
+                    && (filter.EntryNo == "" || e.EntryNo.ToLower() == filter.EntryNo))
                 .OrderBy(o => o.EntryDate)
                 .ThenBy(o => o.EntryNo)
                 .Select(e => new EntryListItemDto
@@ -80,6 +84,7 @@ namespace JCTO.Services
                     Id = e.Id,
                     EntryDate = e.EntryDate,
                     EntryNo = e.EntryNo,
+                    ToBondNo = e.StockTransaction.DischargeTransaction.ToBondNo,
                     Customer = e.Customer.Name,
                     Product = e.Product.Code,
                     InitialQuantity = e.InitialQualtity,

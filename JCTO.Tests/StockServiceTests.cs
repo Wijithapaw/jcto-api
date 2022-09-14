@@ -30,7 +30,7 @@ namespace JCTO.Tests
                       await SetupTestDataAsync(dbContext);
 
                       jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
-                      lsfo_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
+                      lsfo_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_HSFO");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -108,7 +108,7 @@ namespace JCTO.Tests
                       Assert.NotNull(dischargeTxn);
                       Assert.NotNull(dischargeTxn.Stock);
 
-                      Assert.Equal(175, dischargeTxn.Stock.RemainingQuantity);
+                      Assert.Equal(1155, dischargeTxn.Stock.RemainingQuantity);
                       Assert.Equal(jvc_customerId, dischargeTxn.Stock.CustomerId);
                       Assert.Equal(go_productId, dischargeTxn.Stock.ProductId);
 
@@ -138,38 +138,25 @@ namespace JCTO.Tests
                   {
                       var stockSvc = new StockService(dbContext);
 
-                      await stockSvc.DebitForEntryAsync(jvc_customerId, go_productId, null, 25.250, new DateTime(2022, 9, 9));
+                      var stockTxn = await stockSvc.DebitForEntryAsync("501", 25.250, new DateTime(2022, 9, 9));
 
-                      var stock = dbContext.Stocks
-                          .Where(s => s.CustomerId == jvc_customerId && s.ProductId == go_productId)
-                          .Include(s => s.Transactions)
-                          .First();
+                      Assert.NotNull(stockTxn);
 
-                      Assert.NotNull(stock);
+                      Assert.Equal(1054.75, stockTxn.Stock.RemainingQuantity);
 
-                      Assert.Equal(74.750, stock.RemainingQuantity);
-
-                      var txn = stock.Transactions.First();
-
-                      Assert.Equal(StockTransactionType.Out, txn.Type);
-                      Assert.Equal(-25.250, txn.Quantity);
-                      Assert.Equal(new DateTime(2022, 9, 9), txn.TransactionDate);
+                      Assert.Equal(StockTransactionType.Out, stockTxn.Type);
+                      Assert.Equal(-25.250, stockTxn.Quantity);
+                      Assert.Equal(new DateTime(2022, 9, 9), stockTxn.TransactionDate);
                   });
             }
 
             [Fact]
-            public async Task WhenStockDoesNotExists_ThrowsException()
+            public async Task WhenToBondNoNotExists_ThrowsException()
             {
-                var jvc_customerId = Guid.Empty;
-                var lfso_productId = Guid.Empty;
-
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
                   {
                       await SetupTestDataAsync(dbContext);
-
-                      jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
-                      lfso_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -177,25 +164,19 @@ namespace JCTO.Tests
 
                       var entryId = Guid.NewGuid();
 
-                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => stockSvc.DebitForEntryAsync(jvc_customerId, lfso_productId, null, 25.250, new DateTime(2022, 9, 9)));
+                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => stockSvc.DebitForEntryAsync("5011", 25.250, new DateTime(2022, 9, 9)));
 
-                      Assert.Equal("No stock available for this customer and product", ex.Message);
+                      Assert.Equal("No discharge available for ToBondNo: 5011", ex.Message);
                   });
             }
 
             [Fact]
             public async Task WhenStockIsNotSufficient_ThrowsException()
             {
-                var jvc_customerId = Guid.Empty;
-                var go_productId = Guid.Empty;
-
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
                   {
                       await SetupTestDataAsync(dbContext);
-
-                      jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
-                      go_productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -203,9 +184,9 @@ namespace JCTO.Tests
 
                       var entryId = Guid.NewGuid();
 
-                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => stockSvc.DebitForEntryAsync(jvc_customerId, go_productId, null, 125.250, new DateTime(2022, 9, 9)));
+                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => stockSvc.DebitForEntryAsync("502", 125.25, new DateTime(2022, 9, 9)));
 
-                      Assert.Equal($"Remaining quantity in stocks ({100}) not sufficient to create an entity with quantity: {125.25}", ex.Message);
+                      Assert.Equal($"Remaining quantity(50) in To Bond No: 502 is not sufficient to create an entry having quantity: 125.25", ex.Message);
                   });
             }
         }
@@ -213,11 +194,12 @@ namespace JCTO.Tests
         public class SearchStockDischarges
         {
             [Theory]
-            [InlineData("", "", null, null, 7)]
-            [InlineData("JVC", "", null, null, 3)]
+            [InlineData("", "", null, null, 9)]
+            [InlineData("JVC", "", null, null, 4)]
             [InlineData("", "GO", null, null, 7)]
-            [InlineData("", "380_LSFO", null, null, 0)]
+            [InlineData("", "380_LSFO", null, null, 2)]
             [InlineData("Mobil", "", null, null, 0)]
+            [InlineData("", "380_HSFO", null, null, 0)]
             public async Task WhenPassingFilter_ReturnCorrectRecordCount(string customerCode, string productCode, DateTime? from, DateTime? to, int expectedRecordCount)
             {
                 Guid? customerId = null;
@@ -258,7 +240,7 @@ namespace JCTO.Tests
             }
 
             [Theory]
-            [InlineData("", "", "2022-9-1", "2022-9-2", 4)]
+            [InlineData("", "", "2022-9-1", "2022-9-2", 6)]
             [InlineData("JVC", "GO", "2022-9-1", "2022-9-2", 2)]
             public async Task WhenPassingFilter_ReturnCorrectRecordCount2(string customerCode, string productCode, DateTime from, DateTime to, int expectedRecordCount)
             {

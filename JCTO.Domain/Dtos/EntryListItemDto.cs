@@ -6,6 +6,7 @@ namespace JCTO.Domain.Dtos
     {
         public Guid Id { get; set; }
         public string EntryNo { get; set; }
+        public string ToBondNo { get; set; }
         public double InitialQuantity { get; set; }
         public double RemainingQuantity { get; set; }
         public string Product { get; set; }

@@ -46,29 +46,36 @@ namespace JCTO.Services
             return discharges;
         }
 
-        public async Task DebitForEntryAsync(Guid customerId, Guid productId, Entry entry, double quantity, DateTime date)
+        public async Task<StockTransaction> DebitForEntryAsync(string toBondNo, double quantity, DateTime date)
         {
-            var stock = await _dataContext.Stocks
-                .FirstOrDefaultAsync(s => s.CustomerId == customerId && s.ProductId == productId);
+            var dischargeTxn = await _dataContext.StockTransactions
+                .Include(t => t.Stock)
+                .Where(t => t.Type == StockTransactionType.In
+                    && t.ToBondNo.ToLower() == toBondNo.ToLower().Trim())
+                .FirstOrDefaultAsync();
 
-            if (stock == null)
-                throw new JCTOValidationException("No stock available for this customer and product");
+            if (dischargeTxn == null)
+                throw new JCTOValidationException($"No discharge available for ToBondNo: {toBondNo}");
 
-            if (stock.RemainingQuantity < quantity)
-                throw new JCTOValidationException($"Remaining quantity in stocks ({stock.RemainingQuantity}) not sufficient to create an entity with quantity: {quantity}");
+            var remainingQty = await _dataContext.StockTransactions
+                .Where(t => t.Id == dischargeTxn.Id || t.DischargeTransactionId == dischargeTxn.Id)
+                .SumAsync(t => t.Quantity);
+
+            if (remainingQty < quantity)
+                throw new JCTOValidationException($"Remaining quantity({remainingQty}) in To Bond No: {toBondNo} is not sufficient to create an entry having quantity: {quantity}");
 
             var stockTxn = new StockTransaction
             {
-                Stock = stock,
+                Stock = dischargeTxn.Stock,
+                DischargeTransaction = dischargeTxn,
                 Quantity = -1 * Math.Abs(quantity),
-                Entry = entry,
                 TransactionDate = date,
                 Type = StockTransactionType.Out,
             };
 
-            stock.RemainingQuantity += stockTxn.Quantity;
+            dischargeTxn.Stock.RemainingQuantity += stockTxn.Quantity;
 
-            _dataContext.StockTransactions.Add(stockTxn);
+            return stockTxn;
         }
 
         public async Task<EntityCreateResult> TopupAsync(StockTopupDto dto)

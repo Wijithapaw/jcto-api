@@ -1,8 +1,8 @@
 ﻿using JCTO.Domain.Entities.Base;
 using JCTO.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 namespace JCTO.Domain.Entities
 {
     public class Entry : BaseEntity
@@ -18,6 +18,8 @@ namespace JCTO.Domain.Entities
         public double RemainingQuantity { get; set; }
         public DateTime EntryDate { get; set; }
         public EntryStatus Status { get; set; }
+
+        public StockTransaction StockTransaction { get; set; }
 
         public virtual Customer Customer { get; set; }
         public virtual Product Product { get; set; }

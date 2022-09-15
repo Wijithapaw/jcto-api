@@ -12,6 +12,8 @@ namespace JCTO.Domain.Entities
         [Required]
         public Guid ProductId { get; set; }
         [Required]
+        public Guid StockTransactionId { get; set; }
+        [Required]
         [MaxLength(50)]
         public string EntryNo { get; set; }
         public double InitialQualtity { get; set; }
@@ -19,8 +21,7 @@ namespace JCTO.Domain.Entities
         public DateTime EntryDate { get; set; }
         public EntryStatus Status { get; set; }
 
-        public StockTransaction StockTransaction { get; set; }
-
+        public virtual StockTransaction StockTransaction { get; set; }
         public virtual Customer Customer { get; set; }
         public virtual Product Product { get; set; }
 

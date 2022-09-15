@@ -15,16 +15,15 @@ namespace JCTO.Domain.Entities
         public string ToBondNo { get; set; }
         [ForeignKey("DischargeTransaction")]
         public Guid? DischargeTransactionId { get; set; }
-        [ForeignKey("Entry")]
-        public Guid? EntryId { get; set; }
         [Required]
         public DateTime TransactionDate { get; set; }
         [MaxLength(50)]
         public double Quantity { get; set; }
 
+        public Entry Entry { get; set; }
+
         public virtual StockTransaction DischargeTransaction { get; set; }
         public virtual Stock Stock { get; set; }
-        public virtual Entry Entry { get; set; }
 
         public ICollection<StockTransaction> EntryTransactions { get; set; }
     }

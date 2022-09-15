@@ -57,7 +57,7 @@ namespace JCTO.Tests.Helpers
             internal static async Task<List<Entry>> GetEntriesAsync(IDataContext dbContext, Guid customerId1, Guid productId1, Guid customerId2, Guid productId2, Guid orderId1, Guid orderId2, Guid orderId3)
             {
                 var dischargeTxn_501 = await EntityHelper.GetStockTxnAsync(dbContext, "501");
-                var e1StockTxn = EntityHelper.CreateStockTransaction(dischargeTxn_501.Stock.Id, null, 1000.250, new DateTime(2022, 8, 20), StockTransactionType.Out, null, dischargeTxn_501);
+                var e1StockTxn = EntityHelper.CreateStockTransaction(dischargeTxn_501.Stock.Id, 1000.250, new DateTime(2022, 8, 20), StockTransactionType.Out, null, dischargeTxn_501);
                 var e1 = EntityHelper.CreateEntry("1001", customerId1, productId1, 1000.250, 1000.250, new DateTime(2022, 8, 20), EntryStatus.Active, e1StockTxn);
                 var e1Txns = new List<EntryTransaction>
                 {
@@ -66,7 +66,7 @@ namespace JCTO.Tests.Helpers
                 e1.Transactions = e1Txns;
 
                 var dischargeTxn_520 = await EntityHelper.GetStockTxnAsync(dbContext, "520");
-                var e2StockTxn = EntityHelper.CreateStockTransaction(dischargeTxn_520.Stock.Id, null, 500, new DateTime(2022, 8, 20), StockTransactionType.Out, null, dischargeTxn_520);
+                var e2StockTxn = EntityHelper.CreateStockTransaction(dischargeTxn_520.Stock.Id, 500, new DateTime(2022, 8, 20), StockTransactionType.Out, null, dischargeTxn_520);
                 var e2 = EntityHelper.CreateEntry("1002", customerId1, productId2, 500, 220, new DateTime(2022, 8, 28), EntryStatus.Active, e2StockTxn);
                 var e2Txns = new List<EntryTransaction>
                 {
@@ -77,7 +77,7 @@ namespace JCTO.Tests.Helpers
                 e2.Transactions = e2Txns;
 
                 var dischargeTxn_513 = await EntityHelper.GetStockTxnAsync(dbContext, "513");
-                var e3StockTxn = EntityHelper.CreateStockTransaction(dischargeTxn_513.Stock.Id, null, 750, new DateTime(2022, 8, 20), StockTransactionType.Out, null, dischargeTxn_513);
+                var e3StockTxn = EntityHelper.CreateStockTransaction(dischargeTxn_513.Stock.Id, 750, new DateTime(2022, 8, 20), StockTransactionType.Out, null, dischargeTxn_513);
                 var e3 = EntityHelper.CreateEntry("1101", customerId2, productId1, 750, 750, new DateTime(2022, 8, 20), EntryStatus.Active, e3StockTxn);
                 var e3Txns = new List<EntryTransaction>
                 {
@@ -86,7 +86,7 @@ namespace JCTO.Tests.Helpers
                 e3.Transactions = e3Txns;
 
                 var dischargeTxn_540 = await EntityHelper.GetStockTxnAsync(dbContext, "540");
-                var e4StockTxn = EntityHelper.CreateStockTransaction(dischargeTxn_540.Stock.Id, null, 750, new DateTime(2022, 8, 20), StockTransactionType.Out, null, dischargeTxn_540);
+                var e4StockTxn = EntityHelper.CreateStockTransaction(dischargeTxn_540.Stock.Id, 750, new DateTime(2022, 8, 20), StockTransactionType.Out, null, dischargeTxn_540);
                 var e4 = EntityHelper.CreateEntry("1102", customerId2, productId2, 750, 150, new DateTime(2022, 8, 20), EntryStatus.Active, e4StockTxn);
                 var e4Txns = new List<EntryTransaction>
                 {
@@ -96,7 +96,7 @@ namespace JCTO.Tests.Helpers
                 };
                 e4.Transactions = e4Txns;
 
-                var e5StockTxn = EntityHelper.CreateStockTransaction(dischargeTxn_520.Stock.Id, null, 200, new DateTime(2022, 8, 20), StockTransactionType.Out, null, dischargeTxn_520);
+                var e5StockTxn = EntityHelper.CreateStockTransaction(dischargeTxn_520.Stock.Id, 200, new DateTime(2022, 8, 20), StockTransactionType.Out, null, dischargeTxn_520);
                 var e5 = EntityHelper.CreateEntry("1103", customerId1, productId2, 200, 200, new DateTime(2022, 9, 9), EntryStatus.Active, e5StockTxn);
                 var e5Txns = new List<EntryTransaction>
                 {
@@ -104,7 +104,7 @@ namespace JCTO.Tests.Helpers
                 };
                 e5.Transactions = e5Txns;
 
-                var e6StockTxn = EntityHelper.CreateStockTransaction(dischargeTxn_520.Stock.Id, null, 10, new DateTime(2022, 8, 20), StockTransactionType.Out, null, dischargeTxn_520);
+                var e6StockTxn = EntityHelper.CreateStockTransaction(dischargeTxn_520.Stock.Id, 10, new DateTime(2022, 8, 20), StockTransactionType.Out, null, dischargeTxn_520);
                 var e6 = EntityHelper.CreateEntry("1104", customerId1, productId2, 10, 0, new DateTime(2022, 9, 9), EntryStatus.Completed, e6StockTxn);
                 var e6Txns = new List<EntryTransaction>
                 {
@@ -170,9 +170,9 @@ namespace JCTO.Tests.Helpers
                 var s1 = EntityHelper.CreateStock(customerId1, productId1, 1080);
                 var s1_dis = new List<StockTransaction>
                 {
-                    EntityHelper.CreateStockTransaction(Guid.Empty, null, 1000, new DateTime(2022, 9, 1), StockTransactionType.In, "501"),
-                    EntityHelper.CreateStockTransaction(Guid.Empty, null, 50, new DateTime(2022, 9, 2), StockTransactionType.In, "502"),
-                    EntityHelper.CreateStockTransaction(Guid.Empty, null, 30, new DateTime(2022, 9, 3), StockTransactionType.In, "503")
+                    EntityHelper.CreateStockTransaction(Guid.Empty, 1000, new DateTime(2022, 9, 1), StockTransactionType.In, "501"),
+                    EntityHelper.CreateStockTransaction(Guid.Empty, 50, new DateTime(2022, 9, 2), StockTransactionType.In, "502"),
+                    EntityHelper.CreateStockTransaction(Guid.Empty, 30, new DateTime(2022, 9, 3), StockTransactionType.In, "503")
                 };
                 s1.Transactions = s1_dis;
 
@@ -180,7 +180,7 @@ namespace JCTO.Tests.Helpers
                 var s2 = EntityHelper.CreateStock(customerId1, productId2, 5000);
                 var s2_dis = new List<StockTransaction>
                 {
-                    EntityHelper.CreateStockTransaction(Guid.Empty, null, 5000, new DateTime(2022, 9, 1), StockTransactionType.In, "520"),
+                    EntityHelper.CreateStockTransaction(Guid.Empty, 5000, new DateTime(2022, 9, 1), StockTransactionType.In, "520"),
                 };
                 s2.Transactions = s2_dis;
 
@@ -188,17 +188,17 @@ namespace JCTO.Tests.Helpers
                 var s3 = EntityHelper.CreateStock(customerId2, productId1, 1100);
                 var s3_dis = new List<StockTransaction>
                 {
-                    EntityHelper.CreateStockTransaction(Guid.Empty, null, 20, new DateTime(2022, 9, 1), StockTransactionType.In, "510"),
-                    EntityHelper.CreateStockTransaction(Guid.Empty, null, 50, new DateTime(2022, 9, 2), StockTransactionType.In, "511"),
-                    EntityHelper.CreateStockTransaction(Guid.Empty, null, 30, new DateTime(2022, 9, 3), StockTransactionType.In, "512"),
-                    EntityHelper.CreateStockTransaction(Guid.Empty, null, 1000, new DateTime(2022, 9, 6), StockTransactionType.In, "513")
+                    EntityHelper.CreateStockTransaction(Guid.Empty, 20, new DateTime(2022, 9, 1), StockTransactionType.In, "510"),
+                    EntityHelper.CreateStockTransaction(Guid.Empty, 50, new DateTime(2022, 9, 2), StockTransactionType.In, "511"),
+                    EntityHelper.CreateStockTransaction(Guid.Empty, 30, new DateTime(2022, 9, 3), StockTransactionType.In, "512"),
+                    EntityHelper.CreateStockTransaction(Guid.Empty, 1000, new DateTime(2022, 9, 6), StockTransactionType.In, "513")
                 };
                 s3.Transactions = s3_dis;
 
                 var s4 = EntityHelper.CreateStock(customerId2, productId2, 2000);
                 var s4_dis = new List<StockTransaction>
                 {
-                    EntityHelper.CreateStockTransaction(Guid.Empty, null, 2000, new DateTime(2022, 9, 1), StockTransactionType.In, "540"),
+                    EntityHelper.CreateStockTransaction(Guid.Empty, 2000, new DateTime(2022, 9, 1), StockTransactionType.In, "540"),
                 };
                 s4.Transactions = s4_dis;
 

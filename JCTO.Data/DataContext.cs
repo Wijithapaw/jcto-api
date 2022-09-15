@@ -31,7 +31,7 @@ namespace JCTO.Data
             builder.Entity<EntryTransaction>().HasIndex(t => new { t.ApprovalType, t.ApprovalRef }).HasFilter("\"Type\" = 0 AND \"ApprovalType\" in (1,2)");
             builder.Entity<Order>().HasIndex(o => new { o.OrderDate, o.OrderNo }).IsUnique();
             builder.Entity<Stock>().HasIndex(s => new { s.CustomerId, s.ProductId }).IsUnique();
-            builder.Entity<StockTransaction>().HasIndex(t => t.EntryId).IsUnique();
+            builder.Entity<Entry>().HasIndex(t => t.StockTransactionId).IsUnique();
             builder.Entity<StockTransaction>().HasIndex(t => t.ToBondNo).IsUnique();
 
             foreach (var property in builder.Model.GetEntityTypes()

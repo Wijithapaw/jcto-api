@@ -32,7 +32,7 @@ namespace JCTO.Services
             var newEntry = new Entry
             {
                 CustomerId = stockTxn.Stock.CustomerId,
-                ProductId = stockTxn.Stock.ProductId
+                ProductId = stockTxn.Stock.ProductId,
                 EntryNo = dto.EntryNo,
                 EntryDate = dto.EntryDate,
                 InitialQualtity = dto.InitialQuantity,

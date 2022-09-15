@@ -59,11 +59,12 @@ namespace JCTO.Tests
                       var stock = await dbContext.Stocks
                         .Where(s => s.CustomerId == customerId && s.ProductId == productId)
                         .Include(s => s.Transactions)
+                        .ThenInclude(t => t.Entry)
                         .FirstAsync();
 
                       Assert.Equal(1029.8766, stock.RemainingQuantity);
 
-                      var drTxn = stock.Transactions.First(t => t.EntryId == newEntry.Id);
+                      var drTxn = stock.Transactions.First(t => t.Entry.Id == newEntry.Id);
 
                       Assert.Equal(StockTransactionType.Out, drTxn.Type);
                       Assert.Equal(-50.1234, drTxn.Quantity);

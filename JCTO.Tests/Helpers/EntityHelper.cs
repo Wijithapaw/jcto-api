@@ -103,7 +103,7 @@ namespace JCTO.Tests.Helpers
             return stock;
         }
 
-        public static StockTransaction CreateStockTransaction(Guid stockId, Guid? entryId, double quantity, DateTime date,
+        public static StockTransaction CreateStockTransaction(Guid stockId, double quantity, DateTime date,
             StockTransactionType type, string toBondNo, StockTransaction dischargeTxn = null)
         {
             var txn = new StockTransaction
@@ -113,7 +113,6 @@ namespace JCTO.Tests.Helpers
                 TransactionDate = date,
                 Type = type,
                 ToBondNo = toBondNo,
-                EntryId = entryId,
                 DischargeTransaction = dischargeTxn
             };
             return txn;

@@ -40,5 +40,11 @@ namespace JCTO.Api.Controllers
         {
             return await _entryService.GetEntryBalanceQuantitiesAsync(entryNo);
         }
+
+        [HttpGet("{entryNo}/RemainingApprovals")]
+        public async Task<List<EntryRemaningApprovalsDto>> GetEntryRemainingApprvals(string entryNo)
+        {
+            return await _entryService.GetEntryRemainingApprovalsAsync(entryNo);
+        }
     }
 }

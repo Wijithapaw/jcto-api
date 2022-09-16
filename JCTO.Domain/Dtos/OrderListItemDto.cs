@@ -14,5 +14,6 @@ namespace JCTO.Domain.Dtos
         public string Buyer { get; set; }
         public BuyerType BuyerType { get; set; }
         public OrderStatus Status { get; set; }
+        public bool TaxPaid { get; set; }
     }
 }

@@ -18,6 +18,7 @@ namespace JCTO.Domain.Dtos
         public string TankNo { get; set; }
         public BuyerType BuyerType { get; set; }
         public string Remarks { get; set; }
+        public bool TaxPaid { get; set; }
         public List<OrderStockReleaseEntryDto> ReleaseEntries { get; set; } = new List<OrderStockReleaseEntryDto>();
         public List<BowserEntryDto> BowserEntries { get; set; } = new List<BowserEntryDto>();
     }

@@ -136,6 +136,23 @@ namespace JCTO.Services
             return balQty;
         }
 
+        public async Task<List<EntryRemaningApprovalsDto>> GetEntryRemainingApprovalsAsync(string entryNo)
+        {
+            var remApprovals = await _dataContext.EntryTransactions
+                .Where(t => t.Entry.EntryNo == entryNo && t.Type == EntryTransactionType.Approval)
+                .Select(t => new EntryRemaningApprovalsDto
+                {
+                    Id = t.Id,
+                    ApprovalType = t.ApprovalType.Value,
+                    ApprovalRef = t.ApprovalRef,
+                    EntryNo = t.Entry.EntryNo,
+                    RemainingQty = t.Quantity + t.Deliveries.Sum(d => d.Order.Status == OrderStatus.Delivered ? d.DeliveredQuantity.Value : d.Quantity)
+                })
+                .Where(a => a.RemainingQty > 0)
+                .ToListAsync();
+            return remApprovals;
+        }
+
         public async Task<EntityCreateResult> AddApprovalAsync(EntryApprovalDto dto)
         {
             await ValidateEntryApprovalAsync(dto);

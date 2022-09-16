@@ -1012,7 +1012,7 @@ namespace JCTO.Tests
 
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.UpdateAsync(order.Id, dto));
 
-                      Assert.Equal("Remaining quantity (160.5) of XBond-60000 is not sufficient to deliver 171", ex.Message);
+                      Assert.Equal("Remaining quantity (170) of XBond-60000 is not sufficient to deliver 171", ex.Message);
                   });
             }
 
@@ -1058,7 +1058,7 @@ namespace JCTO.Tests
 
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.UpdateAsync(order.Id, dto));
 
-                      Assert.Equal("Remaining quantity (160.5) of XBond-60000 is not sufficient to deliver 321", ex.Message);
+                      Assert.Equal("Remaining quantity (170) of XBond-60000 is not sufficient to deliver 321", ex.Message);
                   });
             }
         }

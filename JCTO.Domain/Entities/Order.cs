@@ -30,7 +30,7 @@ namespace JCTO.Domain.Entities
         public BuyerType BuyerType { get; set; }
         [MaxLength(1000)]
         public string Remarks { get; set; }
-
+        public bool TaxPaid { get; set; }
         public virtual Customer Customer { get; set; }
         public virtual Product Product { get; set; }
 

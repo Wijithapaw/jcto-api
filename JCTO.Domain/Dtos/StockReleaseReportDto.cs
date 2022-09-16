@@ -13,5 +13,6 @@
         public string ObRef { get; set; }
         public string QuantityInText { get; set; }
         public string Remarks { get; set; }
+        public bool TaxPaid { get; set; }
     }
 }

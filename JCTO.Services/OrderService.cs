@@ -39,7 +39,8 @@ namespace JCTO.Services
                 ObRefPrefix = dto.ObRefPrefix,
                 TankNo = dto.TankNo,
                 BuyerType = dto.BuyerType,
-                Remarks = dto.Remarks
+                Remarks = dto.Remarks,
+                TaxPaid = dto.TaxPaid
             };
 
             _dataContext.Orders.Add(order);
@@ -110,6 +111,7 @@ namespace JCTO.Services
             order.BuyerType = dto.BuyerType;
             order.Remarks = dto.Remarks;
             order.ConcurrencyKey = dto.ConcurrencyKey;
+            order.TaxPaid = dto.TaxPaid;
 
             //Delete Current release entries and create new ones
             _dataContext.EntryTransactions.RemoveRange(order.Transactions);
@@ -172,9 +174,11 @@ namespace JCTO.Services
                     BuyerType = o.BuyerType,
                     ObRefPrefix = o.ObRefPrefix,
                     Quantity = o.Quantity,
+                    DeliveredQuantity = o.DeliveredQuantity,
                     Status = o.Status,
                     TankNo = o.TankNo,
                     Remarks = o.Remarks,
+                    TaxPaid = o.TaxPaid,
                     ReleaseEntries = o.Transactions.Select(t => new OrderStockReleaseEntryDto
                     {
                         Id = t.Id,
@@ -223,7 +227,8 @@ namespace JCTO.Services
                     Product = o.Product.Code,
                     Quantity = o.Quantity,
                     DeliveredQuantity = o.DeliveredQuantity,
-                    Status = o.Status
+                    Status = o.Status,
+                    TaxPaid = o.TaxPaid
                 }).GetPagedListAsync(filter);
 
             return orders;
@@ -240,12 +245,16 @@ namespace JCTO.Services
                     Customer = o.Customer.Name,
                     Product = o.Product.Code,
                     Buyer = o.Buyer,
-                    Quantity = o.DeliveredQuantity ?? o.Quantity,
-                    EntryNo = string.Join("/", o.Transactions.Select(t => t.Entry.EntryNo)),
+                    Quantity = o.Quantity,
+                    EntryNo = string.Join(",", o.Transactions.Select(t => $"{t.Entry.EntryNo}{(t.ApprovalTransaction.ApprovalRef != null ? "/" + t.ApprovalTransaction.ApprovalRef : "")}")),
                     ObRef = o.ObRefPrefix + "/" + string.Join(", ", o.Transactions.Select(t => t.ObRef)),
                     TankNo = o.TankNo,
-                    Remarks = o.BuyerType == BuyerType.Bowser ? string.Join('\n', o.BowserEntries.Select(b => $"{b.Capacity}Ltrs x {b.Count.ToString("00")}")) : "",
+                    Remarks = o.BuyerType == BuyerType.Bowser ? string.Join(" + ", o.BowserEntries.Select(b => $"{b.Capacity}Ltrs x {b.Count.ToString("00")}")) : "",
+                    TaxPaid = o.TaxPaid
                 }).SingleOrDefaultAsync();
+
+            if (reportData.TaxPaid)
+                reportData.Remarks = string.IsNullOrEmpty(reportData.Remarks) ? "Duty Paid" : $"{reportData.Remarks} - Duty paid";
 
             NumericWordsConverter converter = new NumericWordsConverter();
             reportData.QuantityInText = $"{converter.ToWords((decimal)reportData.Quantity)} MT of {reportData.Product} only";
@@ -292,7 +301,7 @@ namespace JCTO.Services
             {
                 var duplicateBonds = order.ReleaseEntries
                     .GroupBy(e => new { e.EntryNo, e.ApprovalId })
-                    .Select(g => new { EntryNo = g.Key, Count = g.Count() })
+                    .Select(g => new { EntryNo = g.Key.EntryNo, Count = g.Count() })
                     .ToList();
 
                 foreach (var entry in duplicateBonds.Where(b => b.Count > 1))
@@ -356,7 +365,9 @@ namespace JCTO.Services
                             Id = t.Id,
                             ApprovalType = t.ApprovalType.Value,
                             t.ApprovalRef,
-                            RemainingQty = t.Quantity + t.Deliveries.Where(d => !update || d.OrderId != order.Id).Sum(d => d.Quantity)
+                            RemainingQty = t.Quantity + t.Deliveries
+                                                        .Where(d => !update || d.OrderId != order.Id)
+                                                        .Sum(d => d.Order.Status == OrderStatus.Delivered ? d.DeliveredQuantity.Value : d.Quantity)
                         }).ToList(),
                 })
                 .ToListAsync();

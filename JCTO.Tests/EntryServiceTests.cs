@@ -164,6 +164,46 @@ namespace JCTO.Tests
             }
         }
 
+        public class GetEntryRemainingApprovals
+        {
+            [Theory]
+            [InlineData("1001", "1:50000:1000.25")]
+            [InlineData("1002", "2:60000:70")]
+            [InlineData("1102", "1:50001:150")]
+            public async Task WhenEntryExists_ReturnApprovalsWithBalances(string entryNo, string expected)
+            {
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var entrySvc = CreateService(dbContext);
+
+                      var approvals = await entrySvc.GetEntryRemainingApprovalsAsync(entryNo);
+
+                      var expectedApprovals = expected.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+                      Assert.Equal(expectedApprovals.Length, approvals.Count());
+
+                      foreach (var expectedApproval in expectedApprovals)
+                      {
+                          var approvalData = expectedApproval.Split(":", StringSplitOptions.RemoveEmptyEntries);
+                          var aprType = Enum.Parse(typeof(ApprovalType), approvalData[0]);
+                          var aprRef = approvalData[1];
+                          var remAmount = double.Parse(approvalData[2]);
+
+                          var actual = approvals.Find(a => a.ApprovalRef == aprRef);
+
+                          Assert.Equal(entryNo, actual.EntryNo);
+                          Assert.Equal(remAmount, actual.RemainingQty);
+                          Assert.Equal(aprType, actual.ApprovalType);
+                      }
+                  });
+            }
+        }
+
         private static async Task SetupTestDataAsync(IDataContext dbContext)
         {
             await TestData.Orders.SetupOrderAndEntryTestDataAsync(dbContext);

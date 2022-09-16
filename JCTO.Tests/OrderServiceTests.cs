@@ -27,11 +27,7 @@ namespace JCTO.Tests
             {
                 var customerId = Guid.Empty;
                 var productId = Guid.Empty;
-
-                var releaseEntries = new List<OrderStockReleaseEntryDto>
-                {
-                    new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), ApprovalType=ApprovalType.Rebond, EntryNo="1001", ObRef="xyz", Quantity = 110, DeliveredQuantity=0 }
-                };
+                List<OrderStockReleaseEntryDto> releaseEntries = null;
 
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
@@ -40,6 +36,12 @@ namespace JCTO.Tests
 
                       customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
                       productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
+                      var approvalId = await EntityHelper.GetGetEntryTxnIdAsync(dbContext, "1001", ApprovalType.Rebond, "50000");
+
+                      releaseEntries = new List<OrderStockReleaseEntryDto>
+                      {
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), ApprovalId=approvalId, EntryNo="1001", ObRef="xyz", Quantity = 110, DeliveredQuantity=0 }
+                      };
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -59,6 +61,7 @@ namespace JCTO.Tests
             {
                 var jkcs_customerId = Guid.Empty;
                 var go_productId = Guid.Empty;
+                var approvalId = Guid.Empty;
 
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
@@ -67,6 +70,7 @@ namespace JCTO.Tests
 
                       jkcs_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JKCS");
                       go_productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
+                      approvalId = await EntityHelper.GetGetEntryTxnIdAsync(dbContext, "1001", ApprovalType.Rebond, "50000");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -74,7 +78,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), ApprovalType=ApprovalType.Rebond, EntryNo="1001", ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), ApprovalId=approvalId, EntryNo="1001", ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jkcs_customerId, go_productId, "1001",
@@ -93,6 +97,7 @@ namespace JCTO.Tests
             {
                 var jvc_customerId = Guid.Empty;
                 var lsfo_productId = Guid.Empty;
+                var approvalId = Guid.Empty;
 
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
@@ -101,6 +106,7 @@ namespace JCTO.Tests
 
                       jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
                       lsfo_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
+                      approvalId = await EntityHelper.GetGetEntryTxnIdAsync(dbContext, "1001", ApprovalType.Rebond, "50000");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -108,7 +114,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalId=approvalId, ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lsfo_productId, "1001",
@@ -127,6 +133,7 @@ namespace JCTO.Tests
             {
                 var jvc_customerId = Guid.Empty;
                 var go_productId = Guid.Empty;
+                var approvalId = Guid.Empty;
 
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
@@ -135,6 +142,7 @@ namespace JCTO.Tests
 
                       jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
                       go_productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
+                      approvalId = await EntityHelper.GetGetEntryTxnIdAsync(dbContext, "1001", ApprovalType.Rebond, "50000");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -142,7 +150,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ApprovalId=approvalId, ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
@@ -161,6 +169,8 @@ namespace JCTO.Tests
             {
                 var jvc_customerId = Guid.Empty;
                 var go_productId = Guid.Empty;
+                var approvalId = Guid.Empty;
+
 
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
@@ -169,6 +179,7 @@ namespace JCTO.Tests
 
                       jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
                       go_productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
+                      approvalId = await EntityHelper.GetGetEntryTxnIdAsync(dbContext, "1001", ApprovalType.Rebond, "50000");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -176,9 +187,9 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 },
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="3001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 },
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalId=approvalId, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="3001", ApprovalId=approvalId, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ApprovalId=approvalId, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
@@ -197,6 +208,7 @@ namespace JCTO.Tests
             {
                 var jvc_customerId = Guid.Empty;
                 var go_productId = Guid.Empty;
+                var approvalId = Guid.Empty;
 
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
@@ -205,6 +217,7 @@ namespace JCTO.Tests
 
                       jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
                       go_productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
+                      approvalId = await EntityHelper.GetGetEntryTxnIdAsync(dbContext, "1001", ApprovalType.Rebond, "50000");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -212,7 +225,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 1500, DeliveredQuantity=0 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalId=approvalId, ObRef="xyz", Quantity = 1500, DeliveredQuantity=0 },
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
@@ -222,53 +235,16 @@ namespace JCTO.Tests
 
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
 
-                      Assert.Equal("Remaining quantity: 1000.25 of Entry: 1001 not sufficient to deliver requested quantity: 1500, Remaining Rebond amount (1000.25) of entry (1001) is less than requested amount: 1500", ex.Message);
+                      Assert.Equal("Remaining quantity (1000.25) of Rebond-50000 is not sufficient to deliver 1500", ex.Message);
                   });
             }
-
-            [Theory]
-            //[InlineData("JVC", "380_LSFO", "1002", ApprovalType.XBond, 51, "Remaining Xbond amount (50.5) of entry (1002) is less than requested amount: 51")]
-            [InlineData("JKCS", "GO", "1101", ApprovalType.Letter, 701, "Remaining Letter approved amount (700) of entry (1101) is less than requested amount: 701")]
-            public async Task WhenRequestedQuantitiesAreGreaterThanRemainingQuantityOfBondTypes_ThrowsException(string customerCode, string productCode,
-                string entryNo, ApprovalType approvalType, double qty, string expectedError)
-            {
-                var customerId = Guid.Empty;
-                var productId = Guid.Empty;
-
-                await DbHelper.ExecuteTestAsync(
-                  async (IDataContext dbContext) =>
-                  {
-                      await SetupTestDataAsync(dbContext);
-
-                      customerId = await EntityHelper.GetCustomerIdAsync(dbContext, customerCode);
-                      productId = await EntityHelper.GetProductIdAsync(dbContext, productCode);
-                  },
-                  async (IDataContext dbContext) =>
-                  {
-                      var orderSvc = CreateService(dbContext);
-
-                      var releaseEntries = new List<OrderStockReleaseEntryDto>
-                      {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo=entryNo, ApprovalType=approvalType, ObRef="xyz", Quantity = qty },
-                      };
-
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, customerId, productId, "1001",
-                          new DateTime(2022, 8, 27), qty, null, "Dialog",
-                          OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
-                          null, releaseEntries, new List<BowserEntryDto>(), Guid.Empty);
-
-                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
-
-                      Assert.Equal(expectedError, ex.Message);
-                  });
-            }
-
 
             [Fact]
             public async Task WhenThereAreCompletedEntriesSelected_ThrowsException()
             {
                 var jvc_customerId = Guid.Empty;
                 var lsfo_productId = Guid.Empty;
+                var approvalId = Guid.Empty;
 
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
@@ -277,6 +253,7 @@ namespace JCTO.Tests
 
                       jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
                       lsfo_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
+                      approvalId = await EntityHelper.GetGetEntryTxnIdAsync(dbContext, "1104", ApprovalType.Rebond, "15344");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -284,7 +261,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1104", ApprovalType=ApprovalType.Rebond, ObRef="abc", Quantity = 5, DeliveredQuantity=0 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1104", ApprovalId=approvalId, ObRef="abc", Quantity = 5, DeliveredQuantity=0 },
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lsfo_productId, "2001",
@@ -303,6 +280,7 @@ namespace JCTO.Tests
             {
                 var jkcs_customerId = Guid.Empty;
                 var lsfo_productId = Guid.Empty;
+                var approvalId = Guid.Empty;
 
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
@@ -311,6 +289,7 @@ namespace JCTO.Tests
 
                       jkcs_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JKCS");
                       lsfo_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
+                      approvalId = await EntityHelper.GetGetEntryTxnIdAsync(dbContext, "1001", ApprovalType.Rebond, "50000");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -318,9 +297,9 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 1500, DeliveredQuantity=0 },
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="3001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 },
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalId=approvalId, ObRef="xyz", Quantity = 1500, DeliveredQuantity=0 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="3001", ApprovalId=approvalId, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 },
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ApprovalId=approvalId, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jkcs_customerId, lsfo_productId, "1001",
@@ -330,7 +309,7 @@ namespace JCTO.Tests
 
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
 
-                      Assert.Equal("Invalid entries: 2001|3001, Product miss-matching entries: 1001, Customer miss-matching entries: 1001, Remaining quantity: 1000.25 of Entry: 1001 not sufficient to deliver requested quantity: 1500, Remaining Rebond amount (1000.25) of entry (1001) is less than requested amount: 1500", ex.Message);
+                      Assert.Equal("Invalid entries: 2001|3001, Product miss-matching entries: 1001, Customer miss-matching entries: 1001, Remaining quantity (1000.25) of Rebond-50000 is not sufficient to deliver 1500", ex.Message);
                   });
             }
 
@@ -340,6 +319,7 @@ namespace JCTO.Tests
                 var id = Guid.Empty;
                 var jvc_customerId = Guid.Empty;
                 var go_productId = Guid.Empty;
+                var approvalId = Guid.Empty;
 
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
@@ -348,6 +328,7 @@ namespace JCTO.Tests
 
                       jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
                       go_productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
+                      approvalId = await EntityHelper.GetGetEntryTxnIdAsync(dbContext, "1001", ApprovalType.Rebond, "50000");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -355,7 +336,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalId=approvalId, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1",
@@ -398,6 +379,7 @@ namespace JCTO.Tests
                        Assert.Equal(-120, txn1.Quantity);
                        Assert.Null(txn1.DeliveredQuantity);
                        Assert.Equal(EntryTransactionType.Out, txn1.Type);
+                       Assert.Equal(approvalId, txn1.ApprovalTransactionId);
 
                        //Entry
                        Assert.Equal(1000.250, entry.InitialQualtity);
@@ -412,6 +394,7 @@ namespace JCTO.Tests
                 var id = Guid.Empty;
                 var jvc_customerId = Guid.Empty;
                 var go_productId = Guid.Empty;
+                var approvalId = Guid.Empty;
 
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
@@ -420,6 +403,7 @@ namespace JCTO.Tests
 
                       jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
                       go_productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
+                      approvalId = await EntityHelper.GetGetEntryTxnIdAsync(dbContext, "1001", ApprovalType.Rebond, "50000");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -427,7 +411,7 @@ namespace JCTO.Tests
 
                       var releaseEntries = new List<OrderStockReleaseEntryDto>
                       {
-                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalType=ApprovalType.Rebond, ObRef="xyz", Quantity = 1000.250, DeliveredQuantity=0 }
+                          new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalId=approvalId, ObRef="xyz", Quantity = 1000.250, DeliveredQuantity=0 }
                       };
 
                       var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1",
@@ -470,6 +454,7 @@ namespace JCTO.Tests
                        Assert.Equal(-1000.250, txn1.Quantity);
                        Assert.Null(txn1.DeliveredQuantity);
                        Assert.Equal(EntryTransactionType.Out, txn1.Type);
+                       Assert.Equal(approvalId, txn1.ApprovalTransactionId);
 
                        //Entry
                        Assert.Equal(1000.250, entry.InitialQualtity);
@@ -510,7 +495,7 @@ namespace JCTO.Tests
                       {
                           Id = t.Id,
                           EntryNo = t.Entry.EntryNo,
-                          ApprovalType = t.ApprovalType,
+                          ApprovalId = t.ApprovalTransactionId.Value,
                           ObRef = "ref-11-a",
                           Quantity = Math.Abs(t.Quantity),
                           DeliveredQuantity = t.DeliveredQuantity != null ? Math.Abs(t.DeliveredQuantity.Value) : null,
@@ -592,7 +577,7 @@ namespace JCTO.Tests
                       {
                           Id = t.Id,
                           EntryNo = t.Entry.EntryNo,
-                          ApprovalType = t.ApprovalType,
+                          ApprovalId = t.ApprovalTransactionId.Value,
                           ObRef = "ref-11-a",
                           Quantity = 150,
                           DeliveredQuantity = t.DeliveredQuantity != null ? Math.Abs(t.DeliveredQuantity.Value) : null,
@@ -650,6 +635,7 @@ namespace JCTO.Tests
             {
                 var jvc_customerId = Guid.Empty;
                 var lfso_productId = Guid.Empty;
+                var approvalId = Guid.Empty;
                 Order order = null;
 
                 await DbHelper.ExecuteTestAsync(
@@ -659,6 +645,7 @@ namespace JCTO.Tests
 
                       jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
                       lfso_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
+                      approvalId = await EntityHelper.GetGetEntryTxnIdAsync(dbContext, "1103", ApprovalType.Rebond, "15244");
 
                       order = await dbContext.Orders
                         .Where(o => o.OrderNo == "1502")
@@ -674,7 +661,7 @@ namespace JCTO.Tests
                       {
                           Id = t.Id,
                           EntryNo = "1103",
-                          ApprovalType = ApprovalType.Rebond,
+                          ApprovalId = approvalId,
                           ObRef = "ref-11-a",
                           Quantity = 190,
                           DeliveredQuantity = t.DeliveredQuantity != null ? Math.Abs(t.DeliveredQuantity.Value) : null,
@@ -740,6 +727,8 @@ namespace JCTO.Tests
                 var jvc_customerId = Guid.Empty;
                 var lfso_productId = Guid.Empty;
                 Order order = null;
+                var approvalId = Guid.Empty;
+
 
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
@@ -748,6 +737,7 @@ namespace JCTO.Tests
 
                       jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
                       lfso_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
+                      approvalId = await EntityHelper.GetGetEntryTxnIdAsync(dbContext, "1103", ApprovalType.Rebond, "15244");
 
                       order = await dbContext.Orders
                         .Where(o => o.OrderNo == "1502")
@@ -765,7 +755,7 @@ namespace JCTO.Tests
                           {
                               Id = Guid.Empty,
                               EntryNo = "1103",
-                              ApprovalType = ApprovalType.Rebond,
+                              ApprovalId = approvalId,
                               ObRef = "ref-11-a",
                               Quantity = 200,
                               DeliveredQuantity = 200
@@ -832,6 +822,8 @@ namespace JCTO.Tests
             {
                 var jvc_customerId = Guid.Empty;
                 var lfso_productId = Guid.Empty;
+                var approvalId = Guid.Empty;
+
                 Order order = null;
 
                 await DbHelper.ExecuteTestAsync(
@@ -841,6 +833,7 @@ namespace JCTO.Tests
 
                       jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
                       lfso_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
+                      approvalId = await EntityHelper.GetGetEntryTxnIdAsync(dbContext, "1103", ApprovalType.Rebond, "15244");
 
                       order = await dbContext.Orders
                         .Where(o => o.OrderNo == "1502")
@@ -858,7 +851,7 @@ namespace JCTO.Tests
                           {
                               Id = Guid.Empty,
                               EntryNo = "1103",
-                              ApprovalType = ApprovalType.Rebond,
+                              ApprovalId=approvalId,
                               ObRef = "ref-11-a",
                               Quantity = 200,
                               DeliveredQuantity = 200
@@ -949,7 +942,7 @@ namespace JCTO.Tests
                       {
                           Id = t.Id,
                           EntryNo = t.Entry.EntryNo,
-                          ApprovalType = t.ApprovalType,
+                          ApprovalId = t.ApprovalTransactionId.Value,
                           ObRef = "ref-11-a",
                           Quantity = Math.Abs(t.Quantity),
                           DeliveredQuantity = t.DeliveredQuantity != null ? Math.Abs(t.DeliveredQuantity.Value) : null,
@@ -1006,7 +999,7 @@ namespace JCTO.Tests
                       {
                           Id = t.Id,
                           EntryNo = t.Entry.EntryNo,
-                          ApprovalType = t.ApprovalType,
+                          ApprovalId = t.ApprovalTransactionId.Value,
                           ObRef = t.ObRef,
                           Quantity = 171,
                           DeliveredQuantity = t.DeliveredQuantity != null ? Math.Abs(t.DeliveredQuantity.Value) : null,
@@ -1019,7 +1012,7 @@ namespace JCTO.Tests
 
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.UpdateAsync(order.Id, dto));
 
-                      Assert.Equal("Remaining Xbond amount (170) of entry (1002) is less than requested amount: 171", ex.Message);
+                      Assert.Equal("Remaining quantity (160.5) of XBond-60000 is not sufficient to deliver 171", ex.Message);
                   });
             }
 
@@ -1052,7 +1045,7 @@ namespace JCTO.Tests
                       {
                           Id = t.Id,
                           EntryNo = t.Entry.EntryNo,
-                          ApprovalType = t.ApprovalType,
+                          ApprovalId = t.ApprovalTransactionId.Value,
                           ObRef = t.ObRef,
                           Quantity = 321,
                           DeliveredQuantity = t.DeliveredQuantity != null ? Math.Abs(t.DeliveredQuantity.Value) : null,
@@ -1065,7 +1058,7 @@ namespace JCTO.Tests
 
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.UpdateAsync(order.Id, dto));
 
-                      Assert.Equal("Remaining quantity: 320 of Entry: 1002 not sufficient to deliver requested quantity: 321, Remaining Xbond amount (170) of entry (1002) is less than requested amount: 321", ex.Message);
+                      Assert.Equal("Remaining quantity (160.5) of XBond-60000 is not sufficient to deliver 321", ex.Message);
                   });
             }
         }

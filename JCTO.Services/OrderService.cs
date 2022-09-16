@@ -182,7 +182,7 @@ namespace JCTO.Services
                         ObRef = t.ObRef,
                         DeliveredQuantity = -1 * t.DeliveredQuantity,
                         Quantity = -1 * t.Quantity,
-                        ApprovalType = t.ApprovalType,
+                        ApprovalId = t.ApprovalTransactionId.Value
                     }).OrderBy(e => e.EntryNo).ToList(),
                     BowserEntries = o.BowserEntries.Select(b => new BowserEntryDto
                     {
@@ -290,11 +290,19 @@ namespace JCTO.Services
             }
             else
             {
+                var duplicateBonds = order.ReleaseEntries
+                    .GroupBy(e => new { e.EntryNo, e.ApprovalId })
+                    .Select(g => new { EntryNo = g.Key, Count = g.Count() })
+                    .ToList();
+
+                foreach (var entry in duplicateBonds.Where(b => b.Count > 1))
+                    errors.Add($"Duplicate bond approvals found for entry: {entry.EntryNo}");
+
                 if (order.ReleaseEntries.Sum(e => e.Quantity) != order.Quantity)
                     errors.Add("Sum of release Quantities not equal to overall Quantity");
 
-                if (order.ReleaseEntries.Any(e => !Enum.IsDefined(typeof(ApprovalType), e.ApprovalType)))
-                    errors.Add("Stock release entries found not having Approval Type");
+                if (order.ReleaseEntries.Any(e => e.ApprovalId == Guid.Empty))
+                    errors.Add("Stock release entries found not having Approval");
 
                 if (order.Status == OrderStatus.Delivered)
                 {
@@ -341,24 +349,15 @@ namespace JCTO.Services
                                       .Sum() * -1 : 0),
                     e.InitialQualtity,
                     e.Status,
-                    RemQtys = new
-                    {
-                        Xbond = e.Transactions
-                            .Where(t => t.ApprovalType == ApprovalType.XBond
-                                && (update == false || t.OrderId != order.Id))
-                            .Select(e => e.DeliveredQuantity ?? e.Quantity)
-                            .Sum(),
-                        Rebond = e.Transactions
-                            .Where(t => t.ApprovalType == ApprovalType.Rebond
-                                 && (update == false || t.OrderId != order.Id))
-                            .Select(e => e.DeliveredQuantity ?? e.Quantity)
-                            .Sum(),
-                        Letter = e.Transactions
-                            .Where(t => t.ApprovalType == ApprovalType.Letter
-                                 && (update == false || t.OrderId != order.Id))
-                            .Select(e => e.DeliveredQuantity ?? e.Quantity)
-                            .Sum()
-                    }
+                    RemApprovedQtys = e.Transactions
+                        .Where(t => t.Type == EntryTransactionType.Approval)
+                        .Select(t => new
+                        {
+                            Id = t.Id,
+                            ApprovalType = t.ApprovalType.Value,
+                            t.ApprovalRef,
+                            RemainingQty = t.Quantity + t.Deliveries.Where(d => !update || d.OrderId != order.Id).Sum(d => d.Quantity)
+                        }).ToList(),
                 })
                 .ToListAsync();
 
@@ -395,43 +394,16 @@ namespace JCTO.Services
             if (customerMismatchs.Any())
                 errors.Add($"Customer miss-matching entries: {string.Join("|", customerMismatchs)}");
 
-            var reqQtysFromEntriesBonds = order.ReleaseEntries
-               .Where(re => !invalidEntries.Union(completedEntries).Contains(re.EntryNo))
-               .GroupBy(e => new { e.EntryNo, e.ApprovalType })
-               .Select(e => new
-               {
-                   EntryNo = e.Key.EntryNo,
-                   ApprovalType = e.Key.ApprovalType,
-                   Quantity = e.Sum(r => order.Status == OrderStatus.Delivered ? r.DeliveredQuantity.Value : r.Quantity)
-               }).ToArray();
-
-            var reqQtysFromEntries = reqQtysFromEntriesBonds
-               .GroupBy(e => e.EntryNo)
-               .Select(g => new
-               {
-                   EntryNo = g.Key,
-                   Quantity = g.Sum(e => e.Quantity)
-               }).ToArray();
-
-            foreach (var reqQty in reqQtysFromEntries)
-            {
-                var entry = entries.First(e => e.EntryNo == reqQty.EntryNo);
-                if (entry.RemainingQuantity < reqQty.Quantity)
-                    errors.Add($"Remaining quantity: {entry.RemainingQuantity} of Entry: {reqQty.EntryNo} not sufficient to deliver requested quantity: {reqQty.Quantity}");
-            }
-
-            foreach (var reqBondQty in reqQtysFromEntriesBonds)
+            foreach (var reqBondQty in order.ReleaseEntries.Where(r => !completedEntries.Union(invalidEntries).Contains(r.EntryNo)))
             {
                 var entry = entries.First(e => e.EntryNo == reqBondQty.EntryNo);
 
-                if (reqBondQty.ApprovalType == ApprovalType.XBond && reqBondQty.Quantity > entry.RemQtys.Xbond)
-                    errors.Add($"Remaining Xbond amount ({entry.RemQtys.Xbond}) of entry ({reqBondQty.EntryNo}) is less than requested amount: {reqBondQty.Quantity}");
+                var remApprovedQty = entry.RemApprovedQtys.Find(a => a.Id == reqBondQty.ApprovalId);
 
-                if (reqBondQty.ApprovalType == ApprovalType.Rebond && reqBondQty.Quantity > entry.RemQtys.Rebond)
-                    errors.Add($"Remaining Rebond amount ({entry.RemQtys.Rebond}) of entry ({reqBondQty.EntryNo}) is less than requested amount: {reqBondQty.Quantity}");
-
-                if (reqBondQty.ApprovalType == ApprovalType.Letter && reqBondQty.Quantity > entry.RemQtys.Letter)
-                    errors.Add($"Remaining Letter approved amount ({entry.RemQtys.Letter}) of entry ({reqBondQty.EntryNo}) is less than requested amount: {reqBondQty.Quantity}");
+                if (remApprovedQty == null)
+                    errors.Add($"Incorrect approval selection for entry: {reqBondQty.EntryNo}");
+                else if (remApprovedQty.RemainingQty < reqBondQty.Quantity)
+                    errors.Add($"Remaining quantity ({remApprovedQty.RemainingQty}) of {remApprovedQty.ApprovalType.ToString("g")}-{remApprovedQty.ApprovalRef} is not sufficient to deliver {reqBondQty.Quantity}");
             }
 
             if (errors.Any())

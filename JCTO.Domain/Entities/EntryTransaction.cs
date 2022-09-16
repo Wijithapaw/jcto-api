@@ -2,7 +2,6 @@
 using JCTO.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 namespace JCTO.Domain.Entities
 {
     public class EntryTransaction : BaseEntity
@@ -10,7 +9,7 @@ namespace JCTO.Domain.Entities
         [Required]
         public Guid EntryId { get; set; }
         public EntryTransactionType Type { get; set; }
-        public ApprovalType ApprovalType { get; set; }
+        public ApprovalType? ApprovalType { get; set; }
         [MaxLength(50)]
         public string ApprovalRef { get; set; }
         [Required]
@@ -20,8 +19,12 @@ namespace JCTO.Domain.Entities
         public double Quantity { get; set; }
         public double? DeliveredQuantity { get; set; }
         public Guid? OrderId { get; set; }
+        public Guid? ApprovalTransactionId { get; set; }
 
         public virtual Entry Entry { get; set; }
         public virtual Order Order { get; set; }
+        public virtual EntryTransaction ApprovalTransaction { get; set; }
+
+        public ICollection<EntryTransaction> Deliveries { get; set; }
     }
 }

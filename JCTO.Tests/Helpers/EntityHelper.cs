@@ -56,7 +56,7 @@ namespace JCTO.Tests.Helpers
         }
 
         public static EntryTransaction CreateEntryTransaction(EntryTransactionType type, DateTime txnDate, string obRef,
-            double quantity, double? deliveredQuantity, ApprovalType approvalType, string approvalRef = null, Guid? orderId = null)
+            double quantity, double? deliveredQuantity, ApprovalType approvalType, string approvalRef = null, EntryTransaction approvalTxn = null, Guid? orderId = null)
         {
             return new EntryTransaction
             {
@@ -68,6 +68,7 @@ namespace JCTO.Tests.Helpers
                 OrderId = orderId,
                 ApprovalType = approvalType,
                 ApprovalRef = approvalRef,
+                ApprovalTransaction = approvalTxn
             };
         }
 
@@ -150,6 +151,16 @@ namespace JCTO.Tests.Helpers
         public static async Task<StockTransaction> GetStockTxnAsync(IDataContext dataContext, string toBondNo)
         {
             return await dataContext.StockTransactions.Where(t => t.ToBondNo == toBondNo).Include(t => t.Stock).FirstOrDefaultAsync();
+        }
+
+        public static async Task<Guid> GetGetEntryTxnIdAsync(IDataContext dataContext, string entryNo, ApprovalType approvalType, string approvalRef)
+        {
+            var entryTxn = await dataContext.EntryTransactions
+                .Where(t => t.Entry.EntryNo == entryNo
+                    && t.ApprovalType == approvalType
+                    && t.ApprovalRef == approvalRef)
+                .FirstAsync();
+            return entryTxn.Id;
         }
     }
 }

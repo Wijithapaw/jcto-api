@@ -29,7 +29,7 @@ namespace JCTO.Domain.Dtos
         public string ObRef { get; set; }
         public double Quantity { get; set; }
         public double? DeliveredQuantity { get; set; }
-        public ApprovalType ApprovalType { get; set; }
+        public Guid ApprovalId { get; set; }
     }
 
     public class BowserEntryDto

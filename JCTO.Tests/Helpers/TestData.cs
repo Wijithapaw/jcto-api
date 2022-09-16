@@ -68,11 +68,12 @@ namespace JCTO.Tests.Helpers
                 var dischargeTxn_520 = await EntityHelper.GetStockTxnAsync(dbContext, "520");
                 var e2StockTxn = EntityHelper.CreateStockTransaction(dischargeTxn_520.Stock.Id, 500, new DateTime(2022, 8, 20), StockTransactionType.Out, null, dischargeTxn_520);
                 var e2 = EntityHelper.CreateEntry("1002", customerId1, productId2, 500, 220, new DateTime(2022, 8, 28), EntryStatus.Active, e2StockTxn);
+                var e2Approval1 = EntityHelper.CreateEntryTransaction(EntryTransactionType.Approval, new DateTime(2022, 8, 28), string.Empty, 350, null, ApprovalType.XBond, "60000");
                 var e2Txns = new List<EntryTransaction>
                 {
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Approval, new DateTime(2022, 8, 28), string.Empty, 350, null, ApprovalType.XBond, "60000"),
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, new DateTime(2022, 8, 27), "ref-10", -189.500, -180, ApprovalType.XBond, null, orderId1),
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, new DateTime(2022, 8, 28), "ref-11", -100, null, ApprovalType.XBond, null, orderId2)
+                    e2Approval1,
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, new DateTime(2022, 8, 27), "ref-10", -189.500, -180, ApprovalType.XBond, null, e2Approval1, orderId1),
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, new DateTime(2022, 8, 28), "ref-11", -100, null, ApprovalType.XBond, null, e2Approval1, orderId2)
                 };
                 e2.Transactions = e2Txns;
 
@@ -88,10 +89,11 @@ namespace JCTO.Tests.Helpers
                 var dischargeTxn_540 = await EntityHelper.GetStockTxnAsync(dbContext, "540");
                 var e4StockTxn = EntityHelper.CreateStockTransaction(dischargeTxn_540.Stock.Id, 750, new DateTime(2022, 8, 20), StockTransactionType.Out, null, dischargeTxn_540);
                 var e4 = EntityHelper.CreateEntry("1102", customerId2, productId2, 750, 150, new DateTime(2022, 8, 20), EntryStatus.Active, e4StockTxn);
+                var e4Approval = EntityHelper.CreateEntryTransaction(EntryTransactionType.Approval, new DateTime(2022, 8, 20), string.Empty, 650, null, ApprovalType.Rebond, "50001");
                 var e4Txns = new List<EntryTransaction>
                 {
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Approval, new DateTime(2022, 8, 20), string.Empty, 650, null, ApprovalType.Rebond, "50001"),
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, new DateTime(2022, 8, 29), "ref-101", -500, null, ApprovalType.Rebond, null, orderId3),
+                    e4Approval,
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, new DateTime(2022, 8, 29), "ref-101", -500, null, ApprovalType.Rebond, null, e4Approval, orderId3),
 
                 };
                 e4.Transactions = e4Txns;
@@ -106,10 +108,11 @@ namespace JCTO.Tests.Helpers
 
                 var e6StockTxn = EntityHelper.CreateStockTransaction(dischargeTxn_520.Stock.Id, 10, new DateTime(2022, 8, 20), StockTransactionType.Out, null, dischargeTxn_520);
                 var e6 = EntityHelper.CreateEntry("1104", customerId1, productId2, 10, 0, new DateTime(2022, 9, 9), EntryStatus.Completed, e6StockTxn);
+                var e6Approval = EntityHelper.CreateEntryTransaction(EntryTransactionType.Approval, new DateTime(2022, 9, 10), string.Empty, 10, null, ApprovalType.Rebond, "15344");
                 var e6Txns = new List<EntryTransaction>
                 {
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Approval, new DateTime(2022, 9, 10), string.Empty, 10, null, ApprovalType.Rebond, "15244"),
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, new DateTime(2022, 8, 27), "ref-21", -10, -10, ApprovalType.Rebond, null, orderId1),
+                    e6Approval,
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, new DateTime(2022, 8, 27), "ref-21", -10, -10, ApprovalType.Rebond, null, e6Approval, orderId1),
                 };
                 e6.Transactions = e6Txns;
 

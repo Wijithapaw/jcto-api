@@ -55,7 +55,7 @@ namespace JCTO.Services
 
             var newTxns = releaseEntries
                 .Select(e => EntryTransactionService.GetEntryTransaction(EntryTransactionType.Out, e.Id, entry, order, order.OrderDate,
-                                                                        e.ApprovalType, string.Empty, e.ObRef, e.Quantity,
+                                                                        null, null, e.ApprovalId, e.ObRef, e.Quantity,
                                                                         order.Status == OrderStatus.Delivered ? e.DeliveredQuantity : null))
                 .ToList();
 
@@ -97,14 +97,14 @@ namespace JCTO.Services
                         {
                             OrderNo = t.Order != null ? t.Order.OrderNo : null,
                             TransactionDate = t.TransactionDate,
-                            ApprovalType = t.ApprovalType,
-                            ApprovalRef = t.ApprovalRef,
+                            ApprovalType = t.Type == EntryTransactionType.Approval ? t.ApprovalType : t.ApprovalTransaction.ApprovalType,
+                            ApprivalId = t.Type == EntryTransactionType.Out ? t.ApprovalTransactionId : null,
+                            ApprovalRef = t.Type == EntryTransactionType.Approval ? t.ApprovalRef : t.ApprovalTransaction.ApprovalRef,
                             Type = t.Type,
                             OrderStatus = t.Order != null ? t.Order.Status : null,
                             ObRef = t.ObRef,
                             Quantity = t.Quantity,
                             DeliveredQuantity = t.DeliveredQuantity,
-
                         }).ToList()
                 }).GetPagedListAsync(filter);
 
@@ -141,7 +141,7 @@ namespace JCTO.Services
             await ValidateEntryApprovalAsync(dto);
 
             var entryTxn = EntryTransactionService.GetEntryTransaction(EntryTransactionType.Approval, Guid.Empty,
-                null, null, dto.ApprovalDate, dto.Type, dto.ApprovalRef, string.Empty, dto.Quantity, null);
+                null, null, dto.ApprovalDate, dto.Type, dto.ApprovalRef, null, string.Empty, dto.Quantity, null);
 
             entryTxn.EntryId = dto.EntryId;
 

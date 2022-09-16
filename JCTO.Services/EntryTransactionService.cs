@@ -6,7 +6,7 @@ namespace JCTO.Services
     public static class EntryTransactionService
     {
         public static EntryTransaction GetEntryTransaction(EntryTransactionType type, Guid id, Entry entry, Order order, DateTime transactionDate,
-            ApprovalType approvalType, string approvalRef, string obRef, double quantity, double? deliveredQuantity)
+            ApprovalType? approvalType, string approvalRef, Guid? approvalId, string obRef, double quantity, double? deliveredQuantity)
         {
             var txn = new EntryTransaction
             {
@@ -20,6 +20,7 @@ namespace JCTO.Services
                 ApprovalType = approvalType,
                 ApprovalRef = approvalRef,
                 TransactionDate = transactionDate,
+                ApprovalTransactionId = approvalId,
             };
 
             return txn;

@@ -44,12 +44,18 @@ namespace JCTO.Api.Controllers
         }
 
         [HttpGet("{orderId}/StockRelease")]
-        [AllowAnonymous]
         public async Task<ActionResult> DownloadStockRelease(Guid orderId)
         {
             var bytes = await _orderService.GenerateStockReleaseAsync(orderId);
 
             return File(bytes, ReportContentTypes.XLSX, "StockRelease.xlsx");
+        }
+
+        [HttpGet("NextOrderNo")]
+        public async Task<int> GetNextOrderNo([FromQuery] DateTime date)
+        {
+            var orderNo = await _orderService.GetNextOrderNoAsync(date);
+            return orderNo;
         }
     }
 }

@@ -17,7 +17,6 @@ namespace JCTO.Domain.Entities
         public Guid? DischargeTransactionId { get; set; }
         [Required]
         public DateTime TransactionDate { get; set; }
-        [MaxLength(50)]
         public double Quantity { get; set; }
 
         public Entry Entry { get; set; }

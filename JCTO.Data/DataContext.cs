@@ -5,8 +5,6 @@ using JCTO.Domain.Entities;
 using JCTO.Domain.Entities.Base;
 using Microsoft.EntityFrameworkCore;
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-
 namespace JCTO.Data
 {
     public class DataContext : DbContext, IDataContext
@@ -37,7 +35,8 @@ namespace JCTO.Data
             builder.Entity<Product>().HasIndex(p => p.Code).IsUnique();
             builder.Entity<Entry>().HasIndex(e => e.EntryNo).IsUnique();
             builder.Entity<Entry>().HasIndex(t => t.StockTransactionId).IsUnique();
-            builder.Entity<EntryTransaction>().HasIndex(t => new { t.ApprovalType, t.ApprovalRef }).HasFilter("\"Type\" = 0 AND \"ApprovalType\" in (1,2)");
+            builder.Entity<EntryTransaction>().HasIndex(e => new { e.EntryId, e.ObRef }).IsUnique().HasFilter("\"Type\" = 1");
+            builder.Entity<EntryTransaction>().HasIndex(t => new { t.ApprovalType, t.ApprovalRef }).IsUnique().HasFilter("\"Type\" = 0 AND \"ApprovalType\" <> 3");
             builder.Entity<Order>().HasIndex(o => new { o.OrderDate, o.OrderNo }).IsUnique();
             builder.Entity<Stock>().HasIndex(s => new { s.CustomerId, s.ProductId }).IsUnique();
             builder.Entity<StockTransaction>().HasIndex(t => t.ToBondNo).IsUnique();

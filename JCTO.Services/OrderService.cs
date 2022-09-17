@@ -237,8 +237,8 @@ namespace JCTO.Services
         {
             var currentOrderNo = await _dataContext.Orders
                 .Where(o => o.OrderDate == date)
-                .MaxAsync(o => o.OrderNo);
-            return currentOrderNo + 1;
+                .MaxAsync(o => (int?)o.OrderNo);
+            return (currentOrderNo ?? 0) + 1;
         }
 
         public async Task<byte[]> GenerateStockReleaseAsync(Guid orderId)

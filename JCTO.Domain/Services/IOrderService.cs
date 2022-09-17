@@ -11,5 +11,6 @@ namespace JCTO.Domain.Services
         Task<PagedResultsDto<OrderListItemDto>> SearchOrdersAsync(OrderSearchDto filter);
         Task<OrderDto> GetOrderAsync(Guid id);
         Task<byte[]> GenerateStockReleaseAsync(Guid orderId);
+        Task<int> GetNextOrderNoAsync(DateTime date);
     }
 }

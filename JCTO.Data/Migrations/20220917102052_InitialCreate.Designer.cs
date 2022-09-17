@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JCTO.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220910112503_Altet_Table_Orders_AddedDeliveredQtyCol")]
-    partial class Altet_Table_Orders_AddedDeliveredQtyCol
+    [Migration("20220917102052_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -23,6 +23,8 @@ namespace JCTO.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.HasSequence<int>("EntryIndex");
 
             modelBuilder.Entity("JCTO.Domain.Entities.BowserEntry", b =>
                 {
@@ -62,7 +64,7 @@ namespace JCTO.Data.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("BowserEntry");
+                    b.ToTable("BowserEntries");
                 });
 
             modelBuilder.Entity("JCTO.Domain.Entities.Customer", b =>
@@ -132,6 +134,11 @@ namespace JCTO.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<int>("Index")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValueSql("nextval('\"EntryIndex\"')");
+
                     b.Property<double>("InitialQualtity")
                         .HasColumnType("double precision");
 
@@ -150,6 +157,9 @@ namespace JCTO.Data.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("StockTransactionId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedById");
@@ -159,9 +169,15 @@ namespace JCTO.Data.Migrations
                     b.HasIndex("EntryNo")
                         .IsUnique();
 
+                    b.HasIndex("Index")
+                        .IsUnique();
+
                     b.HasIndex("LastUpdatedById");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("StockTransactionId")
+                        .IsUnique();
 
                     b.ToTable("Entries");
                 });
@@ -176,7 +192,10 @@ namespace JCTO.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<int>("ApprovalType")
+                    b.Property<Guid?>("ApprovalTransactionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("ApprovalType")
                         .HasColumnType("integer");
 
                     b.Property<Guid>("ConcurrencyKey")
@@ -218,16 +237,21 @@ namespace JCTO.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedById");
+                    b.HasIndex("ApprovalTransactionId");
 
-                    b.HasIndex("EntryId");
+                    b.HasIndex("CreatedById");
 
                     b.HasIndex("LastUpdatedById");
 
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ApprovalType", "ApprovalRef")
-                        .HasFilter("\"Type\" = 0 AND \"ApprovalType\" in (1,2)");
+                        .IsUnique()
+                        .HasFilter("\"Type\" = 0 AND \"ApprovalType\" <> 3");
+
+                    b.HasIndex("EntryId", "ObRef")
+                        .IsUnique()
+                        .HasFilter("\"Type\" = 1");
 
                     b.ToTable("EntryTransactions");
                 });
@@ -275,10 +299,8 @@ namespace JCTO.Data.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("OrderNo")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                    b.Property<int>("OrderNo")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
@@ -297,6 +319,9 @@ namespace JCTO.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("TaxPaid")
+                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -417,7 +442,7 @@ namespace JCTO.Data.Migrations
                     b.Property<DateTime>("CreatedDateUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("EntryId")
+                    b.Property<Guid?>("DischargeTransactionId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("LastUpdatedById")
@@ -427,7 +452,6 @@ namespace JCTO.Data.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<double>("Quantity")
-                        .HasMaxLength(50)
                         .HasColumnType("double precision");
 
                     b.Property<Guid>("StockId")
@@ -447,8 +471,7 @@ namespace JCTO.Data.Migrations
 
                     b.HasIndex("CreatedById");
 
-                    b.HasIndex("EntryId")
-                        .IsUnique();
+                    b.HasIndex("DischargeTransactionId");
 
                     b.HasIndex("LastUpdatedById");
 
@@ -580,6 +603,12 @@ namespace JCTO.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("JCTO.Domain.Entities.StockTransaction", "StockTransaction")
+                        .WithOne("Entry")
+                        .HasForeignKey("JCTO.Domain.Entities.Entry", "StockTransactionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("CreatedBy");
 
                     b.Navigation("Customer");
@@ -587,10 +616,16 @@ namespace JCTO.Data.Migrations
                     b.Navigation("LastUpdatedBy");
 
                     b.Navigation("Product");
+
+                    b.Navigation("StockTransaction");
                 });
 
             modelBuilder.Entity("JCTO.Domain.Entities.EntryTransaction", b =>
                 {
+                    b.HasOne("JCTO.Domain.Entities.EntryTransaction", "ApprovalTransaction")
+                        .WithMany("Deliveries")
+                        .HasForeignKey("ApprovalTransactionId");
+
                     b.HasOne("JCTO.Domain.Entities.User", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
@@ -612,6 +647,8 @@ namespace JCTO.Data.Migrations
                     b.HasOne("JCTO.Domain.Entities.Order", "Order")
                         .WithMany("Transactions")
                         .HasForeignKey("OrderId");
+
+                    b.Navigation("ApprovalTransaction");
 
                     b.Navigation("CreatedBy");
 
@@ -719,9 +756,9 @@ namespace JCTO.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("JCTO.Domain.Entities.Entry", "Entry")
-                        .WithMany()
-                        .HasForeignKey("EntryId");
+                    b.HasOne("JCTO.Domain.Entities.StockTransaction", "DischargeTransaction")
+                        .WithMany("EntryTransactions")
+                        .HasForeignKey("DischargeTransactionId");
 
                     b.HasOne("JCTO.Domain.Entities.User", "LastUpdatedBy")
                         .WithMany()
@@ -737,7 +774,7 @@ namespace JCTO.Data.Migrations
 
                     b.Navigation("CreatedBy");
 
-                    b.Navigation("Entry");
+                    b.Navigation("DischargeTransaction");
 
                     b.Navigation("LastUpdatedBy");
 
@@ -775,6 +812,11 @@ namespace JCTO.Data.Migrations
                     b.Navigation("Transactions");
                 });
 
+            modelBuilder.Entity("JCTO.Domain.Entities.EntryTransaction", b =>
+                {
+                    b.Navigation("Deliveries");
+                });
+
             modelBuilder.Entity("JCTO.Domain.Entities.Order", b =>
                 {
                     b.Navigation("BowserEntries");
@@ -785,6 +827,13 @@ namespace JCTO.Data.Migrations
             modelBuilder.Entity("JCTO.Domain.Entities.Stock", b =>
                 {
                     b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("JCTO.Domain.Entities.StockTransaction", b =>
+                {
+                    b.Navigation("Entry");
+
+                    b.Navigation("EntryTransactions");
                 });
 #pragma warning restore 612, 618
         }

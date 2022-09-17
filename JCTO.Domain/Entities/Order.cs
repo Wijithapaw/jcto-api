@@ -2,13 +2,13 @@
 using JCTO.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 namespace JCTO.Domain.Entities
 {
     public class Order : BaseEntity
     {
         [Required]
         public int OrderNo { get; set; }
+        [Required]
         public DateTime OrderDate { get; set; }
         [Required]
         public Guid CustomerId { get; set; }

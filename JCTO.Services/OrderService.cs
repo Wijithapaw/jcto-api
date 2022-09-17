@@ -203,7 +203,6 @@ namespace JCTO.Services
         public async Task<PagedResultsDto<OrderListItemDto>> SearchOrdersAsync(OrderSearchDto filter)
         {
             filter.Buyer = filter.Buyer?.ToLower().Trim() ?? "";
-            filter.OrderNo = filter.OrderNo?.ToLower().Trim() ?? "";
 
             var orders = await _dataContext.Orders
                 .Where(o => (filter.CustomerId == null || filter.CustomerId == o.CustomerId)
@@ -213,7 +212,7 @@ namespace JCTO.Services
                     && (filter.Status == null || o.Status == filter.Status)
                     && (filter.BuyerType == null || o.BuyerType == filter.BuyerType)
                     && (filter.Buyer == "" || o.Buyer.ToLower().Contains(filter.Buyer))
-                    && (filter.OrderNo == "" || o.OrderNo.ToLower().Contains(filter.OrderNo)))
+                    && (filter.OrderNo == null || o.OrderNo == filter.OrderNo))
                 .OrderByDescending(o => o.OrderDate)
                 .ThenByDescending(o => o.OrderNo)
                 .Select(o => new OrderListItemDto
@@ -232,6 +231,14 @@ namespace JCTO.Services
                 }).GetPagedListAsync(filter);
 
             return orders;
+        }
+
+        public async Task<int> GetNextOrderNoAsync(DateTime date)
+        {
+            var currentOrderNo = await _dataContext.Orders
+                .Where(o => o.OrderDate == date)
+                .MaxAsync(o => o.OrderNo);
+            return currentOrderNo + 1;
         }
 
         public async Task<byte[]> GenerateStockReleaseAsync(Guid orderId)
@@ -275,8 +282,8 @@ namespace JCTO.Services
             if (order.OrderDate == DateTime.MinValue)
                 errors.Add("Order Date not found");
 
-            if (string.IsNullOrWhiteSpace(order.OrderNo))
-                errors.Add("Order No. not found");
+            if (order.OrderNo <= 0)
+                errors.Add("Order No. not valid");
 
             if (string.IsNullOrWhiteSpace(order.Buyer))
                 errors.Add("Buyer not found");

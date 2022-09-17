@@ -90,6 +90,7 @@ namespace JCTO.Services
                     InitialQuantity = e.InitialQualtity,
                     RemainingQuantity = e.RemainingQuantity,
                     Status = e.Status,
+                    Index = e.Index,
                     Transactions = e.Transactions
                         .OrderBy(t => t.TransactionDate)
                         .ThenBy(t => t.CreatedDateUtc)

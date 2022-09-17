@@ -3,6 +3,7 @@ using System;
 using JCTO.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JCTO.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class JctoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220917081033_Alter_Table_Entries_AddedCol_Index")]
+    partial class Alter_Table_Entries_AddedCol_Index
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -294,8 +296,10 @@ namespace JCTO.Data.Migrations
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("OrderNo")
-                        .HasColumnType("integer");
+                    b.Property<string>("OrderNo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");

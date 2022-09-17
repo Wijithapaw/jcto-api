@@ -33,7 +33,7 @@ namespace JCTO.Tests.Helpers
             };
         }
 
-        internal static OrderDto CreateOrderDto(Guid id, Guid customerId, Guid productId, string orderNo, DateTime orderDate,
+        internal static OrderDto CreateOrderDto(Guid id, Guid customerId, Guid productId, int orderNo, DateTime orderDate,
             double quantity, double? deliveredQuantity, string buyer, OrderStatus status, string obPrefix, string tankNo, BuyerType buyerType,
             string remarks, List<OrderStockReleaseEntryDto> releaseEntries, List<BowserEntryDto> bowserEntries, Guid concurrencyKey)
         {

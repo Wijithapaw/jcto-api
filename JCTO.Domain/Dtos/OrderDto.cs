@@ -9,7 +9,7 @@ namespace JCTO.Domain.Dtos
         public Guid CustomerId { get; set; }
         public Guid ProductId { get; set; }
         public DateTime OrderDate { get; set; }
-        public string OrderNo { get; set; }
+        public int OrderNo { get; set; }
         public string Buyer { get; set; }
         public OrderStatus Status { get; set; }
         public double Quantity { get; set; }

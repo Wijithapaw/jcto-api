@@ -23,16 +23,25 @@ namespace JCTO.Data
         {
             base.OnModelCreating(builder);
 
+            //Sequences
+            if (Database.IsNpgsql())
+            {
+                builder.HasSequence<int>("EntryIndex").StartsAt(1).IncrementsBy(1);
+                builder.Entity<Entry>().Property(h => h.Index).HasDefaultValueSql("nextval('\"EntryIndex\"')");
+                builder.Entity<Entry>().HasIndex(t => t.Index).IsUnique();
+            }
+
             //Indexes
             builder.Entity<User>().HasIndex(u => u.Email).IsUnique();
             builder.Entity<Customer>().HasIndex(c => c.Name).IsUnique();
             builder.Entity<Product>().HasIndex(p => p.Code).IsUnique();
             builder.Entity<Entry>().HasIndex(e => e.EntryNo).IsUnique();
+            builder.Entity<Entry>().HasIndex(t => t.StockTransactionId).IsUnique();
             builder.Entity<EntryTransaction>().HasIndex(t => new { t.ApprovalType, t.ApprovalRef }).HasFilter("\"Type\" = 0 AND \"ApprovalType\" in (1,2)");
             builder.Entity<Order>().HasIndex(o => new { o.OrderDate, o.OrderNo }).IsUnique();
             builder.Entity<Stock>().HasIndex(s => new { s.CustomerId, s.ProductId }).IsUnique();
-            builder.Entity<Entry>().HasIndex(t => t.StockTransactionId).IsUnique();
             builder.Entity<StockTransaction>().HasIndex(t => t.ToBondNo).IsUnique();
+
 
             foreach (var property in builder.Model.GetEntityTypes()
                  .SelectMany(t => t.GetProperties())

@@ -8,8 +8,7 @@ namespace JCTO.Domain.Entities
     public class Order : BaseEntity
     {
         [Required]
-        [MaxLength(50)]
-        public string OrderNo { get; set; }
+        public int OrderNo { get; set; }
         public DateTime OrderDate { get; set; }
         [Required]
         public Guid CustomerId { get; set; }

@@ -14,5 +14,6 @@ namespace JCTO.Domain.Dtos
         public string Customer { get; set; }
         public EntryStatus Status { get; set; }
         public List<EntryTransactionDto> Transactions { get; set; }
+        public int Index { get; set; }
     }
 }

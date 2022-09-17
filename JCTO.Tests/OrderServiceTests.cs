@@ -14,14 +14,14 @@ namespace JCTO.Tests
         public class Create
         {
             [Theory]
-            [InlineData("1001", "2022-8-26", 111, "Dialog", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, null, "Sum of release Quantities not equal to overall Quantity")]
-            [InlineData("1001", null, 110, "Dialog", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, null, "Order Date not found")]
-            [InlineData("", "2022-8-26", 110, "Dialog", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, null, "Order No. not found")]
-            [InlineData("1001", "2022-8-26", 110, "", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, null, "Buyer not found")]
-            [InlineData("1001", "2022-8-26", 110, "Dialog", OrderStatus.Undelivered, "", "", BuyerType.Barge, null, "OBRef not found, Tank No. not found")]
-            [InlineData("1001", "2022-8-26", 0, "Dialog", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, null, "Quantity must be > 0, Sum of release Quantities not equal to overall Quantity")]
-            [InlineData("1001", "2022-8-26", 0, "", OrderStatus.Undelivered, "", "", BuyerType.Barge, null, "Buyer not found, Quantity must be > 0, OBRef not found, Tank No. not found, Sum of release Quantities not equal to overall Quantity")]
-            public async Task WhenPassingValidData_CreateSuccessfully(string orderNo, DateTime orderDate, double quantity,
+            [InlineData(1001, "2022-8-26", 111, "Dialog", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, null, "Sum of release Quantities not equal to overall Quantity")]
+            [InlineData(1001, null, 110, "Dialog", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, null, "Order Date not found")]
+            [InlineData(0, "2022-8-26", 110, "Dialog", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, null, "Order No. not valid")]
+            [InlineData(1001, "2022-8-26", 110, "", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, null, "Buyer not found")]
+            [InlineData(1001, "2022-8-26", 110, "Dialog", OrderStatus.Undelivered, "", "", BuyerType.Barge, null, "OBRef not found, Tank No. not found")]
+            [InlineData(1001, "2022-8-26", 0, "Dialog", OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge, null, "Quantity must be > 0, Sum of release Quantities not equal to overall Quantity")]
+            [InlineData(1001, "2022-8-26", 0, "", OrderStatus.Undelivered, "", "", BuyerType.Barge, null, "Buyer not found, Quantity must be > 0, OBRef not found, Tank No. not found, Sum of release Quantities not equal to overall Quantity")]
+            public async Task WhenPassingValidData_CreateSuccessfully(int orderNo, DateTime orderDate, double quantity,
             string buyer, OrderStatus status, string obPrefix, string tankNo, BuyerType buyerType,
             string remarks, string expectedError)
             {
@@ -81,7 +81,7 @@ namespace JCTO.Tests
                           new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), ApprovalId=approvalId, EntryNo="1001", ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
                       };
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jkcs_customerId, go_productId, "1001",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jkcs_customerId, go_productId, 1001,
                           new DateTime(2022, 8, 27), 100.1250, null, "Dialog",
                           OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
                           null, releaseEntries, new List<BowserEntryDto>(), Guid.Empty);
@@ -117,7 +117,7 @@ namespace JCTO.Tests
                           new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalId=approvalId, ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
                       };
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lsfo_productId, "1001",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lsfo_productId, 1001,
                           new DateTime(2022, 8, 27), 100.1250, null, "Dialog",
                           OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
                           null, releaseEntries, new List<BowserEntryDto>(), Guid.Empty);
@@ -153,7 +153,7 @@ namespace JCTO.Tests
                           new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ApprovalId=approvalId, ObRef="xyz", Quantity = 100.1250, DeliveredQuantity=0 }
                       };
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, 1001,
                           new DateTime(2022, 8, 27), 100.1250, null, "Dialog",
                           OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
                           null, releaseEntries, new List<BowserEntryDto>(), Guid.Empty);
@@ -192,7 +192,7 @@ namespace JCTO.Tests
                           new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ApprovalId=approvalId, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
                       };
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, 1001,
                           new DateTime(2022, 8, 27), 360, null, "Dialog",
                           OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
                           null, releaseEntries, new List<BowserEntryDto>(), Guid.Empty);
@@ -228,7 +228,7 @@ namespace JCTO.Tests
                           new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalId=approvalId, ObRef="xyz", Quantity = 1500, DeliveredQuantity=0 },
                       };
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1001",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, 1001,
                           new DateTime(2022, 8, 27), 1500, null, "Dialog",
                           OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
                           null, releaseEntries, new List<BowserEntryDto>(), Guid.Empty);
@@ -264,7 +264,7 @@ namespace JCTO.Tests
                           new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1104", ApprovalId=approvalId, ObRef="abc", Quantity = 5, DeliveredQuantity=0 },
                       };
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lsfo_productId, "2001",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lsfo_productId, 2001,
                           new DateTime(2022, 8, 27), 5, null, "Mobitel",
                           OrderStatus.Undelivered, "OB-2", "100", BuyerType.Barge,
                           null, releaseEntries, new List<BowserEntryDto>(), Guid.Empty);
@@ -302,7 +302,7 @@ namespace JCTO.Tests
                           new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="2001", ApprovalId=approvalId, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
                       };
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jkcs_customerId, lsfo_productId, "1001",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jkcs_customerId, lsfo_productId, 1001,
                           new DateTime(2022, 8, 27), 1740, null, "Dialog",
                           OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
                           null, releaseEntries, new List<BowserEntryDto>(), Guid.Empty);
@@ -339,7 +339,7 @@ namespace JCTO.Tests
                           new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalId=approvalId, ObRef="xyz", Quantity = 120, DeliveredQuantity=0 }
                       };
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, 1,
                           new DateTime(2022, 8, 27), 120, null, "Dialog",
                           OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
                           "First order", releaseEntries, new List<BowserEntryDto>(), Guid.Empty);
@@ -359,7 +359,7 @@ namespace JCTO.Tests
                        Assert.NotNull(entry);
 
                        //Order
-                       Assert.Equal("1", order.OrderNo);
+                       Assert.Equal(1, order.OrderNo);
                        Assert.Equal(120, order.Quantity);
                        Assert.Equal("Dialog", order.Buyer);
                        Assert.Equal(BuyerType.Barge, order.BuyerType);
@@ -414,7 +414,7 @@ namespace JCTO.Tests
                           new OrderStockReleaseEntryDto { Id=Guid.NewGuid(), EntryNo="1001", ApprovalId=approvalId, ObRef="xyz", Quantity = 1000.250, DeliveredQuantity=0 }
                       };
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, "1",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, go_productId, 1,
                           new DateTime(2022, 8, 27), 1000.250, null, "Dialog",
                           OrderStatus.Undelivered, "OB-1", "100", BuyerType.Barge,
                           "First order", releaseEntries, new List<BowserEntryDto>(), Guid.Empty);
@@ -434,7 +434,7 @@ namespace JCTO.Tests
                        Assert.NotNull(entry);
 
                        //Order
-                       Assert.Equal("1", order.OrderNo);
+                       Assert.Equal(1, order.OrderNo);
                        Assert.Equal(1000.250, order.Quantity);
                        Assert.Equal("Dialog", order.Buyer);
                        Assert.Equal(BuyerType.Barge, order.BuyerType);
@@ -482,7 +482,7 @@ namespace JCTO.Tests
                       lfso_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
 
                       order = await dbContext.Orders
-                        .Where(o => o.OrderNo == "1502")
+                        .Where(o => o.OrderNo == 1502)
                         .Include(o => o.Transactions).ThenInclude(t => t.Entry)
                         .Include(o => o.BowserEntries)
                         .SingleOrDefaultAsync();
@@ -501,7 +501,7 @@ namespace JCTO.Tests
                           DeliveredQuantity = t.DeliveredQuantity != null ? Math.Abs(t.DeliveredQuantity.Value) : null,
                       }).ToList();
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, "1602",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, 1602,
                           new DateTime(2022, 8, 27), 100, null, "Mobitel",
                           OrderStatus.Undelivered, "OB/2023", "100", BuyerType.Barge,
                           "First order new", releaseEntries, new List<BowserEntryDto>(), order.ConcurrencyKey);
@@ -519,7 +519,7 @@ namespace JCTO.Tests
                        Assert.NotNull(entry);
 
                        //Order
-                       Assert.Equal("1602", updatedOrder.OrderNo);
+                       Assert.Equal(1602, updatedOrder.OrderNo);
                        Assert.Equal(100, updatedOrder.Quantity);
                        Assert.Equal("Mobitel", updatedOrder.Buyer);
                        Assert.Equal(BuyerType.Barge, updatedOrder.BuyerType);
@@ -564,7 +564,7 @@ namespace JCTO.Tests
                       lfso_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
 
                       order = await dbContext.Orders
-                        .Where(o => o.OrderNo == "1502")
+                        .Where(o => o.OrderNo == 1502)
                         .Include(o => o.Transactions).ThenInclude(t => t.Entry)
                         .Include(o => o.BowserEntries)
                         .SingleOrDefaultAsync();
@@ -583,7 +583,7 @@ namespace JCTO.Tests
                           DeliveredQuantity = t.DeliveredQuantity != null ? Math.Abs(t.DeliveredQuantity.Value) : null,
                       }).ToList();
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, "1502",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, 1502,
                           new DateTime(2022, 8, 28), 150, null, "Mobitel",
                           OrderStatus.Undelivered, "OB/2023", "100", BuyerType.Barge,
                           "First order", releaseEntries, new List<BowserEntryDto>(), order.ConcurrencyKey);
@@ -601,7 +601,7 @@ namespace JCTO.Tests
                        Assert.NotNull(entry);
 
                        //Order
-                       Assert.Equal("1502", updatedOrder.OrderNo);
+                       Assert.Equal(1502, updatedOrder.OrderNo);
                        Assert.Equal(150, updatedOrder.Quantity);
                        Assert.Equal("Mobitel", updatedOrder.Buyer);
                        Assert.Equal(BuyerType.Barge, updatedOrder.BuyerType);
@@ -648,7 +648,7 @@ namespace JCTO.Tests
                       approvalId = await EntityHelper.GetGetEntryTxnIdAsync(dbContext, "1103", ApprovalType.Rebond, "15244");
 
                       order = await dbContext.Orders
-                        .Where(o => o.OrderNo == "1502")
+                        .Where(o => o.OrderNo == 1502)
                         .Include(o => o.Transactions).ThenInclude(t => t.Entry)
                         .Include(o => o.BowserEntries)
                         .SingleOrDefaultAsync();
@@ -667,7 +667,7 @@ namespace JCTO.Tests
                           DeliveredQuantity = t.DeliveredQuantity != null ? Math.Abs(t.DeliveredQuantity.Value) : null,
                       }).ToList();
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, "1502",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, 1502,
                           new DateTime(2022, 8, 28), 190, null, "Mobitel",
                           OrderStatus.Undelivered, "OB/2023", "100", BuyerType.Barge,
                           "First order", releaseEntries, new List<BowserEntryDto>(), order.ConcurrencyKey);
@@ -687,7 +687,7 @@ namespace JCTO.Tests
                        Assert.NotNull(newEntry);
 
                        //Order
-                       Assert.Equal("1502", updatedOrder.OrderNo);
+                       Assert.Equal(1502, updatedOrder.OrderNo);
                        Assert.Equal(190, updatedOrder.Quantity);
                        Assert.Equal("Mobitel", updatedOrder.Buyer);
                        Assert.Equal(BuyerType.Barge, updatedOrder.BuyerType);
@@ -740,7 +740,7 @@ namespace JCTO.Tests
                       approvalId = await EntityHelper.GetGetEntryTxnIdAsync(dbContext, "1103", ApprovalType.Rebond, "15244");
 
                       order = await dbContext.Orders
-                        .Where(o => o.OrderNo == "1502")
+                        .Where(o => o.OrderNo == 1502)
                         .Include(o => o.Transactions).ThenInclude(t => t.Entry)
                         .Include(o => o.BowserEntries)
                         .SingleOrDefaultAsync();
@@ -762,7 +762,7 @@ namespace JCTO.Tests
                           }
                       };
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, "1502",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, 1502,
                           new DateTime(2022, 8, 28), 200, 200, "Mobitel",
                           OrderStatus.Delivered, "OB/2023", "100", BuyerType.Barge,
                           "First order", releaseEntries, new List<BowserEntryDto>(), order.ConcurrencyKey);
@@ -782,7 +782,7 @@ namespace JCTO.Tests
                        Assert.NotNull(newEntry);
 
                        //Order
-                       Assert.Equal("1502", updatedOrder.OrderNo);
+                       Assert.Equal(1502, updatedOrder.OrderNo);
                        Assert.Equal(200, updatedOrder.Quantity);
                        Assert.Equal(200, updatedOrder.DeliveredQuantity);
                        Assert.Equal("Mobitel", updatedOrder.Buyer);
@@ -836,7 +836,7 @@ namespace JCTO.Tests
                       approvalId = await EntityHelper.GetGetEntryTxnIdAsync(dbContext, "1103", ApprovalType.Rebond, "15244");
 
                       order = await dbContext.Orders
-                        .Where(o => o.OrderNo == "1502")
+                        .Where(o => o.OrderNo == 1502)
                         .Include(o => o.Transactions).ThenInclude(t => t.Entry)
                         .Include(o => o.BowserEntries)
                         .SingleOrDefaultAsync();
@@ -858,7 +858,7 @@ namespace JCTO.Tests
                           }
                       };
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, "1502",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, 1502,
                           new DateTime(2022, 8, 28), 200, 200, "Mobitel",
                           OrderStatus.Undelivered, "OB/2023", "100", BuyerType.Barge,
                           "First order", releaseEntries, new List<BowserEntryDto>(), order.ConcurrencyKey);
@@ -878,7 +878,7 @@ namespace JCTO.Tests
                        Assert.NotNull(newEntry);
 
                        //Order
-                       Assert.Equal("1502", updatedOrder.OrderNo);
+                       Assert.Equal(1502, updatedOrder.OrderNo);
                        Assert.Equal(200, updatedOrder.Quantity);
                        Assert.Null(updatedOrder.DeliveredQuantity);
                        Assert.Equal("Mobitel", updatedOrder.Buyer);
@@ -929,7 +929,7 @@ namespace JCTO.Tests
                       lfso_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
 
                       order = await dbContext.Orders
-                        .Where(o => o.OrderNo == "1501")
+                        .Where(o => o.OrderNo == 1501)
                         .Include(o => o.Transactions).ThenInclude(t => t.Entry)
                         .Include(o => o.BowserEntries)
                         .SingleOrDefaultAsync();
@@ -948,7 +948,7 @@ namespace JCTO.Tests
                           DeliveredQuantity = t.DeliveredQuantity != null ? Math.Abs(t.DeliveredQuantity.Value) : null,
                       }).ToList();
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, "1501",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, 1501,
                           new DateTime(2022, 8, 28), 199.5, 190, "Mobitel",
                           OrderStatus.Undelivered, "OB/2023", "100", BuyerType.Barge,
                           "First order", releaseEntries, new List<BowserEntryDto>(), order.ConcurrencyKey);
@@ -986,7 +986,7 @@ namespace JCTO.Tests
                       lfso_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
 
                       order = await dbContext.Orders
-                        .Where(o => o.OrderNo == "1502")
+                        .Where(o => o.OrderNo == 1502)
                         .Include(o => o.Transactions).ThenInclude(t => t.Entry)
                         .Include(o => o.BowserEntries)
                         .SingleOrDefaultAsync();
@@ -1005,7 +1005,7 @@ namespace JCTO.Tests
                           DeliveredQuantity = t.DeliveredQuantity != null ? Math.Abs(t.DeliveredQuantity.Value) : null,
                       }).ToList();
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, "1602",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, 1602,
                           new DateTime(2022, 8, 27), 171, null, "Mobitel",
                           OrderStatus.Undelivered, "OB/2023", "100", BuyerType.Barge,
                           "First order new", releaseEntries, new List<BowserEntryDto>(), order.ConcurrencyKey);
@@ -1032,7 +1032,7 @@ namespace JCTO.Tests
                       lfso_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
 
                       order = await dbContext.Orders
-                        .Where(o => o.OrderNo == "1502")
+                        .Where(o => o.OrderNo == 1502)
                         .Include(o => o.Transactions).ThenInclude(t => t.Entry)
                         .Include(o => o.BowserEntries)
                         .SingleOrDefaultAsync();
@@ -1051,7 +1051,7 @@ namespace JCTO.Tests
                           DeliveredQuantity = t.DeliveredQuantity != null ? Math.Abs(t.DeliveredQuantity.Value) : null,
                       }).ToList();
 
-                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, "1602",
+                      var dto = DtoHelper.CreateOrderDto(Guid.Empty, jvc_customerId, lfso_productId, 1602,
                           new DateTime(2022, 8, 27), 321, null, "Mobitel",
                           OrderStatus.Undelivered, "OB/2023", "100", BuyerType.Barge,
                           "First order new", releaseEntries, new List<BowserEntryDto>(), order.ConcurrencyKey);
@@ -1074,7 +1074,7 @@ namespace JCTO.Tests
                   {
                       await SetupTestDataAsync(dbContext);
 
-                      orderId = await EntityHelper.GetOrderIdAsync(dbContext, "1502");
+                      orderId = await EntityHelper.GetOrderIdAsync(dbContext, 1502);
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -1112,7 +1112,7 @@ namespace JCTO.Tests
                   {
                       await SetupTestDataAsync(dbContext);
 
-                      orderId = await EntityHelper.GetOrderIdAsync(dbContext, "1501");
+                      orderId = await EntityHelper.GetOrderIdAsync(dbContext, 1501);
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -1137,7 +1137,7 @@ namespace JCTO.Tests
                   async (IDataContext dbContext) =>
                   {
                       await SetupTestDataAsync(dbContext);
-                      id = await EntityHelper.GetOrderIdAsync(dbContext, "1501");
+                      id = await EntityHelper.GetOrderIdAsync(dbContext, 1501);
                       jvc_customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
                       lsfo_productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
                   },
@@ -1150,7 +1150,7 @@ namespace JCTO.Tests
                       //Order
                       Assert.NotNull(order);
 
-                      Assert.Equal("1501", order.OrderNo);
+                      Assert.Equal(1501, order.OrderNo);
                       Assert.Equal(199.5, order.Quantity);
                       Assert.Equal("Exex", order.Buyer);
                       Assert.Equal(BuyerType.Bowser, order.BuyerType);
@@ -1231,9 +1231,9 @@ namespace JCTO.Tests
                       Assert.True(orders.Total > 0);
                       Assert.Equal(orders.Total, orders.Items.Count);
 
-                      var order = orders.Items.First(o => o.OrderNo == "1501");
+                      var order = orders.Items.First(o => o.OrderNo == 1501);
 
-                      Assert.Equal("1501", order.OrderNo);
+                      Assert.Equal(1501, order.OrderNo);
                       Assert.Equal(199.5, order.Quantity);
                       Assert.Equal("Exex", order.Buyer);
                       Assert.Equal(BuyerType.Bowser, order.BuyerType);

@@ -6,7 +6,7 @@
         public string Product { get; set; }
         public double Quantity { get; set; }
         public string OrderDate { get; set; }
-        public string OrderNo { get; set; }
+        public int OrderNo { get; set; }
         public string TankNo { get; set; }
         public string Buyer { get; set; }
         public string EntryNo { get; set; }

@@ -10,7 +10,7 @@ namespace JCTO.Domain.Dtos
         public double Quantity { get; set; }
         public double? DeliveredQuantity { get; set; }
         public DateTime OrderDate { get; set; }
-        public string OrderNo { get; set; }
+        public int OrderNo { get; set; }
         public string Buyer { get; set; }
         public BuyerType BuyerType { get; set; }
         public OrderStatus Status { get; set; }

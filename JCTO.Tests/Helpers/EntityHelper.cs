@@ -72,7 +72,7 @@ namespace JCTO.Tests.Helpers
             };
         }
 
-        public static Order CreateOrder(Guid customerId, Guid productId, DateTime orderDate, string orderNo,
+        public static Order CreateOrder(Guid customerId, Guid productId, DateTime orderDate, int orderNo,
             string buyer, BuyerType buyerType, string tankNo, string obPrefix, OrderStatus status, double quantity, double? deliveredQty,
             string remarks, List<BowserEntry> bowserEntries)
         {
@@ -138,7 +138,7 @@ namespace JCTO.Tests.Helpers
             return (await dataContext.Entries.FirstAsync(c => c.EntryNo == entryNo)).Id;
         }
 
-        public static async Task<Guid> GetOrderIdAsync(IDataContext dataContext, string orderNo)
+        public static async Task<Guid> GetOrderIdAsync(IDataContext dataContext, int orderNo)
         {
             return (await dataContext.Orders.FirstAsync(o => o.OrderNo == orderNo)).Id;
         }

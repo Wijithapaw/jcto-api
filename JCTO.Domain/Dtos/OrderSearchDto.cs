@@ -17,6 +17,6 @@ namespace JCTO.Domain.Dtos
         public string Buyer { get; set; }
         public OrderStatus? Status { get; set; }
         public BuyerType? BuyerType { get; set; }
-        public string OrderNo { get; set; }
+        public int? OrderNo { get; set; }
     }
 }

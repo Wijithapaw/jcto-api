@@ -130,7 +130,7 @@ namespace JCTO.Tests
                       Assert.Equal(-189.5, tr1.Quantity);
                       Assert.Equal(-180, tr1.DeliveredQuantity);
                       Assert.Equal(new DateTime(2022, 8, 27), tr1.TransactionDate);
-                      Assert.Equal("1501", tr1.OrderNo);
+                      Assert.Equal(1501, tr1.OrderNo);
                   });
             }
         }

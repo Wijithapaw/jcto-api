@@ -128,9 +128,9 @@ namespace JCTO.Tests.Helpers
             {
                 var orders = new List<Order>()
                 {
-                    EntityHelper.CreateOrder(customerId1, productId2, new DateTime(2022, 8, 27), "1501", "Exex", BuyerType.Bowser, "110", "OB/2022", OrderStatus.Delivered, 199.5, 190, "Test 123", new List<BowserEntry> {EntityHelper.CreateBowserEntry(13600, 2)}),
-                    EntityHelper.CreateOrder(customerId1, productId2, new DateTime(2022, 8, 28), "1502", "Samagi", BuyerType.Barge, "110", "OB/2022", OrderStatus.Undelivered, 100, null, "Test", new List<BowserEntry>()),
-                    EntityHelper.CreateOrder(customerId2, productId2, new DateTime(2022, 8, 29), "1503", "Ins", BuyerType.Barge, "120", "OB/2022", OrderStatus.Undelivered, 500, null, "Test", new List<BowserEntry>())
+                    EntityHelper.CreateOrder(customerId1, productId2, new DateTime(2022, 8, 27), 1501, "Exex", BuyerType.Bowser, "110", "OB/2022", OrderStatus.Delivered, 199.5, 190, "Test 123", new List<BowserEntry> {EntityHelper.CreateBowserEntry(13600, 2)}),
+                    EntityHelper.CreateOrder(customerId1, productId2, new DateTime(2022, 8, 28), 1502, "Samagi", BuyerType.Barge, "110", "OB/2022", OrderStatus.Undelivered, 100, null, "Test", new List<BowserEntry>()),
+                    EntityHelper.CreateOrder(customerId2, productId2, new DateTime(2022, 8, 29), 1503, "Ins", BuyerType.Barge, "120", "OB/2022", OrderStatus.Undelivered, 500, null, "Test", new List<BowserEntry>())
                 };
 
                 return orders;
@@ -148,9 +148,9 @@ namespace JCTO.Tests.Helpers
                 dbContext.Orders.AddRange(GetOrders(customerId1, customerId2, productId1, productId2));
                 await dbContext.SaveChangesAsync();
 
-                var orderId_1501 = await EntityHelper.GetOrderIdAsync(dbContext, "1501");
-                var orderId_1502 = await EntityHelper.GetOrderIdAsync(dbContext, "1502");
-                var orderId_1503 = await EntityHelper.GetOrderIdAsync(dbContext, "1503");
+                var orderId_1501 = await EntityHelper.GetOrderIdAsync(dbContext, 1501);
+                var orderId_1502 = await EntityHelper.GetOrderIdAsync(dbContext, 1502);
+                var orderId_1503 = await EntityHelper.GetOrderIdAsync(dbContext, 1503);
 
                 dbContext.Entries.AddRange(await Entries.GetEntriesAsync(dbContext, customerId1, productId1, customerId2, productId2, orderId_1501, orderId_1502, orderId_1503));
                 await dbContext.SaveChangesAsync();

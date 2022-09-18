@@ -13,6 +13,6 @@ namespace JCTO.Domain.Services
         Task<EntryBalanceQtyDto> GetEntryBalanceQuantitiesAsync(string entryNo);
         Task UpdateRemainingAmountsAsync(List<Guid> entryIds);
         Task<Entry> GetEntryByEntryNoAsync(string entryNo);
-        Task<List<EntryRemaningApprovalsDto>> GetEntryRemainingApprovalsAsync(string entryNo);
+        Task<List<EntryRemaningApprovalsDto>> GetEntryRemainingApprovalsAsync(string entryNo, Guid? excludeOrderId = null);
     }
 }

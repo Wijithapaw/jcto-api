@@ -42,9 +42,9 @@ namespace JCTO.Api.Controllers
         }
 
         [HttpGet("{entryNo}/RemainingApprovals")]
-        public async Task<List<EntryRemaningApprovalsDto>> GetEntryRemainingApprvals(string entryNo)
+        public async Task<List<EntryRemaningApprovalsDto>> GetEntryRemainingApprvals(string entryNo, [FromQuery] Guid? excludeOrderId = null)
         {
-            return await _entryService.GetEntryRemainingApprovalsAsync(entryNo);
+            return await _entryService.GetEntryRemainingApprovalsAsync(entryNo, excludeOrderId);
         }
     }
 }

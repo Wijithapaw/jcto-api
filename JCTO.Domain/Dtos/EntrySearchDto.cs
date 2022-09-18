@@ -15,6 +15,6 @@ namespace JCTO.Domain.Dtos
         public string ToBondNo { get; set; }
         public DateTime? From { get; set; }
         public DateTime? To { get; set; }
-        public bool ActiveEntriesOnly { get; set; }
+        public bool? Active { get; set; }
     }
 }

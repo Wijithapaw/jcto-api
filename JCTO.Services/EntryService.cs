@@ -53,6 +53,8 @@ namespace JCTO.Services
         {
             var entry = await GetEntryByEntryNoAsync(entryNo);
 
+            FillObRefs(entry, releaseEntries);
+
             var newTxns = releaseEntries
                 .Select(e => EntryTransactionService.GetEntryTransaction(EntryTransactionType.Out, e.Id, entry, order, order.OrderDate,
                                                                         null, null, e.ApprovalId, e.ObRef, e.Quantity,
@@ -62,6 +64,34 @@ namespace JCTO.Services
             newTxns.ForEach(t => t.Entry = entry);
 
             return newTxns;
+        }
+
+        private void FillObRefs(Entry entry, List<OrderStockReleaseEntryDto> releaseEntries)
+        {
+            if (!releaseEntries.Any(t => string.IsNullOrEmpty(t.ObRef)))
+                return;
+
+            try
+            {
+                var lastRefNoGiven = entry.Transactions
+                    .Where(t => t.Type == EntryTransactionType.Out)
+                    .Select(t => t.ObRef)
+                    .Union(releaseEntries.Where(t => !string.IsNullOrEmpty(t.ObRef)).Select(t => t.ObRef))
+                    .Distinct()
+                    .Select(r => r.Replace($"{entry.Index}-", ""))
+                    .Select(r => int.Parse(r))
+                    .OrderByDescending(r => r)
+                    .FirstOrDefault();
+
+                foreach (var entryTxn in releaseEntries.Where(e => string.IsNullOrEmpty(e.ObRef)))
+                {
+                    entryTxn.ObRef = $"{entry.Index}-{++lastRefNoGiven}";
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new JCTOException($"OB Refs of entry {entry.EntryNo} are not in proper order. Hence unable to auto generate OB Refs. Manually enter OB Refs to proceed.", ex);
+            }
         }
 
         public async Task<PagedResultsDto<EntryListItemDto>> SearchEntriesAsync(EntrySearchDto filter)
@@ -74,7 +104,7 @@ namespace JCTO.Services
                     && (filter.ProductId == null || filter.ProductId == e.ProductId)
                     && (filter.From == null || e.EntryDate >= filter.From)
                     && (filter.To == null || e.EntryDate <= filter.To)
-                    && (!filter.ActiveEntriesOnly || e.Status == EntryStatus.Active)
+                    && (filter.Active == null || filter.Active.Value && e.Status == EntryStatus.Active || !filter.Active.Value && e.Status == EntryStatus.Completed)
                     && (filter.ToBondNo == "" || e.StockTransaction.DischargeTransaction.ToBondNo.ToLower() == filter.ToBondNo)
                     && (filter.EntryNo == "" || e.EntryNo.ToLower() == filter.EntryNo))
                 .OrderBy(o => o.EntryDate)
@@ -93,7 +123,7 @@ namespace JCTO.Services
                     Index = e.Index,
                     Transactions = e.Transactions
                         .OrderBy(t => t.TransactionDate)
-                        .ThenBy(t => t.CreatedDateUtc)
+                        .ThenBy(t => t.ObRef)
                         .Select(t => new EntryTransactionDto
                         {
                             OrderNo = t.Order != null ? t.Order.OrderNo : null,
@@ -137,7 +167,7 @@ namespace JCTO.Services
             return balQty;
         }
 
-        public async Task<List<EntryRemaningApprovalsDto>> GetEntryRemainingApprovalsAsync(string entryNo)
+        public async Task<List<EntryRemaningApprovalsDto>> GetEntryRemainingApprovalsAsync(string entryNo, Guid? excludeOrderId = null)
         {
             var remApprovals = await _dataContext.EntryTransactions
                 .Where(t => t.Entry.EntryNo == entryNo && t.Type == EntryTransactionType.Approval)
@@ -147,7 +177,9 @@ namespace JCTO.Services
                     ApprovalType = t.ApprovalType.Value,
                     ApprovalRef = t.ApprovalRef,
                     EntryNo = t.Entry.EntryNo,
-                    RemainingQty = t.Quantity + t.Deliveries.Sum(d => d.Order.Status == OrderStatus.Delivered ? d.DeliveredQuantity.Value : d.Quantity)
+                    RemainingQty = t.Quantity + t.Deliveries
+                        .Where(d => excludeOrderId == null || d.OrderId != excludeOrderId)
+                        .Sum(d => d.Order.Status == OrderStatus.Delivered ? d.DeliveredQuantity.Value : d.Quantity)
                 })
                 .Where(a => a.RemainingQty > 0)
                 .ToListAsync();

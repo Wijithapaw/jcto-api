@@ -17,10 +17,28 @@ namespace JCTO.Api.Controllers
             _entryService = entryService;
         }
 
+        [HttpGet("{id}")]
+        public async Task<EntryDto> GetEntry(Guid id)
+        {
+            return await _entryService.GetAsync(id);
+        }
+
         [HttpPost]
         public async Task<EntityCreateResult> CreateEntry(EntryDto entry)
         {
             return await _entryService.CreateAsync(entry);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<EntityUpdateResult> UpdateEntry(Guid id, EntryDto entry)
+        {
+            return await _entryService.UpdateAsync(id, entry);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task DeleteEntry(Guid id)
+        {
+            await _entryService.DeleteAsync(id);
         }
 
         [HttpGet]
@@ -29,10 +47,16 @@ namespace JCTO.Api.Controllers
             return await _entryService.SearchEntriesAsync(filter);
         }
 
-        [HttpPost("Approve")]
-        public async Task<EntityCreateResult> ApproveEntry(EntryApprovalDto dto)
+        [HttpPost("Approval")]
+        public async Task<EntityCreateResult> CreateApproval(EntryApprovalDto dto)
         {
             return await _entryService.AddApprovalAsync(dto);
+        }
+
+        [HttpDelete("Approval/{id}")]
+        public async Task DeleteApproval(Guid id)
+        {
+            await _entryService.DeleteAsync(id);
         }
 
         [HttpGet("{entryNo}/balance")]

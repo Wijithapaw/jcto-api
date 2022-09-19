@@ -6,11 +6,6 @@ using JCTO.Domain.Entities;
 using JCTO.Domain.Enums;
 using JCTO.Domain.Services;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace JCTO.Services
 {
@@ -47,6 +42,101 @@ namespace JCTO.Services
             await _dataContext.SaveChangesAsync();
 
             return GetEntityCreateResult(newEntry);
+        }
+
+        public async Task<EntryDto> GetAsync(Guid id)
+        {
+            var entry = await _dataContext.Entries
+                .Where(e => e.Id == id)
+                .Select(e => new EntryDto
+                {
+                    ToBondNo = e.StockTransaction.DischargeTransaction.ToBondNo,
+                    EntryNo = e.EntryNo,
+                    EntryDate = e.EntryDate,
+                    InitialQuantity = e.InitialQualtity,
+                    Status = e.Status,
+                    ConcurrencyKey = e.ConcurrencyKey
+                }).FirstOrDefaultAsync();
+
+            return entry;
+        }
+
+        public async Task<EntityUpdateResult> UpdateAsync(Guid id, EntryDto dto)
+        {
+            var entry = await _dataContext.Entries
+                .Where(e => e.Id == id)
+                .Include(e => e.Transactions)
+                .Include(e => e.StockTransaction)
+                .ThenInclude(st => st.Stock)
+                .Include(e => e.StockTransaction)
+                .ThenInclude(st => st.DischargeTransaction)
+                .ThenInclude(dt => dt.EntryTransactions)
+                .FirstAsync();
+
+            if (entry.Status == EntryStatus.Completed)
+                throw new JCTOValidationException("Completed entries cannot be updated");
+
+            var oldQty = entry.InitialQualtity;
+            var newQty = dto.InitialQuantity;
+
+            if (oldQty != newQty)
+            {
+                if (entry.Transactions.Any())
+                    throw new JCTOValidationException("Can't update the quantity of an entry where there approvals and/or order releases");
+
+                if (newQty < oldQty)
+                {
+                    entry.StockTransaction.Quantity = newQty;
+                    entry.StockTransaction.Stock.RemainingQuantity += (oldQty - newQty);
+                }
+                else
+                {
+                    var addition = newQty - oldQty;
+                    var remQtyOfTobond = entry.StockTransaction.DischargeTransaction.Quantity
+                        + entry.StockTransaction.DischargeTransaction.EntryTransactions.Sum(t => t.Quantity);
+
+                    if (remQtyOfTobond < addition)
+                        throw new JCTOValidationException($"Remaining quantity: {remQtyOfTobond} of ToBond: {entry.StockTransaction.DischargeTransaction.ToBondNo}, not sufficient to make this change");
+
+                    entry.StockTransaction.Quantity = newQty;
+                    entry.StockTransaction.Stock.RemainingQuantity -= (newQty - oldQty);
+                }
+
+                entry.InitialQualtity = newQty;
+                entry.RemainingQuantity = newQty;
+            }
+
+            entry.EntryDate = dto.EntryDate;
+            entry.EntryNo = dto.EntryNo;
+            entry.ConcurrencyKey = dto.ConcurrencyKey;
+
+            await _dataContext.SaveChangesAsync();
+
+            return GetEntityUpdateResult(entry);
+        }
+
+        public async Task DeleteAsync(Guid id)
+        {
+            var entry = await _dataContext.Entries
+                .Where(e => e.Id == id)
+                .Include(e => e.Transactions)
+                .Include(e => e.StockTransaction)
+                .ThenInclude(st => st.Stock)
+                .FirstAsync();
+
+            if (entry.Status == EntryStatus.Completed)
+                throw new JCTOValidationException("Completed entries cannot be deleted");
+
+            if (entry.Transactions.Any())
+                throw new JCTOValidationException("Can't delete an entry when there are approvals and/or order releases");
+
+            _dataContext.StockTransactions.Remove(entry.StockTransaction);
+
+            entry.StockTransaction.Stock.RemainingQuantity += entry.RemainingQuantity;
+
+            _dataContext.Entries.Remove(entry);
+
+            await _dataContext.SaveChangesAsync();
         }
 
         public async Task<List<EntryTransaction>> CreateOrderEntryTransactionsAsync(string entryNo, Order order, List<OrderStockReleaseEntryDto> releaseEntries)
@@ -201,31 +291,18 @@ namespace JCTO.Services
             return GetEntityCreateResult(entryTxn);
         }
 
-        private async Task ValidateEntryApprovalAsync(EntryApprovalDto dto)
+        public async Task DeleteApprovalAsync(Guid id)
         {
-            var errors = new List<string>();
-            if ((dto.Type == ApprovalType.Rebond || dto.Type == ApprovalType.XBond) && string.IsNullOrWhiteSpace(dto.ApprovalRef))
-            {
-                errors.Add("Approval Ref. is required for Xbond and Rebond approvals");
-            }
+            var approvalTxn = await _dataContext.EntryTransactions
+                .Where(t => t.Id == id)
+                .Include(t => t.Deliveries)
+                .FirstAsync(t => t.ApprovalTransactionId == id);
 
-            var quantityToBeApproved = await _dataContext.Entries
-                .Where(e => e.Id == dto.EntryId)
-                .Select(e => new
-                {
-                    IninitalQty = e.InitialQualtity,
-                    ApprovedQty = e.Transactions.Where(t => t.Type == EntryTransactionType.Approval).Sum(t => t.Quantity)
-                }).Select(e => e.IninitalQty - e.ApprovedQty).FirstAsync();
+            if (approvalTxn.Deliveries.Any())
+                throw new JCTOValidationException("Can't delete an entry approval when there are order releases associated with it");
 
-            if (dto.Quantity > quantityToBeApproved)
-            {
-                errors.Add("Approving quantity is greater than remaining amount to approve");
-            }
-
-            if (errors.Any())
-            {
-                throw new JCTOValidationException(string.Join(", ", errors));
-            }
+            _dataContext.EntryTransactions.Remove(approvalTxn);
+            await _dataContext.SaveChangesAsync();
         }
 
         public async Task<Entry> GetEntryByEntryNoAsync(string entryNo)
@@ -277,15 +354,31 @@ namespace JCTO.Services
             await _dataContext.SaveChangesAsync();
         }
 
-        private void UpdateRemainingAmount(Entry entry, List<EntryTransaction> txns)
+        private async Task ValidateEntryApprovalAsync(EntryApprovalDto dto)
         {
-            var totalGoingOut = txns.Sum(t => t.Quantity);
-            var remainingQty = entry.RemainingQuantity + totalGoingOut;
+            var errors = new List<string>();
+            if ((dto.Type == ApprovalType.Rebond || dto.Type == ApprovalType.XBond) && string.IsNullOrWhiteSpace(dto.ApprovalRef))
+            {
+                errors.Add("Approval Ref. is required for Xbond and Rebond approvals");
+            }
 
-            if (remainingQty < 0)
-                throw new JCTOValidationException($"Cant create order. Insufficient amount remaining in Entry: {entry.EntryNo}");
+            var quantityToBeApproved = await _dataContext.Entries
+                .Where(e => e.Id == dto.EntryId)
+                .Select(e => new
+                {
+                    IninitalQty = e.InitialQualtity,
+                    ApprovedQty = e.Transactions.Where(t => t.Type == EntryTransactionType.Approval).Sum(t => t.Quantity)
+                }).Select(e => e.IninitalQty - e.ApprovedQty).FirstAsync();
 
-            entry.RemainingQuantity = remainingQty;
+            if (dto.Quantity > quantityToBeApproved)
+            {
+                errors.Add("Approving quantity is greater than remaining amount to approve");
+            }
+
+            if (errors.Any())
+            {
+                throw new JCTOValidationException(string.Join(", ", errors));
+            }
         }
     }
 }

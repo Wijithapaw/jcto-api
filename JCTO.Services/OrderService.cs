@@ -62,21 +62,6 @@ namespace JCTO.Services
             return GetEntityCreateResult(order);
         }
 
-        private async Task<List<EntryTransaction>> CreateNewEntryTxnsAsync(List<OrderStockReleaseEntryDto> releaseEntries, Order order)
-        {
-            var entryTxnsGrp = releaseEntries
-                .GroupBy(e => e.EntryNo)
-                .Select(g => new { EntryNo = g.Key, entries = g.ToList() });
-
-            var orderReleaseTxns = new List<EntryTransaction>();
-            foreach (var txns in entryTxnsGrp)
-            {
-                var entryTxns = await _entryService.CreateOrderEntryTransactionsAsync(txns.EntryNo, order, txns.entries);
-                orderReleaseTxns.AddRange(entryTxns);
-            }
-            return orderReleaseTxns;
-        }
-
         public async Task<EntityUpdateResult> UpdateAsync(Guid id, OrderDto dto)
         {
             dto.Id = id;
@@ -428,6 +413,21 @@ namespace JCTO.Services
             {
                 throw new JCTOValidationException(string.Join(", ", errors));
             }
+        }
+
+        private async Task<List<EntryTransaction>> CreateNewEntryTxnsAsync(List<OrderStockReleaseEntryDto> releaseEntries, Order order)
+        {
+            var entryTxnsGrp = releaseEntries
+                .GroupBy(e => e.EntryNo)
+                .Select(g => new { EntryNo = g.Key, entries = g.ToList() });
+
+            var orderReleaseTxns = new List<EntryTransaction>();
+            foreach (var txns in entryTxnsGrp)
+            {
+                var entryTxns = await _entryService.CreateOrderEntryTransactionsAsync(txns.EntryNo, order, txns.entries);
+                orderReleaseTxns.AddRange(entryTxns);
+            }
+            return orderReleaseTxns;
         }
     }
 }

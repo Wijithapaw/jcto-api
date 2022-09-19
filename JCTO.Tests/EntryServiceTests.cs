@@ -204,6 +204,227 @@ namespace JCTO.Tests
             }
         }
 
+        public class Update
+        {
+            [Theory]
+            [InlineData("1001")]
+            [InlineData("1002")]
+            [InlineData("1103")]
+            public async Task WhenModifingQtyWhenHavingTransactions_ThrowsException(string entryNo)
+            {
+                var entryId = Guid.Empty;
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+                      entryId = await EntityHelper.GetEntryIdAsync(dbContext, entryNo);
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var entrySvc = CreateService(dbContext);
+
+                      var entryDto = DtoHelper.CreateEntryDto("", entryNo, new DateTime(2022, 9, 19), EntryStatus.Active, 2000);
+
+                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => entrySvc.UpdateAsync(entryId, entryDto));
+
+                      Assert.Equal("Can't update the quantity of an entry where there approvals and/or order releases", ex.Message);
+                  });
+            }
+
+            [Fact]
+            public async Task WhenNotModifingQty_UpdateSuccessfully()
+            {
+                var entryNo = "1002";
+                var entryId = Guid.Empty;
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+                      entryId = await EntityHelper.GetEntryIdAsync(dbContext, entryNo);
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var entrySvc = CreateService(dbContext);
+
+                      var entry = await dbContext.Entries.FindAsync(entryId);
+
+                      var entryDto = DtoHelper.CreateEntryDto("", "10021", new DateTime(2022, 9, 19), EntryStatus.Active, 500);
+                      entryDto.ConcurrencyKey = entry.ConcurrencyKey;
+
+                      var result = await entrySvc.UpdateAsync(entryId, entryDto);
+
+                      Assert.NotNull(result);
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var entry = await dbContext.Entries.FindAsync(entryId);
+
+                      Assert.Equal("10021", entry.EntryNo);
+                      Assert.Equal(new DateTime(2022, 9, 19), entry.EntryDate);
+                      Assert.Equal(500, entry.InitialQualtity);
+                      Assert.Equal(220, entry.RemainingQuantity);
+                  });
+            }
+
+            [Fact]
+            public async Task WhenNoTxnsAndIncreasingQty_UpdateSuccessfully()
+            {
+                var entryNo = "1103";
+                var entryId = Guid.Empty;
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+                      entryId = await EntityHelper.GetEntryIdAsync(dbContext, entryNo);
+
+                      var txns = await dbContext.EntryTransactions.Where(t => t.EntryId == entryId).ToListAsync();
+                      dbContext.EntryTransactions.RemoveRange(txns);
+                      await dbContext.SaveChangesAsync();
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var entrySvc = CreateService(dbContext);
+
+                      var entry = await dbContext.Entries.FindAsync(entryId);
+
+                      var entryDto = DtoHelper.CreateEntryDto("", "1103", new DateTime(2022, 9, 19), EntryStatus.Active, 250);
+                      entryDto.ConcurrencyKey = entry.ConcurrencyKey;
+
+                      var result = await entrySvc.UpdateAsync(entryId, entryDto);
+
+                      Assert.NotNull(result);
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var entry = await dbContext.Entries.Where(e => e.Id == entryId)
+                        .Include(e => e.StockTransaction)
+                        .ThenInclude(t => t.Stock)
+                        .FirstAsync();
+
+                      Assert.Equal("1103", entry.EntryNo);
+                      Assert.Equal(new DateTime(2022, 9, 19), entry.EntryDate);
+                      Assert.Equal(250, entry.InitialQualtity);
+                      Assert.Equal(250, entry.RemainingQuantity);
+
+                      Assert.Equal(250, entry.StockTransaction.Quantity);
+
+                      Assert.Equal(4950, entry.StockTransaction.Stock.RemainingQuantity);
+                  });
+            }
+
+            [Fact]
+            public async Task WhenNoTxnsAndDecreasingQty_UpdateSuccessfully()
+            {
+                var entryNo = "1103";
+                var entryId = Guid.Empty;
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+                      entryId = await EntityHelper.GetEntryIdAsync(dbContext, entryNo);
+
+                      var txns = await dbContext.EntryTransactions.Where(t => t.EntryId == entryId).ToListAsync();
+                      dbContext.EntryTransactions.RemoveRange(txns);
+                      await dbContext.SaveChangesAsync();
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var entrySvc = CreateService(dbContext);
+
+                      var entry = await dbContext.Entries.FindAsync(entryId);
+
+                      var entryDto = DtoHelper.CreateEntryDto("", "1103", new DateTime(2022, 9, 19), EntryStatus.Active, 150);
+                      entryDto.ConcurrencyKey = entry.ConcurrencyKey;
+
+                      var result = await entrySvc.UpdateAsync(entryId, entryDto);
+
+                      Assert.NotNull(result);
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var entry = await dbContext.Entries.Where(e => e.Id == entryId)
+                        .Include(e => e.StockTransaction)
+                        .ThenInclude(t => t.Stock)
+                        .FirstAsync();
+
+                      Assert.Equal("1103", entry.EntryNo);
+                      Assert.Equal(new DateTime(2022, 9, 19), entry.EntryDate);
+                      Assert.Equal(150, entry.InitialQualtity);
+                      Assert.Equal(150, entry.RemainingQuantity);
+
+                      Assert.Equal(150, entry.StockTransaction.Quantity);
+
+                      Assert.Equal(5050, entry.StockTransaction.Stock.RemainingQuantity);
+                  });
+            }
+        }
+
+        public class Delete
+        {
+            [Fact]
+            public async Task WhenHavingTransactions_ThrowsException()
+            {
+                string entryNo = "1001";
+                var entryId = Guid.Empty;
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+                      entryId = await EntityHelper.GetEntryIdAsync(dbContext, entryNo);
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var entrySvc = CreateService(dbContext);
+
+                      var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => entrySvc.DeleteAsync(entryId));
+
+                      Assert.Equal("Can't delete an entry when there are approvals and/or order releases", ex.Message);
+                  });
+            }
+
+            [Fact]
+            public async Task WhenNotHavingTransactions_DeleteSuccessfully()
+            {
+                string entryNo = "1103";
+                var entryId = Guid.Empty;
+                var customerId = Guid.Empty;
+                var productId = Guid.Empty;
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+                      entryId = await EntityHelper.GetEntryIdAsync(dbContext, entryNo);
+
+                      customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                      productId = await EntityHelper.GetProductIdAsync(dbContext, "380_LSFO");
+
+                      var txns = await dbContext.EntryTransactions.Where(t => t.EntryId == entryId).ToListAsync();
+                      dbContext.EntryTransactions.RemoveRange(txns);
+                      await dbContext.SaveChangesAsync();
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var entrySvc = CreateService(dbContext);
+
+                      await entrySvc.DeleteAsync(entryId);
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var entry = await dbContext.Entries.FindAsync(entryId);
+                      var stock = await dbContext.Stocks
+                          .Where(s => s.CustomerId == customerId && s.ProductId == productId)
+                          .Include(s => s.Transactions)
+                          .ThenInclude(t => t.Entry)
+                          .FirstAsync();
+
+                      Assert.Null(entry);
+                      Assert.Equal(5200, stock.RemainingQuantity);
+
+                      Assert.DoesNotContain(stock.Transactions, t => t.Entry?.EntryNo == "1103");
+                  });
+            }
+        }
+
         private static async Task SetupTestDataAsync(IDataContext dbContext)
         {
             await TestData.Orders.SetupOrderAndEntryTestDataAsync(dbContext);

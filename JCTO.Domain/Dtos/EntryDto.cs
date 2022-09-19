@@ -1,8 +1,9 @@
-﻿using JCTO.Domain.Enums;
+﻿using JCTO.Domain.Dtos.Base;
+using JCTO.Domain.Enums;
 
 namespace JCTO.Domain.Dtos
 {
-    public class EntryDto
+    public class EntryDto : ConcurrencyHandledDto
     {
         public string EntryNo { get; set; }
         public double InitialQuantity { get; set; }

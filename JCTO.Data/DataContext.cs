@@ -34,13 +34,9 @@ namespace JCTO.Data
             builder.Entity<Customer>().HasIndex(c => c.Name).IsUnique();
             builder.Entity<Product>().HasIndex(p => p.Code).IsUnique();
             builder.Entity<Entry>().HasIndex(e => e.EntryNo).IsUnique();
-            builder.Entity<Entry>().HasIndex(t => t.StockTransactionId).IsUnique();
             builder.Entity<EntryTransaction>().HasIndex(e => new { e.EntryId, e.ObRef }).IsUnique().HasFilter("\"Type\" = 1");
             builder.Entity<EntryTransaction>().HasIndex(t => new { t.ApprovalType, t.ApprovalRef }).IsUnique().HasFilter("\"Type\" = 0 AND \"ApprovalType\" <> 3");
             builder.Entity<Order>().HasIndex(o => new { o.OrderDate, o.OrderNo }).IsUnique();
-            builder.Entity<Stock>().HasIndex(s => new { s.CustomerId, s.ProductId }).IsUnique();
-            builder.Entity<StockTransaction>().HasIndex(t => t.ToBondNo).IsUnique();
-
 
             foreach (var property in builder.Model.GetEntityTypes()
                  .SelectMany(t => t.GetProperties())
@@ -57,8 +53,6 @@ namespace JCTO.Data
         public DbSet<EntryTransaction> EntryTransactions { get; set; }
         public DbSet<BowserEntry> BowserEntries { get; set; }
         public DbSet<Order> Orders { get; set; }
-        public DbSet<Stock> Stocks { get; set; }
-        public DbSet<StockTransaction> StockTransactions { get; set; }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {

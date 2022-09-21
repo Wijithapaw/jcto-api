@@ -27,20 +27,6 @@ namespace JCTO.Services
 
         public async Task<List<CustomerStockDto>> GetAllCustomerStocksAsync()
         {
-            var stockBalance = await _dataContext.Customers
-                .Where(c => !c.Inactive)
-                .Select(c => new CustomerStockDto
-                {
-                    CustomerId = c.Id,
-                    CustomerName = c.Name,
-                    Stocks = c.Stocks.Select(p => new ProductStockDto
-                    {
-                        ProductId = p.ProductId,
-                        RemainingStock = p.RemainingQuantity,
-                        UndeliveredStock = 0
-                    }).ToList()
-                }).ToListAsync();
-
             var entryBalance = await _dataContext.Customers
                 .Where(c => !c.Inactive)
                 .Select(c => new
@@ -72,23 +58,7 @@ namespace JCTO.Services
                     }).ToList()
                 }).ToListAsync();
 
-            foreach (var cusStockBal in stockBalance)
-            {
-                foreach (var cusProdBal in cusStockBal.Stocks)
-                {
-                    var cusProdEntryBal = entryBalance
-                        .FirstOrDefault(e => e.CustomerId == cusStockBal.CustomerId)?
-                        .Stocks.FirstOrDefault(s => s.ProductId == cusProdBal.ProductId);
-
-                    if (cusProdEntryBal != null)
-                    {
-                        cusProdBal.RemainingStock += cusProdEntryBal.RemainingStock;
-                        cusProdBal.UndeliveredStock += cusProdEntryBal.UndeliveredStock;
-                    }
-                }
-            }
-
-            return stockBalance;
+            return entryBalance;
         }
 
         public async Task<List<ListItem>> GetProductListItemsAsync()

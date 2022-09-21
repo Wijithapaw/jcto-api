@@ -31,7 +31,7 @@ namespace JCTO.Tests
                   {
                       var entrySvc = CreateService(dbContext);
 
-                      var entryDto = DtoHelper.CreateEntryDto("501", "10001", new DateTime(2022, 8, 20), EntryStatus.Active, 50.1234);
+                      var entryDto = DtoHelper.CreateEntryDto(customerId, productId, "10001", new DateTime(2022, 8, 20), EntryStatus.Active, 50.1234);
 
                       var entry = await entrySvc.CreateAsync(entryDto);
 
@@ -44,7 +44,6 @@ namespace JCTO.Tests
                       var newEntry = await dbContext.Entries
                         .Where(e => e.Id == id)
                         .Include(e => e.Transactions)
-                        .Include(e => e.StockTransaction)
                         .FirstAsync();
 
                       Assert.True(newEntry != null);
@@ -55,20 +54,6 @@ namespace JCTO.Tests
                       Assert.Equal("10001", newEntry.EntryNo);
                       Assert.Equal(new DateTime(2022, 8, 20), newEntry.EntryDate);
                       Assert.Equal(EntryStatus.Active, newEntry.Status);
-
-                      var stock = await dbContext.Stocks
-                        .Where(s => s.CustomerId == customerId && s.ProductId == productId)
-                        .Include(s => s.Transactions)
-                        .ThenInclude(t => t.Entry)
-                        .FirstAsync();
-
-                      Assert.Equal(1029.8766, stock.RemainingQuantity);
-
-                      var drTxn = stock.Transactions.First(t => t.Entry.Id == newEntry.Id);
-
-                      Assert.Equal(StockTransactionType.Out, drTxn.Type);
-                      Assert.Equal(-50.1234, drTxn.Quantity);
-                      Assert.Equal(newEntry.EntryDate, drTxn.TransactionDate);
                   });
             }
 
@@ -87,7 +72,7 @@ namespace JCTO.Tests
                       var customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
                       var productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
 
-                      var entryDto = DtoHelper.CreateEntryDto("501", "1001", new DateTime(2022, 8, 20), EntryStatus.Active, 100);
+                      var entryDto = DtoHelper.CreateEntryDto(customerId, productId, "1001", new DateTime(2022, 8, 20), EntryStatus.Active, 100);
 
                       var ex = await Assert.ThrowsAsync<DbUpdateException>(() => entrySvc.CreateAsync(entryDto));
                   });
@@ -138,8 +123,8 @@ namespace JCTO.Tests
         public class AddApproval
         {
             [Theory]
-            [InlineData(ApprovalType.Rebond, null, "2022-8-31", 100, "Approval Ref. is required for Xbond and Rebond approvals")]
-            [InlineData(ApprovalType.Rebond, "50010", "2022-8-31", 200, "Approving quantity is greater than remaining amount to approve")]
+            //[InlineData(ApprovalType.Rebond, null, "2022-8-31", 100, "Approval Ref. is required for Xbond and Rebond approvals")]
+            //[InlineData(ApprovalType.Rebond, "50010", "2022-8-31", 200, "Approving quantity is greater than remaining amount to approve")]
             [InlineData(ApprovalType.Rebond, null, "2022-8-31", 200, "Approval Ref. is required for Xbond and Rebond approvals, Approving quantity is greater than remaining amount to approve")]
             public async Task WhenNoFilters_ReturnAll(ApprovalType approvalType, string approvalRef, DateTime date, double qty, string expectedError)
             {
@@ -213,17 +198,23 @@ namespace JCTO.Tests
             public async Task WhenModifingQtyWhenHavingTransactions_ThrowsException(string entryNo)
             {
                 var entryId = Guid.Empty;
+                var customerId = Guid.Empty;
+                var productId = Guid.Empty;
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
                   {
                       await SetupTestDataAsync(dbContext);
                       entryId = await EntityHelper.GetEntryIdAsync(dbContext, entryNo);
+
                   },
                   async (IDataContext dbContext) =>
                   {
                       var entrySvc = CreateService(dbContext);
 
-                      var entryDto = DtoHelper.CreateEntryDto("", entryNo, new DateTime(2022, 9, 19), EntryStatus.Active, 2000);
+                      customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                      productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
+
+                      var entryDto = DtoHelper.CreateEntryDto(customerId, productId, entryNo, new DateTime(2022, 9, 19), EntryStatus.Active, 2000);
 
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => entrySvc.UpdateAsync(entryId, entryDto));
 
@@ -236,11 +227,15 @@ namespace JCTO.Tests
             {
                 var entryNo = "1002";
                 var entryId = Guid.Empty;
+                var customerId = Guid.Empty;
+                var productId = Guid.Empty;
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
                   {
                       await SetupTestDataAsync(dbContext);
                       entryId = await EntityHelper.GetEntryIdAsync(dbContext, entryNo);
+                      customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                      productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
                   },
                   async (IDataContext dbContext) =>
                   {
@@ -248,7 +243,7 @@ namespace JCTO.Tests
 
                       var entry = await dbContext.Entries.FindAsync(entryId);
 
-                      var entryDto = DtoHelper.CreateEntryDto("", "10021", new DateTime(2022, 9, 19), EntryStatus.Active, 500);
+                      var entryDto = DtoHelper.CreateEntryDto(customerId, productId, "10021", new DateTime(2022, 9, 19), EntryStatus.Active, 500);
                       entryDto.ConcurrencyKey = entry.ConcurrencyKey;
 
                       var result = await entrySvc.UpdateAsync(entryId, entryDto);
@@ -271,11 +266,15 @@ namespace JCTO.Tests
             {
                 var entryNo = "1103";
                 var entryId = Guid.Empty;
+                var customerId = Guid.Empty;
+                var productId = Guid.Empty;
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
                   {
                       await SetupTestDataAsync(dbContext);
                       entryId = await EntityHelper.GetEntryIdAsync(dbContext, entryNo);
+                      customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                      productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
 
                       var txns = await dbContext.EntryTransactions.Where(t => t.EntryId == entryId).ToListAsync();
                       dbContext.EntryTransactions.RemoveRange(txns);
@@ -287,7 +286,7 @@ namespace JCTO.Tests
 
                       var entry = await dbContext.Entries.FindAsync(entryId);
 
-                      var entryDto = DtoHelper.CreateEntryDto("", "1103", new DateTime(2022, 9, 19), EntryStatus.Active, 250);
+                      var entryDto = DtoHelper.CreateEntryDto(customerId, productId, "1103", new DateTime(2022, 9, 19), EntryStatus.Active, 250);
                       entryDto.ConcurrencyKey = entry.ConcurrencyKey;
 
                       var result = await entrySvc.UpdateAsync(entryId, entryDto);
@@ -297,18 +296,12 @@ namespace JCTO.Tests
                   async (IDataContext dbContext) =>
                   {
                       var entry = await dbContext.Entries.Where(e => e.Id == entryId)
-                        .Include(e => e.StockTransaction)
-                        .ThenInclude(t => t.Stock)
                         .FirstAsync();
 
                       Assert.Equal("1103", entry.EntryNo);
                       Assert.Equal(new DateTime(2022, 9, 19), entry.EntryDate);
                       Assert.Equal(250, entry.InitialQualtity);
                       Assert.Equal(250, entry.RemainingQuantity);
-
-                      Assert.Equal(250, entry.StockTransaction.Quantity);
-
-                      Assert.Equal(4950, entry.StockTransaction.Stock.RemainingQuantity);
                   });
             }
 
@@ -317,11 +310,15 @@ namespace JCTO.Tests
             {
                 var entryNo = "1103";
                 var entryId = Guid.Empty;
+                var customerId = Guid.Empty;
+                var productId = Guid.Empty;
                 await DbHelper.ExecuteTestAsync(
                   async (IDataContext dbContext) =>
                   {
                       await SetupTestDataAsync(dbContext);
                       entryId = await EntityHelper.GetEntryIdAsync(dbContext, entryNo);
+                      customerId = await EntityHelper.GetCustomerIdAsync(dbContext, "JVC");
+                      productId = await EntityHelper.GetProductIdAsync(dbContext, "GO");
 
                       var txns = await dbContext.EntryTransactions.Where(t => t.EntryId == entryId).ToListAsync();
                       dbContext.EntryTransactions.RemoveRange(txns);
@@ -333,7 +330,7 @@ namespace JCTO.Tests
 
                       var entry = await dbContext.Entries.FindAsync(entryId);
 
-                      var entryDto = DtoHelper.CreateEntryDto("", "1103", new DateTime(2022, 9, 19), EntryStatus.Active, 150);
+                      var entryDto = DtoHelper.CreateEntryDto(customerId, productId, "1103", new DateTime(2022, 9, 19), EntryStatus.Active, 150);
                       entryDto.ConcurrencyKey = entry.ConcurrencyKey;
 
                       var result = await entrySvc.UpdateAsync(entryId, entryDto);
@@ -343,18 +340,12 @@ namespace JCTO.Tests
                   async (IDataContext dbContext) =>
                   {
                       var entry = await dbContext.Entries.Where(e => e.Id == entryId)
-                        .Include(e => e.StockTransaction)
-                        .ThenInclude(t => t.Stock)
                         .FirstAsync();
 
                       Assert.Equal("1103", entry.EntryNo);
                       Assert.Equal(new DateTime(2022, 9, 19), entry.EntryDate);
                       Assert.Equal(150, entry.InitialQualtity);
                       Assert.Equal(150, entry.RemainingQuantity);
-
-                      Assert.Equal(150, entry.StockTransaction.Quantity);
-
-                      Assert.Equal(5050, entry.StockTransaction.Stock.RemainingQuantity);
                   });
             }
         }
@@ -411,16 +402,8 @@ namespace JCTO.Tests
                   async (IDataContext dbContext) =>
                   {
                       var entry = await dbContext.Entries.FindAsync(entryId);
-                      var stock = await dbContext.Stocks
-                          .Where(s => s.CustomerId == customerId && s.ProductId == productId)
-                          .Include(s => s.Transactions)
-                          .ThenInclude(t => t.Entry)
-                          .FirstAsync();
 
                       Assert.Null(entry);
-                      Assert.Equal(5200, stock.RemainingQuantity);
-
-                      Assert.DoesNotContain(stock.Transactions, t => t.Entry?.EntryNo == "1103");
                   });
             }
         }
@@ -432,8 +415,7 @@ namespace JCTO.Tests
 
         private static EntryService CreateService(IDataContext dbContext)
         {
-            var stockSvc = new StockService(dbContext);
-            var entrySvc = new EntryService(dbContext, stockSvc);
+            var entrySvc = new EntryService(dbContext);
 
             return entrySvc;
         }

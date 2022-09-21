@@ -40,7 +40,7 @@ namespace JCTO.Tests.Helpers
             };
         }
 
-        public static Entry CreateEntry(string entryNo, Guid customerId, Guid productId, double initialQuantity, double remainingQuantity, DateTime entryDate, EntryStatus entryStatus, StockTransaction stockTxn)
+        public static Entry CreateEntry(string entryNo, Guid customerId, Guid productId, double initialQuantity, double remainingQuantity, DateTime entryDate, EntryStatus entryStatus)
         {
             return new Entry
             {
@@ -51,7 +51,6 @@ namespace JCTO.Tests.Helpers
                 RemainingQuantity = remainingQuantity,
                 EntryDate = entryDate,
                 Status = entryStatus,
-                StockTransaction = stockTxn
             };
         }
 
@@ -93,32 +92,6 @@ namespace JCTO.Tests.Helpers
             };
         }
 
-        public static Stock CreateStock(Guid customerId, Guid productId, double remainingQuantity)
-        {
-            var stock = new Stock
-            {
-                CustomerId = customerId,
-                ProductId = productId,
-                RemainingQuantity = remainingQuantity,
-            };
-            return stock;
-        }
-
-        public static StockTransaction CreateStockTransaction(Guid stockId, double quantity, DateTime date,
-            StockTransactionType type, string toBondNo, StockTransaction dischargeTxn = null)
-        {
-            var txn = new StockTransaction
-            {
-                StockId = stockId,
-                Quantity = quantity,
-                TransactionDate = date,
-                Type = type,
-                ToBondNo = toBondNo,
-                DischargeTransaction = dischargeTxn
-            };
-            return txn;
-        }
-
         public static BowserEntry CreateBowserEntry(double capacity, double count)
         {
             return new BowserEntry
@@ -146,11 +119,6 @@ namespace JCTO.Tests.Helpers
         public static async Task<Guid> GetProductIdAsync(IDataContext dataContext, string code)
         {
             return (await dataContext.Products.FirstAsync(c => c.Code == code)).Id;
-        }
-
-        public static async Task<StockTransaction> GetStockTxnAsync(IDataContext dataContext, string toBondNo)
-        {
-            return await dataContext.StockTransactions.Where(t => t.ToBondNo == toBondNo).Include(t => t.Stock).FirstOrDefaultAsync();
         }
 
         public static async Task<Guid> GetGetEntryTxnIdAsync(IDataContext dataContext, string entryNo, ApprovalType approvalType, string approvalRef)

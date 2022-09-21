@@ -11,6 +11,5 @@ namespace JCTO.Domain.Entities
         public bool Inactive { get; set; }
 
         public ICollection<Entry> Entries { get; set; }
-        public ICollection<Stock> Stocks { get; set; }
     }
 }

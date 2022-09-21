@@ -3,6 +3,7 @@ using System;
 using JCTO.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JCTO.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220921114232_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -276,12 +278,6 @@ namespace JCTO.Data.Migrations
 
                     b.Property<double?>("DeliveredQuantity")
                         .HasColumnType("double precision");
-
-                    b.Property<DateTime?>("IssueEndTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime?>("IssueStartTime")
-                        .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("LastUpdatedById")
                         .HasColumnType("uuid");

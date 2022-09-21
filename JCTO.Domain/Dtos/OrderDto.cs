@@ -19,6 +19,9 @@ namespace JCTO.Domain.Dtos
         public BuyerType BuyerType { get; set; }
         public string Remarks { get; set; }
         public bool TaxPaid { get; set; }
+        public DateTime? IssueStartTime { get; set; }
+        public DateTime? IssueEndTime { get; set; }
+
         public List<OrderStockReleaseEntryDto> ReleaseEntries { get; set; } = new List<OrderStockReleaseEntryDto>();
         public List<BowserEntryDto> BowserEntries { get; set; } = new List<BowserEntryDto>();
     }

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JCTO.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220917102052_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20220921122756_InitialCreate_2")]
+    partial class InitialCreate_2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -157,9 +157,6 @@ namespace JCTO.Data.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("StockTransactionId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedById");
@@ -175,9 +172,6 @@ namespace JCTO.Data.Migrations
                     b.HasIndex("LastUpdatedById");
 
                     b.HasIndex("ProductId");
-
-                    b.HasIndex("StockTransactionId")
-                        .IsUnique();
 
                     b.ToTable("Entries");
                 });
@@ -285,6 +279,12 @@ namespace JCTO.Data.Migrations
                     b.Property<double?>("DeliveredQuantity")
                         .HasColumnType("double precision");
 
+                    b.Property<DateTime?>("IssueEndTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("IssueStartTime")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<Guid>("LastUpdatedById")
                         .HasColumnType("uuid");
 
@@ -381,106 +381,6 @@ namespace JCTO.Data.Migrations
                     b.HasIndex("LastUpdatedById");
 
                     b.ToTable("Products");
-                });
-
-            modelBuilder.Entity("JCTO.Domain.Entities.Stock", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ConcurrencyKey")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CreatedById")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedDateUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("LastUpdatedById")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("LastUpdatedDateUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid");
-
-                    b.Property<double>("RemainingQuantity")
-                        .HasColumnType("double precision");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("LastUpdatedById");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("CustomerId", "ProductId")
-                        .IsUnique();
-
-                    b.ToTable("Stocks");
-                });
-
-            modelBuilder.Entity("JCTO.Domain.Entities.StockTransaction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ConcurrencyKey")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CreatedById")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedDateUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("DischargeTransactionId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("LastUpdatedById")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("LastUpdatedDateUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<double>("Quantity")
-                        .HasColumnType("double precision");
-
-                    b.Property<Guid>("StockId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ToBondNo")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime>("TransactionDate")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("DischargeTransactionId");
-
-                    b.HasIndex("LastUpdatedById");
-
-                    b.HasIndex("StockId");
-
-                    b.HasIndex("ToBondNo")
-                        .IsUnique();
-
-                    b.ToTable("StockTransactions");
                 });
 
             modelBuilder.Entity("JCTO.Domain.Entities.User", b =>
@@ -603,12 +503,6 @@ namespace JCTO.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("JCTO.Domain.Entities.StockTransaction", "StockTransaction")
-                        .WithOne("Entry")
-                        .HasForeignKey("JCTO.Domain.Entities.Entry", "StockTransactionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("CreatedBy");
 
                     b.Navigation("Customer");
@@ -616,8 +510,6 @@ namespace JCTO.Data.Migrations
                     b.Navigation("LastUpdatedBy");
 
                     b.Navigation("Product");
-
-                    b.Navigation("StockTransaction");
                 });
 
             modelBuilder.Entity("JCTO.Domain.Entities.EntryTransaction", b =>
@@ -713,74 +605,6 @@ namespace JCTO.Data.Migrations
                     b.Navigation("LastUpdatedBy");
                 });
 
-            modelBuilder.Entity("JCTO.Domain.Entities.Stock", b =>
-                {
-                    b.HasOne("JCTO.Domain.Entities.User", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JCTO.Domain.Entities.Customer", "Customer")
-                        .WithMany("Stocks")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JCTO.Domain.Entities.User", "LastUpdatedBy")
-                        .WithMany()
-                        .HasForeignKey("LastUpdatedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JCTO.Domain.Entities.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatedBy");
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("LastUpdatedBy");
-
-                    b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("JCTO.Domain.Entities.StockTransaction", b =>
-                {
-                    b.HasOne("JCTO.Domain.Entities.User", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JCTO.Domain.Entities.StockTransaction", "DischargeTransaction")
-                        .WithMany("EntryTransactions")
-                        .HasForeignKey("DischargeTransactionId");
-
-                    b.HasOne("JCTO.Domain.Entities.User", "LastUpdatedBy")
-                        .WithMany()
-                        .HasForeignKey("LastUpdatedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JCTO.Domain.Entities.Stock", "Stock")
-                        .WithMany("Transactions")
-                        .HasForeignKey("StockId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatedBy");
-
-                    b.Navigation("DischargeTransaction");
-
-                    b.Navigation("LastUpdatedBy");
-
-                    b.Navigation("Stock");
-                });
-
             modelBuilder.Entity("JCTO.Domain.Entities.User", b =>
                 {
                     b.HasOne("JCTO.Domain.Entities.User", "CreatedBy")
@@ -803,8 +627,6 @@ namespace JCTO.Data.Migrations
             modelBuilder.Entity("JCTO.Domain.Entities.Customer", b =>
                 {
                     b.Navigation("Entries");
-
-                    b.Navigation("Stocks");
                 });
 
             modelBuilder.Entity("JCTO.Domain.Entities.Entry", b =>
@@ -822,18 +644,6 @@ namespace JCTO.Data.Migrations
                     b.Navigation("BowserEntries");
 
                     b.Navigation("Transactions");
-                });
-
-            modelBuilder.Entity("JCTO.Domain.Entities.Stock", b =>
-                {
-                    b.Navigation("Transactions");
-                });
-
-            modelBuilder.Entity("JCTO.Domain.Entities.StockTransaction", b =>
-                {
-                    b.Navigation("Entry");
-
-                    b.Navigation("EntryTransactions");
                 });
 #pragma warning restore 612, 618
         }

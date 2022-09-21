@@ -4,6 +4,7 @@ namespace JCTO.Domain.Dtos
 {
     public class EntryTransactionDto
     {
+        public Guid Id { get; set; }
         public DateTime TransactionDate { get; set; }
         public EntryTransactionType Type { get; set; }
         public ApprovalType? ApprovalType { get; set; }

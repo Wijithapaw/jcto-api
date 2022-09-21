@@ -105,6 +105,54 @@ namespace JCTO.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Entries",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CustomerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EntryNo = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Index = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"EntryIndex\"')"),
+                    InitialQualtity = table.Column<double>(type: "double precision", nullable: false),
+                    RemainingQuantity = table.Column<double>(type: "double precision", nullable: false),
+                    EntryDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    CreatedById = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedDateUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastUpdatedById = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ConcurrencyKey = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Entries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Entries_Customers_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "Customers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Entries_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Entries_Users_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Entries_Users_LastUpdatedById",
+                        column: x => x.LastUpdatedById,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Orders",
                 columns: table => new
                 {
@@ -158,49 +206,6 @@ namespace JCTO.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Stocks",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    CustomerId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ProductId = table.Column<Guid>(type: "uuid", nullable: false),
-                    RemainingQuantity = table.Column<double>(type: "double precision", nullable: false),
-                    CreatedById = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatedDateUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    LastUpdatedById = table.Column<Guid>(type: "uuid", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ConcurrencyKey = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Stocks", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Stocks_Customers_CustomerId",
-                        column: x => x.CustomerId,
-                        principalTable: "Customers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Stocks_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Stocks_Users_CreatedById",
-                        column: x => x.CreatedById,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Stocks_Users_LastUpdatedById",
-                        column: x => x.LastUpdatedById,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "BowserEntries",
                 columns: table => new
                 {
@@ -231,106 +236,6 @@ namespace JCTO.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_BowserEntries_Users_LastUpdatedById",
-                        column: x => x.LastUpdatedById,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "StockTransactions",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    StockId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<int>(type: "integer", nullable: false),
-                    ToBondNo = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    DischargeTransactionId = table.Column<Guid>(type: "uuid", nullable: true),
-                    TransactionDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    Quantity = table.Column<double>(type: "double precision", nullable: false),
-                    CreatedById = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatedDateUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    LastUpdatedById = table.Column<Guid>(type: "uuid", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ConcurrencyKey = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_StockTransactions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_StockTransactions_Stocks_StockId",
-                        column: x => x.StockId,
-                        principalTable: "Stocks",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_StockTransactions_StockTransactions_DischargeTransactionId",
-                        column: x => x.DischargeTransactionId,
-                        principalTable: "StockTransactions",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_StockTransactions_Users_CreatedById",
-                        column: x => x.CreatedById,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_StockTransactions_Users_LastUpdatedById",
-                        column: x => x.LastUpdatedById,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Entries",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    CustomerId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ProductId = table.Column<Guid>(type: "uuid", nullable: false),
-                    StockTransactionId = table.Column<Guid>(type: "uuid", nullable: false),
-                    EntryNo = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Index = table.Column<int>(type: "integer", nullable: false, defaultValueSql: "nextval('\"EntryIndex\"')"),
-                    InitialQualtity = table.Column<double>(type: "double precision", nullable: false),
-                    RemainingQuantity = table.Column<double>(type: "double precision", nullable: false),
-                    EntryDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    CreatedById = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatedDateUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    LastUpdatedById = table.Column<Guid>(type: "uuid", nullable: false),
-                    LastUpdatedDateUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ConcurrencyKey = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Entries", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Entries_Customers_CustomerId",
-                        column: x => x.CustomerId,
-                        principalTable: "Customers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Entries_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Entries_StockTransactions_StockTransactionId",
-                        column: x => x.StockTransactionId,
-                        principalTable: "StockTransactions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Entries_Users_CreatedById",
-                        column: x => x.CreatedById,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Entries_Users_LastUpdatedById",
                         column: x => x.LastUpdatedById,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -455,12 +360,6 @@ namespace JCTO.Data.Migrations
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Entries_StockTransactionId",
-                table: "Entries",
-                column: "StockTransactionId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_EntryTransactions_ApprovalTransactionId",
                 table: "EntryTransactions",
                 column: "ApprovalTransactionId");
@@ -537,53 +436,6 @@ namespace JCTO.Data.Migrations
                 column: "LastUpdatedById");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Stocks_CreatedById",
-                table: "Stocks",
-                column: "CreatedById");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Stocks_CustomerId_ProductId",
-                table: "Stocks",
-                columns: new[] { "CustomerId", "ProductId" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Stocks_LastUpdatedById",
-                table: "Stocks",
-                column: "LastUpdatedById");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Stocks_ProductId",
-                table: "Stocks",
-                column: "ProductId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StockTransactions_CreatedById",
-                table: "StockTransactions",
-                column: "CreatedById");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StockTransactions_DischargeTransactionId",
-                table: "StockTransactions",
-                column: "DischargeTransactionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StockTransactions_LastUpdatedById",
-                table: "StockTransactions",
-                column: "LastUpdatedById");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StockTransactions_StockId",
-                table: "StockTransactions",
-                column: "StockId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StockTransactions_ToBondNo",
-                table: "StockTransactions",
-                column: "ToBondNo",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Users_CreatedById",
                 table: "Users",
                 column: "CreatedById");
@@ -613,12 +465,6 @@ namespace JCTO.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Orders");
-
-            migrationBuilder.DropTable(
-                name: "StockTransactions");
-
-            migrationBuilder.DropTable(
-                name: "Stocks");
 
             migrationBuilder.DropTable(
                 name: "Customers");

@@ -97,6 +97,8 @@ namespace JCTO.Services
             order.Remarks = dto.Remarks;
             order.ConcurrencyKey = dto.ConcurrencyKey;
             order.TaxPaid = dto.TaxPaid;
+            order.IssueStartTime = dto.IssueStartTime;
+            order.IssueEndTime = dto.IssueEndTime;
 
             //Delete Current release entries and create new ones
             _dataContext.EntryTransactions.RemoveRange(order.Transactions);
@@ -164,6 +166,8 @@ namespace JCTO.Services
                     TankNo = o.TankNo,
                     Remarks = o.Remarks,
                     TaxPaid = o.TaxPaid,
+                    IssueStartTime = o.IssueStartTime,
+                    IssueEndTime = o.IssueEndTime,
                     ReleaseEntries = o.Transactions.Select(t => new OrderStockReleaseEntryDto
                     {
                         Id = t.Id,
@@ -212,7 +216,9 @@ namespace JCTO.Services
                     Quantity = o.Quantity,
                     DeliveredQuantity = o.DeliveredQuantity,
                     Status = o.Status,
-                    TaxPaid = o.TaxPaid
+                    TaxPaid = o.TaxPaid,
+                    IssueStartTime = o.IssueStartTime,
+                    IssueEndTime = o.IssueEndTime,
                 }).GetPagedListAsync(filter);
 
             return orders;

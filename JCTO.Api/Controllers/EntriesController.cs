@@ -59,6 +59,12 @@ namespace JCTO.Api.Controllers
             await _entryService.DeleteAsync(id);
         }
 
+        [HttpGet("Approval/{id}/Summary")]
+        public async Task<EntryApprovalSummaryDto> GetApprovalSummary(Guid id)
+        {
+            return await _entryService.GetApprovalSummaryAsync(id);
+        }
+
         [HttpGet("{entryNo}/balance")]
         public async Task<EntryBalanceQtyDto> GetEntryBalanceQuantities(string entryNo)
         {

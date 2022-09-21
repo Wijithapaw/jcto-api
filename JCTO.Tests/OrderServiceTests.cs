@@ -1252,8 +1252,7 @@ namespace JCTO.Tests
 
         private static OrderService CreateService(IDataContext dataContext)
         {
-            var stockSvc = new StockService(dataContext);
-            var entrySvc = new EntryService(dataContext, stockSvc);
+            var entrySvc = new EntryService(dataContext);
             var orderSvc = new OrderService(dataContext, entrySvc);
             return orderSvc;
         }

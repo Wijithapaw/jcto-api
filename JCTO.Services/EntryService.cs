@@ -12,31 +12,25 @@ namespace JCTO.Services
     public class EntryService : BaseService, IEntryService
     {
         private readonly IDataContext _dataContext;
-        private readonly IStockService _stockService;
 
-        public EntryService(IDataContext dataContext, IStockService stockService)
+        public EntryService(IDataContext dataContext)
         {
             _dataContext = dataContext;
-            _stockService = stockService;
         }
 
         public async Task<EntityCreateResult> CreateAsync(EntryDto dto)
         {
-            var stockTxn = await _stockService.DebitForEntryAsync(dto.ToBondNo, dto.InitialQuantity, dto.EntryDate);
-
             var newEntry = new Entry
             {
-                CustomerId = stockTxn.Stock.CustomerId,
-                ProductId = stockTxn.Stock.ProductId,
+                CustomerId = dto.CustomerId,
+                ProductId = dto.ProductId,
                 EntryNo = dto.EntryNo,
                 EntryDate = dto.EntryDate,
                 InitialQualtity = dto.InitialQuantity,
                 RemainingQuantity = dto.InitialQuantity,
                 Status = dto.Status,
-                StockTransaction = stockTxn,
             };
 
-            _dataContext.StockTransactions.Add(stockTxn);
             _dataContext.Entries.Add(newEntry);
 
             await _dataContext.SaveChangesAsync();
@@ -50,7 +44,6 @@ namespace JCTO.Services
                 .Where(e => e.Id == id)
                 .Select(e => new EntryDto
                 {
-                    ToBondNo = e.StockTransaction.DischargeTransaction.ToBondNo,
                     EntryNo = e.EntryNo,
                     EntryDate = e.EntryDate,
                     InitialQuantity = e.InitialQualtity,
@@ -66,11 +59,6 @@ namespace JCTO.Services
             var entry = await _dataContext.Entries
                 .Where(e => e.Id == id)
                 .Include(e => e.Transactions)
-                .Include(e => e.StockTransaction)
-                .ThenInclude(st => st.Stock)
-                .Include(e => e.StockTransaction)
-                .ThenInclude(st => st.DischargeTransaction)
-                .ThenInclude(dt => dt.EntryTransactions)
                 .FirstAsync();
 
             if (entry.Status == EntryStatus.Completed)
@@ -83,24 +71,6 @@ namespace JCTO.Services
             {
                 if (entry.Transactions.Any())
                     throw new JCTOValidationException("Can't update the quantity of an entry where there approvals and/or order releases");
-
-                if (newQty < oldQty)
-                {
-                    entry.StockTransaction.Quantity = newQty;
-                    entry.StockTransaction.Stock.RemainingQuantity += (oldQty - newQty);
-                }
-                else
-                {
-                    var addition = newQty - oldQty;
-                    var remQtyOfTobond = entry.StockTransaction.DischargeTransaction.Quantity
-                        + entry.StockTransaction.DischargeTransaction.EntryTransactions.Sum(t => t.Quantity);
-
-                    if (remQtyOfTobond < addition)
-                        throw new JCTOValidationException($"Remaining quantity: {remQtyOfTobond} of ToBond: {entry.StockTransaction.DischargeTransaction.ToBondNo}, not sufficient to make this change");
-
-                    entry.StockTransaction.Quantity = newQty;
-                    entry.StockTransaction.Stock.RemainingQuantity -= (newQty - oldQty);
-                }
 
                 entry.InitialQualtity = newQty;
                 entry.RemainingQuantity = newQty;
@@ -120,8 +90,6 @@ namespace JCTO.Services
             var entry = await _dataContext.Entries
                 .Where(e => e.Id == id)
                 .Include(e => e.Transactions)
-                .Include(e => e.StockTransaction)
-                .ThenInclude(st => st.Stock)
                 .FirstAsync();
 
             if (entry.Status == EntryStatus.Completed)
@@ -129,10 +97,6 @@ namespace JCTO.Services
 
             if (entry.Transactions.Any())
                 throw new JCTOValidationException("Can't delete an entry when there are approvals and/or order releases");
-
-            _dataContext.StockTransactions.Remove(entry.StockTransaction);
-
-            entry.StockTransaction.Stock.RemainingQuantity += entry.RemainingQuantity;
 
             _dataContext.Entries.Remove(entry);
 
@@ -154,6 +118,21 @@ namespace JCTO.Services
             newTxns.ForEach(t => t.Entry = entry);
 
             return newTxns;
+        }
+
+        public async Task<EntryApprovalSummaryDto> GetApprovalSummaryAsync(Guid id)
+        {
+            var data = await _dataContext.EntryTransactions
+                .Where(t => t.Id == id)
+                .Select(t => new EntryApprovalSummaryDto
+                {
+                    ApprovalId = t.Id,
+                    CustomerId = t.Entry.CustomerId,
+                    ProductId = t.Entry.ProductId,
+                    TobondNo = t.Entry.EntryNo
+                }).FirstOrDefaultAsync();
+
+            return data;
         }
 
         private void FillObRefs(Entry entry, List<OrderStockReleaseEntryDto> releaseEntries)
@@ -195,7 +174,6 @@ namespace JCTO.Services
                     && (filter.From == null || e.EntryDate >= filter.From)
                     && (filter.To == null || e.EntryDate <= filter.To)
                     && (filter.Active == null || filter.Active.Value && e.Status == EntryStatus.Active || !filter.Active.Value && e.Status == EntryStatus.Completed)
-                    && (filter.ToBondNo == "" || e.StockTransaction.DischargeTransaction.ToBondNo.ToLower() == filter.ToBondNo)
                     && (filter.EntryNo == "" || e.EntryNo.ToLower() == filter.EntryNo))
                 .OrderBy(o => o.EntryDate)
                 .ThenBy(o => o.EntryNo)
@@ -204,7 +182,6 @@ namespace JCTO.Services
                     Id = e.Id,
                     EntryDate = e.EntryDate,
                     EntryNo = e.EntryNo,
-                    ToBondNo = e.StockTransaction.DischargeTransaction.ToBondNo,
                     Customer = e.Customer.Name,
                     Product = e.Product.Code,
                     InitialQuantity = e.InitialQualtity,
@@ -216,6 +193,7 @@ namespace JCTO.Services
                         .ThenBy(t => t.ObRef)
                         .Select(t => new EntryTransactionDto
                         {
+                            Id = t.Id,
                             OrderNo = t.Order != null ? t.Order.OrderNo : null,
                             TransactionDate = t.TransactionDate,
                             ApprovalType = t.Type == EntryTransactionType.Approval ? t.ApprovalType : t.ApprovalTransaction.ApprovalType,

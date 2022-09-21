@@ -30,6 +30,9 @@ namespace JCTO.Domain.Entities
         [MaxLength(1000)]
         public string Remarks { get; set; }
         public bool TaxPaid { get; set; }
+        public DateTime? IssueStartTime { get; set; }
+        public DateTime? IssueEndTime { get; set; }
+
         public virtual Customer Customer { get; set; }
         public virtual Product Product { get; set; }
 

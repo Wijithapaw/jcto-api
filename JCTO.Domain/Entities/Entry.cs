@@ -1,7 +1,6 @@
 ﻿using JCTO.Domain.Entities.Base;
 using JCTO.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JCTO.Domain.Entities
 {
@@ -12,8 +11,6 @@ namespace JCTO.Domain.Entities
         [Required]
         public Guid ProductId { get; set; }
         [Required]
-        public Guid StockTransactionId { get; set; }
-        [Required]
         [MaxLength(50)]
         public string EntryNo { get; set; }
         public int Index { get; set; }
@@ -22,7 +19,6 @@ namespace JCTO.Domain.Entities
         public DateTime EntryDate { get; set; }
         public EntryStatus Status { get; set; }
 
-        public virtual StockTransaction StockTransaction { get; set; }
         public virtual Customer Customer { get; set; }
         public virtual Product Product { get; set; }
 

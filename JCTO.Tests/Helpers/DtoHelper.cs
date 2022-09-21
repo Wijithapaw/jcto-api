@@ -21,11 +21,12 @@ namespace JCTO.Tests.Helpers
             };
         }
 
-        internal static EntryDto CreateEntryDto(string toBondNo, string entryNo, DateTime entryDate, EntryStatus entryStatus, double initialQuantity)
+        internal static EntryDto CreateEntryDto(Guid customerId, Guid productId, string entryNo, DateTime entryDate, EntryStatus entryStatus, double initialQuantity)
         {
             return new EntryDto
             {
-                ToBondNo = toBondNo,
+                CustomerId = customerId,
+                ProductId = productId,
                 EntryNo = entryNo,
                 EntryDate = entryDate,
                 Status = entryStatus,

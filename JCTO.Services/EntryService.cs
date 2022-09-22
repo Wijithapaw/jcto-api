@@ -44,6 +44,8 @@ namespace JCTO.Services
                 .Where(e => e.Id == id)
                 .Select(e => new EntryDto
                 {
+                    CustomerId = e.CustomerId,
+                    ProductId = e.ProductId,
                     EntryNo = e.EntryNo,
                     EntryDate = e.EntryDate,
                     InitialQuantity = e.InitialQualtity,

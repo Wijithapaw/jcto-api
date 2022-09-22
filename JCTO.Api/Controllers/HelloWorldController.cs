@@ -22,6 +22,8 @@ namespace JCTO.Api.Controllers
         [HttpGet("{name}")]
         public string Get(string name)
         {
+            _logger.LogInformation("Hello world service invoked params: {name}", name);
+
             if (name == "1") throw new JCTOValidationException("Validation Error");
 
             if (name == "2") throw new JCTOConcurrencyException("Order");

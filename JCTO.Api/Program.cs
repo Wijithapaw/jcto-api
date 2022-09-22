@@ -105,7 +105,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: AllowedOrigins,
          policy =>
          {
-             policy.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod();
+             policy.WithOrigins(corsOrigins).AllowAnyHeader().AllowAnyMethod();
          });
 });
 
@@ -116,6 +116,8 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<DataContext>();
     await dbContext.Database.MigrateAsync();
 }
+
+app.Logger.LogInformation("JCT API has started");
 
 app.Map("/healthz", () => "ok");
 

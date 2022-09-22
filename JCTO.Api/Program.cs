@@ -117,7 +117,7 @@ using (var scope = app.Services.CreateScope())
     await dbContext.Database.MigrateAsync();
 }
 
-app.Logger.LogInformation("JCT API has started");
+app.Logger.LogInformation("JCT API has started, {@timeUtc}", DateTime.UtcNow);
 
 app.Map("/healthz", () => "ok");
 

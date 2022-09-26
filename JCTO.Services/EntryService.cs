@@ -199,7 +199,7 @@ namespace JCTO.Services
                             OrderNo = t.Order != null ? t.Order.OrderNo : null,
                             TransactionDate = t.TransactionDate,
                             ApprovalType = t.Type == EntryTransactionType.Approval ? t.ApprovalType : t.ApprovalTransaction.ApprovalType,
-                            ApprivalId = t.Type == EntryTransactionType.Out ? t.ApprovalTransactionId : null,
+                            ApprovalId = t.Type == EntryTransactionType.Out ? t.ApprovalTransactionId : null,
                             ApprovalRef = t.Type == EntryTransactionType.Approval ? t.ApprovalRef : t.ApprovalTransaction.ApprovalRef,
                             Type = t.Type,
                             OrderStatus = t.Order != null ? t.Order.Status : null,

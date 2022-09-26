@@ -254,7 +254,14 @@ namespace JCTO.Services
             if (reportData.TaxPaid)
                 reportData.Remarks = string.IsNullOrEmpty(reportData.Remarks) ? "Duty Paid" : $"{reportData.Remarks} - Duty paid";
 
-            NumericWordsConverter converter = new NumericWordsConverter();
+
+            var options = new NumericWordsConversionOptions
+            {
+                DecimalPlaces = 3,
+                DecimalSeparator = "decimal"
+            };
+
+            NumericWordsConverter converter = new NumericWordsConverter(options);
             reportData.QuantityInText = $"{converter.ToWords((decimal)reportData.Quantity)} MT of {reportData.Product} only";
 
             return await StockReleaseReport.GenerateAsync(reportData);

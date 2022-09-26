@@ -123,9 +123,9 @@ namespace JCTO.Tests
         public class AddApproval
         {
             [Theory]
-            //[InlineData(ApprovalType.Rebond, null, "2022-8-31", 100, "Approval Ref. is required for Xbond and Rebond approvals")]
-            //[InlineData(ApprovalType.Rebond, "50010", "2022-8-31", 200, "Approving quantity is greater than remaining amount to approve")]
-            [InlineData(ApprovalType.Rebond, null, "2022-8-31", 200, "Approval Ref. is required for Xbond and Rebond approvals, Approving quantity is greater than remaining amount to approve")]
+            [InlineData(ApprovalType.Rebond, null, "2022-8-31", 100, "Approval Ref. is required for Xbond and Rebond approvals")]
+            [InlineData(ApprovalType.Rebond, "50010", "2022-8-31", 200, "Approving quantity (200) is greater than remaining quantity (150) to approve")]
+            [InlineData(ApprovalType.Rebond, null, "2022-8-31", 200, "Approval Ref. is required for Xbond and Rebond approvals, Approving quantity (200) is greater than remaining quantity (150) to approve")]
             public async Task WhenNoFilters_ReturnAll(ApprovalType approvalType, string approvalRef, DateTime date, double qty, string expectedError)
             {
                 var entryId = Guid.Empty;

@@ -19,5 +19,6 @@ namespace JCTO.Domain.Services
         Task<Entry> GetEntryByEntryNoAsync(string entryNo);
         Task<List<EntryRemaningApprovalsDto>> GetEntryRemainingApprovalsAsync(string entryNo, Guid? excludeOrderId = null);
         Task<EntryApprovalSummaryDto> GetApprovalSummaryAsync(Guid id);
+        Task<EntityCreateResult> RebondToAsync(EntryRebondToDto dto);
     }
 }

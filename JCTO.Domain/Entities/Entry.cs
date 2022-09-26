@@ -1,6 +1,7 @@
 ﻿using JCTO.Domain.Entities.Base;
 using JCTO.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JCTO.Domain.Entities
 {
@@ -18,9 +19,12 @@ namespace JCTO.Domain.Entities
         public double RemainingQuantity { get; set; }
         public DateTime EntryDate { get; set; }
         public EntryStatus Status { get; set; }
+        [ForeignKey("RebondFromEntryTxn")]
+        public Guid? RebondFromEntryTxnId { get; set; }
 
         public virtual Customer Customer { get; set; }
         public virtual Product Product { get; set; }
+        public EntryTransaction RebondFromEntryTxn { get; set; }
 
         public ICollection<EntryTransaction> Transactions { get; set; }
     }

@@ -5,16 +5,12 @@
         Active = 0,
         Completed = 1
     }
+
     public enum EntryTransactionType
     {
         Approval = 0,
         Out = 1,
-    }
-
-    public enum StockTransactionType
-    {
-        In = 1,
-        Out = 2,
+        RebondTo = 2,
     }
 
     public enum OrderStatus
@@ -28,6 +24,7 @@
         Barge = 0,
         Bowser = 1,
     }
+
     public enum ApprovalType
     {
         Rebond = 1,

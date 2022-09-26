@@ -29,7 +29,7 @@ namespace JCTO.Services
         private static double SignAmount(EntryTransactionType type, double amount)
         {
             var amountAbs = Math.Abs(amount);
-            var signedAmount = (type == EntryTransactionType.Out ? -1 : 1) * amountAbs;
+            var signedAmount = (type == EntryTransactionType.Approval ? 1 : -1) * amountAbs;
             return signedAmount;
         }
     }

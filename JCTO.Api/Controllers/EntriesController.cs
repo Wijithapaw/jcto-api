@@ -76,5 +76,11 @@ namespace JCTO.Api.Controllers
         {
             return await _entryService.GetEntryRemainingApprovalsAsync(entryNo, excludeOrderId);
         }
+
+        [HttpPost("{entryId}/RebondTo")]
+        public async Task<EntityCreateResult> RebondTo(EntryRebondToDto dto)
+        {
+            return await _entryService.RebondToAsync(dto);
+        }
     }
 }

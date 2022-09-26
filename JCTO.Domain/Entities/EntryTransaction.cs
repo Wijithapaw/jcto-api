@@ -1,6 +1,7 @@
 ﻿using JCTO.Domain.Entities.Base;
 using JCTO.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JCTO.Domain.Entities
 {
@@ -24,6 +25,9 @@ namespace JCTO.Domain.Entities
         public virtual Entry Entry { get; set; }
         public virtual Order Order { get; set; }
         public virtual EntryTransaction ApprovalTransaction { get; set; }
+
+        [InverseProperty("RebondFromEntryTxn")]
+        public Entry RebondToEntry { get; set; }
 
         public ICollection<EntryTransaction> Deliveries { get; set; }
     }

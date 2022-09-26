@@ -15,5 +15,6 @@ namespace JCTO.Domain.Dtos
         public double Quantity { get; set; }
         public double? DeliveredQuantity { get; set; }
         public OrderStatus? OrderStatus { get; set; }
+        public string RebondedTo { get; set; }
     }
 }

@@ -20,6 +20,11 @@ namespace JCTO.Services
 
         public async Task<EntityCreateResult> CreateAsync(EntryDto dto)
         {
+            return await CreateAsync(dto, null);
+        }
+
+        private async Task<EntityCreateResult> CreateAsync(EntryDto dto, EntryTransaction rebondFromTxn)
+        {
             var newEntry = new Entry
             {
                 CustomerId = dto.CustomerId,
@@ -28,7 +33,8 @@ namespace JCTO.Services
                 EntryDate = dto.EntryDate,
                 InitialQualtity = dto.InitialQuantity,
                 RemainingQuantity = dto.InitialQuantity,
-                Status = dto.Status,
+                Status = EntryStatus.Active,
+                RebondFromEntryTxn = rebondFromTxn
             };
 
             _dataContext.Entries.Add(newEntry);
@@ -36,6 +42,53 @@ namespace JCTO.Services
             await _dataContext.SaveChangesAsync();
 
             return GetEntityCreateResult(newEntry);
+        }
+
+        public async Task<EntityCreateResult> RebondToAsync(EntryRebondToDto dto)
+        {
+            var entry = await _dataContext.Entries
+                .Where(e => e.Id == dto.EntryId)
+                .Include(e => e.Transactions)
+                .FirstAsync();
+
+            ValidateRebondTo(entry, dto);
+
+            var entrDto = new EntryDto
+            {
+                CustomerId = dto.CustomerId,
+                ProductId = entry.ProductId,
+                EntryDate = dto.Date,
+                EntryNo = dto.RebondNo,
+                InitialQuantity = dto.Quantity,
+            };
+
+            var debitTxn = EntryTransactionService.GetEntryTransaction(EntryTransactionType.RebondTo, Guid.Empty,
+                entry, null, dto.Date, ApprovalType.Rebond, dto.RebondNo, null, null, dto.Quantity, null);
+
+            _dataContext.EntryTransactions.Add(debitTxn);
+
+            var result = await CreateAsync(entrDto, debitTxn);
+
+            await UpdateRemainingAmountsAsync(new List<Guid> { entry.Id });
+
+            return result;
+        }
+
+        private void ValidateRebondTo(Entry entry, EntryRebondToDto rebondTo)
+        {
+            if (rebondTo.CustomerId == entry.CustomerId)
+            {
+                throw new JCTOValidationException("Can't rebond to the same customer");
+            }
+
+            var approvedQty = entry.Transactions.Where(t => t.Type == EntryTransactionType.Approval).Sum(t => t.Quantity);
+            var rebondedToQty = entry.Transactions.Where(t => t.Type == EntryTransactionType.RebondTo).Sum(t => t.Quantity) * -1;
+            var remQtyToRebond = entry.InitialQualtity - rebondedToQty - approvedQty;
+
+            if (rebondTo.Quantity > remQtyToRebond)
+            {
+                throw new JCTOValidationException($"Remaining quantity ({remQtyToRebond}) not sufficient to rebond: {rebondTo.Quantity}");
+            }
         }
 
         public async Task<EntryDto> GetAsync(Guid id)
@@ -92,6 +145,7 @@ namespace JCTO.Services
             var entry = await _dataContext.Entries
                 .Where(e => e.Id == id)
                 .Include(e => e.Transactions)
+                .Include(e => e.RebondFromEntryTxn)
                 .FirstAsync();
 
             if (entry.Status == EntryStatus.Completed)
@@ -102,7 +156,19 @@ namespace JCTO.Services
 
             _dataContext.Entries.Remove(entry);
 
+            Guid? rebondedFromEntryId = null;
+            if (entry.RebondFromEntryTxn != null)
+            {
+                _dataContext.EntryTransactions.Remove(entry.RebondFromEntryTxn);
+                rebondedFromEntryId = entry.RebondFromEntryTxn.EntryId;
+            }
+
             await _dataContext.SaveChangesAsync();
+
+            if (rebondedFromEntryId != null)
+            {
+                await UpdateRemainingAmountsAsync(new List<Guid> { rebondedFromEntryId.Value });
+            }
         }
 
         public async Task<List<EntryTransaction>> CreateOrderEntryTransactionsAsync(string entryNo, Order order, List<OrderStockReleaseEntryDto> releaseEntries)
@@ -193,19 +259,21 @@ namespace JCTO.Services
                     Transactions = e.Transactions
                         .OrderBy(t => t.TransactionDate)
                         .ThenBy(t => t.ObRef)
+                        .ThenBy(t => t.CreatedDateUtc)
                         .Select(t => new EntryTransactionDto
                         {
                             Id = t.Id,
                             OrderNo = t.Order != null ? t.Order.OrderNo : null,
                             TransactionDate = t.TransactionDate,
-                            ApprovalType = t.Type == EntryTransactionType.Approval ? t.ApprovalType : t.ApprovalTransaction.ApprovalType,
+                            ApprovalType = (t.Type == EntryTransactionType.Approval || t.Type == EntryTransactionType.RebondTo) ? t.ApprovalType : t.ApprovalTransaction.ApprovalType,
                             ApprovalId = t.Type == EntryTransactionType.Out ? t.ApprovalTransactionId : null,
-                            ApprovalRef = t.Type == EntryTransactionType.Approval ? t.ApprovalRef : t.ApprovalTransaction.ApprovalRef,
+                            ApprovalRef = (t.Type == EntryTransactionType.Approval || t.Type == EntryTransactionType.RebondTo) ? t.ApprovalRef : t.ApprovalTransaction.ApprovalRef,
                             Type = t.Type,
                             OrderStatus = t.Order != null ? t.Order.Status : null,
                             ObRef = t.ObRef,
                             Quantity = t.Quantity,
                             DeliveredQuantity = t.DeliveredQuantity,
+                            RebondedTo = t.RebondToEntry != null ? t.RebondToEntry.Customer.Name : null
                         }).ToList()
                 }).GetPagedListAsync(filter);
 
@@ -261,7 +329,7 @@ namespace JCTO.Services
             await ValidateEntryApprovalAsync(dto);
 
             var entryTxn = EntryTransactionService.GetEntryTransaction(EntryTransactionType.Approval, Guid.Empty,
-                null, null, dto.ApprovalDate, dto.Type, dto.ApprovalRef, null, string.Empty, dto.Quantity, null);
+                null, null, dto.ApprovalDate, dto.Type, dto.ApprovalRef, null, null, dto.Quantity, null);
 
             entryTxn.EntryId = dto.EntryId;
 
@@ -304,12 +372,9 @@ namespace JCTO.Services
             foreach (var entry in entries)
             {
                 var totalDeliveringQty = entry.Transactions
-                    .Where(t => t.Type == EntryTransactionType.Out)
+                    .Where(t => t.Type == EntryTransactionType.Out || t.Type == EntryTransactionType.RebondTo)
                     .Select(t => t.DeliveredQuantity ?? t.Quantity)
                     .Sum();
-
-                if (totalDeliveringQty > entry.InitialQualtity)
-                    throw new JCTOValidationException($"Cant create order. Insufficient amount remaining in Entry: {entry.EntryNo}");
 
                 entry.RemainingQuantity = entry.InitialQualtity + totalDeliveringQty; //totalDeliveringQty is minus here
 
@@ -347,12 +412,13 @@ namespace JCTO.Services
                 .Select(e => new
                 {
                     IninitalQty = e.InitialQualtity,
-                    ApprovedQty = e.Transactions.Where(t => t.Type == EntryTransactionType.Approval).Sum(t => t.Quantity)
-                }).Select(e => e.IninitalQty - e.ApprovedQty).FirstAsync();
+                    ApprovedQty = e.Transactions.Where(t => t.Type == EntryTransactionType.Approval).Sum(t => t.Quantity),
+                    RebondToQty = e.Transactions.Where(t => t.Type == EntryTransactionType.RebondTo).Sum(t => t.Quantity)
+                }).Select(e => (e.IninitalQty + e.RebondToQty) - e.ApprovedQty).FirstAsync();
 
             if (dto.Quantity > quantityToBeApproved)
             {
-                errors.Add("Approving quantity is greater than remaining amount to approve");
+                errors.Add($"Approving quantity ({dto.Quantity}) is greater than remaining quantity ({quantityToBeApproved}) to approve");
             }
 
             if (errors.Any())

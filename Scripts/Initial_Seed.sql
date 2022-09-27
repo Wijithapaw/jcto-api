@@ -22,7 +22,7 @@ values
 insert into "Products" 
 ("Id", "Code", "Inactive", "SortOrder", "CreatedById", "CreatedDateUtc", "LastUpdatedById", "LastUpdatedDateUtc", "ConcurrencyKey")
 values
-('a336b227-644b-44e8-b6f1-6b9261a3fc80', 'GO', false, 10, 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74'),
+('a336b227-644b-44e8-b6f1-6b9261a3fc80', 'MGO', false, 10, 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74'),
 ('a336b227-644b-44e8-b6f1-6b9261a3fc81', '380_LSFO', false, 20, 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74'),
 ('a336b227-644b-44e8-b6f1-6b9261a3fc82', '380_HSFO', false, 30, 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74', now(), 'a336b227-644b-44e8-b6f1-6b9261a3fb74');
 

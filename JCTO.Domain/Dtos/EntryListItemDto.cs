@@ -14,5 +14,6 @@ namespace JCTO.Domain.Dtos
         public EntryStatus Status { get; set; }
         public List<EntryTransactionDto> Transactions { get; set; }
         public int Index { get; set; }
+        public string RebondedFromCustomer { get; set; }
     }
 }

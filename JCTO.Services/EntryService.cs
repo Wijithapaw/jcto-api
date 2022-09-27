@@ -256,6 +256,7 @@ namespace JCTO.Services
                     RemainingQuantity = e.RemainingQuantity,
                     Status = e.Status,
                     Index = e.Index,
+                    RebondedFromCustomer = e.RebondFromEntryTxn != null ? e.RebondFromEntryTxn.Entry.Customer.Name : null,
                     Transactions = e.Transactions
                         .OrderBy(t => t.TransactionDate)
                         .ThenBy(t => t.ObRef)
@@ -344,7 +345,7 @@ namespace JCTO.Services
             var approvalTxn = await _dataContext.EntryTransactions
                 .Where(t => t.Id == id)
                 .Include(t => t.Deliveries)
-                .FirstAsync(t => t.ApprovalTransactionId == id);
+                .FirstAsync();
 
             if (approvalTxn.Deliveries.Any())
                 throw new JCTOValidationException("Can't delete an entry approval when there are order releases associated with it");

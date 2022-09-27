@@ -56,7 +56,7 @@ namespace JCTO.Api.Controllers
         [HttpDelete("Approval/{id}")]
         public async Task DeleteApproval(Guid id)
         {
-            await _entryService.DeleteAsync(id);
+            await _entryService.DeleteApprovalAsync(id);
         }
 
         [HttpGet("Approval/{id}/Summary")]

@@ -36,7 +36,7 @@ namespace JCTO.Services
                 Buyer = dto.Buyer,
                 Status = OrderStatus.Undelivered,
                 Quantity = dto.Quantity,
-                ObRefPrefix = dto.ObRefPrefix,
+                ObRefPrefix = dto.ObRefPrefix.Trim(),
                 TankNo = dto.TankNo,
                 BuyerType = dto.BuyerType,
                 Remarks = dto.Remarks,
@@ -91,7 +91,7 @@ namespace JCTO.Services
             order.Status = dto.Status;
             order.DeliveredQuantity = dto.Status == OrderStatus.Delivered ? dto.DeliveredQuantity : null;
             order.Quantity = dto.Quantity;
-            order.ObRefPrefix = dto.ObRefPrefix;
+            order.ObRefPrefix = dto.ObRefPrefix.Trim();
             order.TankNo = dto.TankNo;
             order.BuyerType = dto.BuyerType;
             order.Remarks = dto.Remarks;

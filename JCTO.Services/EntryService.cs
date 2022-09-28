@@ -29,7 +29,7 @@ namespace JCTO.Services
             {
                 CustomerId = dto.CustomerId,
                 ProductId = dto.ProductId,
-                EntryNo = dto.EntryNo,
+                EntryNo = dto.EntryNo.Trim(),
                 EntryDate = dto.EntryDate,
                 InitialQualtity = dto.InitialQuantity,
                 RemainingQuantity = dto.InitialQuantity,
@@ -58,7 +58,7 @@ namespace JCTO.Services
                 CustomerId = dto.CustomerId,
                 ProductId = entry.ProductId,
                 EntryDate = dto.Date,
-                EntryNo = dto.RebondNo,
+                EntryNo = dto.RebondNo.Trim(),
                 InitialQuantity = dto.Quantity,
             };
 
@@ -132,7 +132,7 @@ namespace JCTO.Services
             }
 
             entry.EntryDate = dto.EntryDate;
-            entry.EntryNo = dto.EntryNo;
+            entry.EntryNo = dto.EntryNo.Trim();
             entry.ConcurrencyKey = dto.ConcurrencyKey;
 
             await _dataContext.SaveChangesAsync();

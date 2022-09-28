@@ -49,6 +49,8 @@ namespace JCTO.Api.Middlewares
                         var pgEx = (PostgresException)ex.InnerException!;
                         if (!string.IsNullOrEmpty(pgEx.ConstraintName))
                         {
+                            logger.LogWarning(ex, "Bad data. Database level constraint faild. {constraint} {column} {errorMessage}", pgEx.ConstraintName, pgEx.ColumnName, pgEx.MessageText);
+
                             statusCode = HttpStatusCode.BadRequest;
                             errorObj.ErrorMessage = $"Duplicate {pgEx.ConstraintName.Split('_').Last()}";
                         }

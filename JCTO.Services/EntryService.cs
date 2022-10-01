@@ -284,6 +284,7 @@ namespace JCTO.Services
                         {
                             Id = t.Id,
                             OrderNo = t.Order != null ? t.Order.OrderNo : null,
+                            OrderId = t.OrderId,
                             TransactionDate = t.TransactionDate,
                             ApprovalType = (t.Type == EntryTransactionType.Approval || t.Type == EntryTransactionType.RebondTo) ? t.ApprovalType : t.ApprovalTransaction.ApprovalType,
                             ApprovalId = t.Type == EntryTransactionType.Out ? t.ApprovalTransactionId : null,

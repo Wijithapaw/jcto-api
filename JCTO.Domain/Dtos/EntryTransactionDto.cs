@@ -9,6 +9,7 @@ namespace JCTO.Domain.Dtos
         public EntryTransactionType Type { get; set; }
         public ApprovalType? ApprovalType { get; set; }
         public Guid? ApprovalId { get; set; }
+        public Guid? OrderId { get; set; }
         public string ApprovalRef { get; set; }
         public int? OrderNo { get; set; }
         public string ObRef { get; set; }

@@ -1,7 +1,6 @@
 ﻿using JCTO.Domain.Dtos;
 using JCTO.Domain.Dtos.Base;
 using JCTO.Domain.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JCTO.Api.Controllers
@@ -57,6 +56,18 @@ namespace JCTO.Api.Controllers
         public async Task DeleteApproval(Guid id)
         {
             await _entryService.DeleteApprovalAsync(id);
+        }
+
+        [HttpGet("Approval/{id}")]
+        public async Task<EntryApprovalDto> GetApproval(Guid id)
+        {
+            return await _entryService.GetApprovalAsync(id);
+        }
+
+        [HttpPut("Approval/{id}")]
+        public async Task<EntityUpdateResult> UpdateApproval(Guid id, EntryApprovalDto dto)
+        {
+            return await _entryService.UpdateApprovalAsync(id, dto);
         }
 
         [HttpGet("Approval/{id}/Summary")]

@@ -1,4 +1,5 @@
 ﻿using JCTO.Domain;
+using JCTO.Domain.ConfigSettings;
 using JCTO.Domain.CustomExceptions;
 using JCTO.Domain.Dtos;
 using JCTO.Domain.Dtos.Base;
@@ -6,16 +7,19 @@ using JCTO.Domain.Entities;
 using JCTO.Domain.Enums;
 using JCTO.Domain.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace JCTO.Services
 {
     public class EntryService : BaseService, IEntryService
     {
         private readonly IDataContext _dataContext;
+        private readonly FeatureToggles _featureToggles;
 
-        public EntryService(IDataContext dataContext)
+        public EntryService(IDataContext dataContext, IOptions<FeatureToggles> featureToggles)
         {
             _dataContext = dataContext;
+            _featureToggles = featureToggles.Value;
         }
 
         public async Task<EntityCreateResult> CreateAsync(EntryDto dto)
@@ -124,11 +128,25 @@ namespace JCTO.Services
 
             if (oldQty != newQty)
             {
-                if (entry.Transactions.Any())
-                    throw new JCTOValidationException("Can't update the quantity of an entry where there approvals and/or order releases");
+                if (_featureToggles.AllowEditingActiveEntries)
+                {
+                    var approvedQty = entry.Transactions.Where(t => t.Type == EntryTransactionType.Approval).Sum(t => t.Quantity);
+                    var rebondToQty = entry.Transactions.Where(t => t.Type == EntryTransactionType.RebondTo).Sum(t => t.Quantity) * -1;
 
-                entry.InitialQualtity = newQty;
-                entry.RemainingQuantity = newQty;
+                    if (newQty < (approvedQty + rebondToQty))
+                        throw new JCTOValidationException("Cant set the new quantity lesser than total (approved + rebond to) quantity.");
+
+                    entry.InitialQualtity = newQty;
+                    entry.RemainingQuantity += (newQty - oldQty);
+                }
+                else
+                {
+                    if (entry.Transactions.Any())
+                        throw new JCTOValidationException("Can't update the quantity of an entry where there are approvals or order releases");
+
+                    entry.InitialQualtity = newQty;
+                    entry.RemainingQuantity = newQty;
+                }
             }
 
             entry.EntryDate = dto.EntryDate;
@@ -243,8 +261,8 @@ namespace JCTO.Services
                     && (filter.To == null || e.EntryDate <= filter.To)
                     && (filter.Active == null || filter.Active.Value && e.Status == EntryStatus.Active || !filter.Active.Value && e.Status == EntryStatus.Completed)
                     && (filter.EntryNo == "" || e.EntryNo.ToLower() == filter.EntryNo))
-                .OrderBy(o => o.EntryDate)
-                .ThenBy(o => o.EntryNo)
+                .OrderByDescending(o => o.EntryDate)
+                .ThenByDescending(o => o.CreatedDateUtc)
                 .Select(e => new EntryListItemDto
                 {
                     Id = e.Id,
@@ -338,6 +356,48 @@ namespace JCTO.Services
             await _dataContext.SaveChangesAsync();
 
             return GetEntityCreateResult(entryTxn);
+        }
+
+        public async Task<EntryApprovalDto> GetApprovalAsync(Guid id)
+        {
+            var approval = await _dataContext.EntryTransactions
+                .Where(t => t.Id == id)
+                .Select(t => new EntryApprovalDto
+                {
+                    ApprovalDate = t.TransactionDate,
+                    ApprovalRef = t.ApprovalRef,
+                    ConcurrencyKey = t.ConcurrencyKey,
+                    EntryId = t.EntryId,
+                    Quantity = t.Quantity,
+                    Type = t.ApprovalType.Value
+                }).FirstOrDefaultAsync();
+
+            return approval;
+        }
+
+        public async Task<EntityUpdateResult> UpdateApprovalAsync(Guid id, EntryApprovalDto dto)
+        {
+            if (!_featureToggles.AllowEditingActiveEntries)
+                throw new JCTOValidationException("Can't modify an approval. Please delete and recreate it.");
+
+            var approval = await _dataContext.EntryTransactions
+                .Where(t => t.Id == id)
+                .Include(t => t.Deliveries)
+                .FirstOrDefaultAsync();
+
+            if (approval.Type != EntryTransactionType.Approval)
+                throw new JCTOValidationException("Not an approval.");
+
+            var issuedQty = approval.Deliveries.Sum(t => t.DeliveredQuantity ?? t.Quantity) * -1;
+
+            if (dto.Quantity < issuedQty)
+                throw new JCTOValidationException("Can't decrease the quantity of an approval lesser than to issued quantity.");
+
+            approval.Quantity = dto.Quantity;
+            approval.ConcurrencyKey = dto.ConcurrencyKey;
+            await _dataContext.SaveChangesAsync();
+
+            return GetEntityUpdateResult(approval);
         }
 
         public async Task DeleteApprovalAsync(Guid id)

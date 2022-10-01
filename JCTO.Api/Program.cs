@@ -29,6 +29,8 @@ builder.Services.AddScoped<IEntryService, EntryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IDataContext>(s => s.GetRequiredService<DataContext>());
 
+builder.Services.Configure<FeatureToggles>(builder.Configuration.GetSection("FeatureToggles"));
+
 builder.Services.AddControllers(options =>
 {
     var policy = new AuthorizationPolicyBuilder()

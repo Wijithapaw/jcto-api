@@ -1,13 +1,9 @@
-﻿using JCTO.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using JCTO.Domain.Dtos.Base;
+using JCTO.Domain.Enums;
 
 namespace JCTO.Domain.Dtos
 {
-    public class EntryApprovalDto
+    public class EntryApprovalDto : ConcurrencyHandledDto
     {
         public Guid EntryId { get; set; }
         public ApprovalType Type { get; set; }

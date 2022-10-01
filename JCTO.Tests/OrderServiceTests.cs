@@ -1,4 +1,5 @@
 ﻿using JCTO.Domain;
+using JCTO.Domain.ConfigSettings;
 using JCTO.Domain.CustomExceptions;
 using JCTO.Domain.Dtos;
 using JCTO.Domain.Entities;
@@ -6,6 +7,7 @@ using JCTO.Domain.Enums;
 using JCTO.Services;
 using JCTO.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace JCTO.Tests
 {
@@ -1252,7 +1254,8 @@ namespace JCTO.Tests
 
         private static OrderService CreateService(IDataContext dataContext)
         {
-            var entrySvc = new EntryService(dataContext);
+            var featureToggles = Options.Create(new FeatureToggles { AllowEditingActiveEntries = false });
+            var entrySvc = new EntryService(dataContext, featureToggles);
             var orderSvc = new OrderService(dataContext, entrySvc);
             return orderSvc;
         }

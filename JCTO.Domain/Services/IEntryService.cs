@@ -14,6 +14,8 @@ namespace JCTO.Domain.Services
         Task<PagedResultsDto<EntryListItemDto>> SearchEntriesAsync(EntrySearchDto filter);
         Task<EntityCreateResult> AddApprovalAsync(EntryApprovalDto dto);
         Task DeleteApprovalAsync(Guid id);
+        Task<EntryApprovalDto> GetApprovalAsync(Guid id);
+        Task<EntityUpdateResult> UpdateApprovalAsync(Guid id, EntryApprovalDto dto);
         Task<EntryBalanceQtyDto> GetEntryBalanceQuantitiesAsync(string entryNo);
         Task UpdateRemainingAmountsAsync(List<Guid> entryIds);
         Task<Entry> GetEntryByEntryNoAsync(string entryNo);

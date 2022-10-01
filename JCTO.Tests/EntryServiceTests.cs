@@ -1,10 +1,12 @@
 ﻿using JCTO.Domain;
+using JCTO.Domain.ConfigSettings;
 using JCTO.Domain.CustomExceptions;
 using JCTO.Domain.Dtos;
 using JCTO.Domain.Enums;
 using JCTO.Services;
 using JCTO.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace JCTO.Tests
 {
@@ -218,7 +220,7 @@ namespace JCTO.Tests
 
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => entrySvc.UpdateAsync(entryId, entryDto));
 
-                      Assert.Equal("Can't update the quantity of an entry where there approvals and/or order releases", ex.Message);
+                      Assert.Equal("Can't update the quantity of an entry where there are approvals or order releases", ex.Message);
                   });
             }
 
@@ -415,7 +417,9 @@ namespace JCTO.Tests
 
         private static EntryService CreateService(IDataContext dbContext)
         {
-            var entrySvc = new EntryService(dbContext);
+            var featureToggles = Options.Create(new FeatureToggles { AllowEditingActiveEntries = false });
+
+            var entrySvc = new EntryService(dbContext, featureToggles);
 
             return entrySvc;
         }

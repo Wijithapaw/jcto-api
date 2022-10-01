@@ -276,6 +276,7 @@ namespace JCTO.Services
                     Index = e.Index,
                     RebondedFromCustomer = e.RebondFromEntryTxn != null ? e.RebondFromEntryTxn.Entry.Customer.Name : null,
                     Transactions = e.Transactions
+                        .Where(t => t.Type != EntryTransactionType.Reversal)
                         .OrderBy(t => t.TransactionDate)
                         .ThenBy(t => t.ObRef)
                         .ThenBy(t => t.CreatedDateUtc)
@@ -433,7 +434,7 @@ namespace JCTO.Services
             foreach (var entry in entries)
             {
                 var totalDeliveringQty = entry.Transactions
-                    .Where(t => t.Type == EntryTransactionType.Out || t.Type == EntryTransactionType.RebondTo)
+                    .Where(t => t.Type != EntryTransactionType.Approval)
                     .Select(t => t.DeliveredQuantity ?? t.Quantity)
                     .Sum();
 

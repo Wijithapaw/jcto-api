@@ -37,6 +37,12 @@ namespace JCTO.Api.Controllers
             await _orderService.DeleteAsync(id);
         }
 
+        [HttpPut("{id}/Cancel")]
+        public async Task Cancel(Guid id)
+        {
+            await _orderService.CancelOrderAsync(id);
+        }
+
         [HttpGet("{id}")]
         public async Task<OrderDto> Get(Guid id)
         {

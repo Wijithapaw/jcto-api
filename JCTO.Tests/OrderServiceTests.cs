@@ -1127,6 +1127,52 @@ namespace JCTO.Tests
             }
         }
 
+        public class Cancel
+        {
+            [Fact]
+            public async Task WhenCancelingOrder_ReversalsCreatesSuccessfully()
+            {
+                var orderId = Guid.Empty;
+                await DbHelper.ExecuteTestAsync(
+                  async (IDataContext dbContext) =>
+                  {
+                      await SetupTestDataAsync(dbContext);
+
+                      orderId = await EntityHelper.GetOrderIdAsync(dbContext, 1502);
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var orderSvc = CreateService(dbContext);
+
+                      await orderSvc.CancelOrderAsync(orderId);
+                  },
+                  async (IDataContext dbContext) =>
+                  {
+                      var order = await dbContext.Orders.FindAsync(orderId);
+                      var entry = await dbContext.Entries
+                           .Where(e => e.EntryNo == "1002")
+                           .Include(e => e.Transactions)
+                           .FirstAsync();
+
+                      Assert.NotNull(order);
+                      Assert.Equal(OrderStatus.Cancelled, order.Status);
+
+                      Assert.Equal(320, entry.RemainingQuantity);
+
+                      //Entry Transactions
+                      Assert.Contains(entry.Transactions, t => t.OrderId == orderId && t.Type == EntryTransactionType.Reversal);
+
+                      var reversal = entry.Transactions
+                      .Where(t => t.OrderId == orderId && t.Type == EntryTransactionType.Reversal)
+                      .FirstOrDefault();
+
+                      //Entry
+                      Assert.NotNull(reversal);
+                      Assert.Equal(100, reversal.Quantity);
+                  });
+            }
+        }
+
         public class Get
         {
             [Fact]

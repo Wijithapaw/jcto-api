@@ -146,6 +146,36 @@ namespace JCTO.Services
             await _entryService.UpdateRemainingAmountsAsync(affectedEntryIds);
         }
 
+        public async Task CancelOrderAsync(Guid id)
+        {
+            var order = await _dataContext.Orders
+                .Where(o => o.Id == id)
+                .Include(o => o.Transactions)
+                .ThenInclude(t => t.Entry)
+                .FirstAsync();
+
+            if (order.Status != OrderStatus.Undelivered)
+                throw new JCTOValidationException("Only Undelivered orders are allowed to cancel");
+
+            order.Status = OrderStatus.Cancelled;
+
+            var reversals = new List<EntryTransaction>();
+            foreach (var txn in order.Transactions)
+            {
+                var reversal = EntryTransactionService.GetEntryTransaction(EntryTransactionType.Reversal, Guid.Empty, txn.Entry, order,
+                    DateTime.Now, null, null, txn.ApprovalTransactionId, null, txn.Quantity, null);
+                reversals.Add(reversal);
+            }
+
+            _dataContext.EntryTransactions.AddRange(reversals);
+
+            await _dataContext.SaveChangesAsync();
+
+            var affectedEntryIds = order.Transactions.Select(t => t.EntryId).Distinct().ToList();
+
+            await _entryService.UpdateRemainingAmountsAsync(affectedEntryIds);
+        }
+
         public async Task<OrderDto> GetOrderAsync(Guid id)
         {
             var order = await _dataContext.Orders
@@ -168,15 +198,17 @@ namespace JCTO.Services
                     TaxPaid = o.TaxPaid,
                     IssueStartTime = o.IssueStartTime,
                     IssueEndTime = o.IssueEndTime,
-                    ReleaseEntries = o.Transactions.Select(t => new OrderStockReleaseEntryDto
-                    {
-                        Id = t.Id,
-                        EntryNo = t.Entry.EntryNo,
-                        ObRef = t.ObRef,
-                        DeliveredQuantity = -1 * t.DeliveredQuantity,
-                        Quantity = -1 * t.Quantity,
-                        ApprovalId = t.ApprovalTransactionId.Value
-                    }).OrderBy(e => e.EntryNo).ToList(),
+                    ReleaseEntries = o.Transactions
+                        .Where(t => t.Type == EntryTransactionType.Out)
+                        .Select(t => new OrderStockReleaseEntryDto
+                        {
+                            Id = t.Id,
+                            EntryNo = t.Entry.EntryNo,
+                            ObRef = t.ObRef,
+                            DeliveredQuantity = -1 * t.DeliveredQuantity,
+                            Quantity = -1 * t.Quantity,
+                            ApprovalId = t.ApprovalTransactionId.Value
+                        }).OrderBy(e => e.EntryNo).ToList(),
                     BowserEntries = o.BowserEntries.Select(b => new BowserEntryDto
                     {
                         Id = b.Id,

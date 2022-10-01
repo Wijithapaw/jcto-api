@@ -11,12 +11,14 @@
         Approval = 0,
         Out = 1,
         RebondTo = 2,
+        Reversal = 3,
     }
 
     public enum OrderStatus
     {
         Undelivered = 0,
         Delivered = 1,
+        Cancelled = 2,
     }
 
     public enum BuyerType

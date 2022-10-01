@@ -29,8 +29,20 @@ namespace JCTO.Services
         private static double SignAmount(EntryTransactionType type, double amount)
         {
             var amountAbs = Math.Abs(amount);
-            var signedAmount = (type == EntryTransactionType.Approval ? 1 : -1) * amountAbs;
+            var signedAmount = amountAbs * GetSign(type);
             return signedAmount;
+        }
+
+        private static int GetSign(EntryTransactionType type)
+        {
+            switch (type)
+            {
+                case EntryTransactionType.Approval:
+                case EntryTransactionType.Reversal: return 1;
+                case EntryTransactionType.Out:
+                case EntryTransactionType.RebondTo: return -1;
+                default: throw new ApplicationException("Sign has not ben defined for EntryTransactionType");
+            }
         }
     }
 }

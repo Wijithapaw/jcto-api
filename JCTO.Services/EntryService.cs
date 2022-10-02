@@ -382,6 +382,8 @@ namespace JCTO.Services
             if (!_featureToggles.AllowEditingActiveEntries)
                 throw new JCTOValidationException("Can't modify an approval. Please delete and recreate it.");
 
+            await ValidateEntryApprovalAsync(dto, id);
+
             var approval = await _dataContext.EntryTransactions
                 .Where(t => t.Id == id)
                 .Include(t => t.Deliveries)
@@ -462,7 +464,7 @@ namespace JCTO.Services
             await _dataContext.SaveChangesAsync();
         }
 
-        private async Task ValidateEntryApprovalAsync(EntryApprovalDto dto)
+        private async Task ValidateEntryApprovalAsync(EntryApprovalDto dto, Guid? updatingId = null)
         {
             var errors = new List<string>();
             if ((dto.Type == ApprovalType.Rebond || dto.Type == ApprovalType.XBond) && string.IsNullOrWhiteSpace(dto.ApprovalRef))
@@ -475,7 +477,9 @@ namespace JCTO.Services
                 .Select(e => new
                 {
                     IninitalQty = e.InitialQualtity,
-                    ApprovedQty = e.Transactions.Where(t => t.Type == EntryTransactionType.Approval).Sum(t => t.Quantity),
+                    ApprovedQty = e.Transactions
+                        .Where(t => t.Type == EntryTransactionType.Approval && (updatingId == null || t.Id != updatingId))
+                        .Sum(t => t.Quantity),
                     RebondToQty = e.Transactions.Where(t => t.Type == EntryTransactionType.RebondTo).Sum(t => t.Quantity)
                 }).Select(e => (e.IninitalQty + e.RebondToQty) - e.ApprovedQty).FirstAsync();
 

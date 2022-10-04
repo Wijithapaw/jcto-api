@@ -276,8 +276,10 @@ namespace JCTO.Services
                     Product = o.Product.Code,
                     Buyer = o.Buyer,
                     Quantity = o.Quantity,
-                    EntryNo = string.Join(",", o.Transactions.Select(t => $"{t.Entry.EntryNo}{(!string.IsNullOrEmpty(t.ApprovalTransaction.ApprovalRef) ? "/" + t.ApprovalTransaction.ApprovalRef : "")}")),
-                    ObRef = o.ObRefPrefix + "/" + string.Join(", ", o.Transactions.Select(t => t.ObRef)),
+                    EntryNo = string.Join(",", o.Transactions
+                        .Where(t => t.Type == EntryTransactionType.Out)
+                        .Select(t => $"{t.Entry.EntryNo}{(!string.IsNullOrEmpty(t.ApprovalTransaction.ApprovalRef) ? "/" + t.ApprovalTransaction.ApprovalRef : "")}")),
+                    ObRef = o.ObRefPrefix + "/" + string.Join(", ", o.Transactions.Where(t => t.Type == EntryTransactionType.Out).Select(t => t.ObRef)),
                     TankNo = o.TankNo,
                     Remarks = o.BuyerType == BuyerType.Bowser ? string.Join(" + ", o.BowserEntries.Select(b => $"{b.Capacity}Ltrs x {b.Count.ToString("00")}")) : "",
                     TaxPaid = o.TaxPaid

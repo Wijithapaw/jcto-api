@@ -9,6 +9,7 @@ namespace JCTO.Domain.Entities
         [MaxLength(50)]
         public string Name { get; set; }
         public bool Inactive { get; set; }
+        public int SortOrder { get; set; }
 
         public ICollection<Entry> Entries { get; set; }
     }

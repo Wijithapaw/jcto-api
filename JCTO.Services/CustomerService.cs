@@ -29,6 +29,7 @@ namespace JCTO.Services
         {
             var entryBalance = await _dataContext.Customers
                 .Where(c => !c.Inactive)
+                .OrderBy(c => c.SortOrder)
                 .Select(c => new
                 {
                     CustomerId = c.Id,

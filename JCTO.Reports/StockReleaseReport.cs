@@ -1,4 +1,4 @@
-﻿using JCTO.Domain.Dtos;
+﻿using JCTO.Reports.Dtos;
 using OfficeOpenXml;
 using System.Reflection;
 
@@ -9,7 +9,7 @@ namespace JCTO.Reports
         public async static Task<byte[]> GenerateAsync(StockReleaseReportDto data)
         {
             string rootPath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-            var filePath = Path.Combine(rootPath, "ReportTemplates/StockRelease.xlsx");
+            var filePath = Path.Combine(rootPath, "ReportTemplates/Excel/StockRelease.xlsx");
 
             FileInfo existingFile = new FileInfo(filePath);
 

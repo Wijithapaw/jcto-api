@@ -1,4 +1,4 @@
-﻿namespace JCTO.Domain.Dtos
+﻿namespace JCTO.Reports.Dtos
 {
     public class StockReleaseReportDto
     {

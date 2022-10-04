@@ -4,7 +4,9 @@ using JCTO.Domain.Dtos.Base;
 using JCTO.Domain.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SelectPdf;
 using System.Reflection;
+using System.Text;
 
 namespace JCTO.Api.Controllers
 {
@@ -68,6 +70,15 @@ namespace JCTO.Api.Controllers
         {
             var orderNo = await _orderService.GetNextOrderNoAsync(date);
             return orderNo;
+        }
+
+        [HttpGet("{orderId}/PDDocuments")]
+        [AllowAnonymous]
+        public async Task<ActionResult> DownloadPDDocuments(Guid orderId)
+        {
+            var bytes = await _orderService.GeneratePDDocumentAsync(orderId);
+
+            return File(bytes, ReportContentTypes.PDF, "PDDocument.pdf");
         }
     }
 }

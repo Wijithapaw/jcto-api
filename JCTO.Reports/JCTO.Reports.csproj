@@ -7,22 +7,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="ReportTemplates\" />
+    <Content Remove="C:\Users\wijit\.nuget\packages\select.htmltopdf.netcore\22.1.0\contentFiles\any\any\Select.Html.dep" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="6.0.7" />
+    <PackageReference Include="Select.HtmlToPdf.NetCore" Version="22.1.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\JCTO.Domain\JCTO.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <None Update="ReportTemplates\Html\PDDocument.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="ReportTemplates\StockRelease.xls">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ReportTemplates\StockRelease.xlsx">
+    <None Update="ReportTemplates\Excel\StockRelease.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

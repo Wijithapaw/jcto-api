@@ -6,6 +6,7 @@ using JCTO.Domain.Entities;
 using JCTO.Domain.Enums;
 using JCTO.Domain.Services;
 using JCTO.Reports;
+using JCTO.Reports.Dtos;
 using Microsoft.EntityFrameworkCore;
 using NumericWordsConversion;
 
@@ -276,8 +277,10 @@ namespace JCTO.Services
                     Product = o.Product.Code,
                     Buyer = o.Buyer,
                     Quantity = o.Quantity,
-                    EntryNo = string.Join(",", o.Transactions.Select(t => $"{t.Entry.EntryNo}{(!string.IsNullOrEmpty(t.ApprovalTransaction.ApprovalRef) ? "/" + t.ApprovalTransaction.ApprovalRef : "")}")),
-                    ObRef = o.ObRefPrefix + "/" + string.Join(", ", o.Transactions.Select(t => t.ObRef)),
+                    EntryNo = string.Join(",", o.Transactions
+                        .Where(t => t.Type == EntryTransactionType.Out)
+                        .Select(t => $"{t.Entry.EntryNo}{(!string.IsNullOrEmpty(t.ApprovalTransaction.ApprovalRef) ? "/" + t.ApprovalTransaction.ApprovalRef : "")}")),
+                    ObRef = o.ObRefPrefix + "/" + string.Join(", ", o.Transactions.Where(t => t.Type == EntryTransactionType.Out).Select(t => t.ObRef)),
                     TankNo = o.TankNo,
                     Remarks = o.BuyerType == BuyerType.Bowser ? string.Join(" + ", o.BowserEntries.Select(b => $"{b.Capacity}Ltrs x {b.Count.ToString("00")}")) : "",
                     TaxPaid = o.TaxPaid
@@ -297,6 +300,11 @@ namespace JCTO.Services
             reportData.QuantityInText = $"{converter.ToWords((decimal)reportData.Quantity)} MT of {reportData.Product} only";
 
             return await StockReleaseReport.GenerateAsync(reportData);
+        }
+
+        public async Task<byte[]> GeneratePDDocumentAsync(Guid orderId)
+        {
+            return await PDDocument.GenerateAsync(new PDDocumentDto { });
         }
 
         private void ValidateOrder(OrderDto order)

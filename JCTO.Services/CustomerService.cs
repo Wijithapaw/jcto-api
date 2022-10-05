@@ -57,7 +57,7 @@ namespace JCTO.Services
                         RemainingStock = s.RemainingStocks.Sum(),
                         UndeliveredStock = s.UndeliveredStocks.Sum()
                     }).ToList()
-                }).ToListAsync();
+                }).AsSplitQuery().ToListAsync();
 
             return entryBalance;
         }

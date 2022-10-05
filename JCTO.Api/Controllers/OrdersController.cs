@@ -63,6 +63,14 @@ namespace JCTO.Api.Controllers
             return File(bytes, ReportContentTypes.XLSX, "StockRelease.xlsx");
         }
 
+        [HttpGet("Report")]
+        public async Task<ActionResult> DownloadOrderReport([FromQuery] OrderSearchDto filter)
+        {
+            var bytes = await _orderService.GenerateOrdersReportAsync(filter);
+
+            return File(bytes, ReportContentTypes.XLSX, "OrderReport.xlsx");
+        }
+
         [HttpGet("NextOrderNo")]
         public async Task<int> GetNextOrderNo([FromQuery] DateTime date)
         {

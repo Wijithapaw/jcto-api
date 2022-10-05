@@ -1,4 +1,4 @@
-﻿using JCTO.Domain.Dtos;
+﻿using JCTO.Reports.Dtos;
 using OfficeOpenXml;
 using System.Reflection;
 

@@ -19,7 +19,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog((ctx, lc) => lc.ReadFrom.Configuration(ctx.Configuration));
 
 builder.Services.AddDbContext<DataContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")
+                , o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)));
 
 // Add services to the container.
 builder.Services.AddScoped<IUserContext, UserContext>();

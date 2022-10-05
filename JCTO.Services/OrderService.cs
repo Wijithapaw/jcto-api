@@ -1,4 +1,5 @@
 ﻿using JCTO.Domain;
+using JCTO.Domain.Constants;
 using JCTO.Domain.CustomExceptions;
 using JCTO.Domain.Dtos;
 using JCTO.Domain.Dtos.Base;
@@ -6,6 +7,7 @@ using JCTO.Domain.Entities;
 using JCTO.Domain.Enums;
 using JCTO.Domain.Services;
 using JCTO.Reports;
+using JCTO.Reports.Dtos;
 using Microsoft.EntityFrameworkCore;
 using NumericWordsConversion;
 
@@ -301,6 +303,61 @@ namespace JCTO.Services
             return await StockReleaseReport.GenerateAsync(reportData);
         }
 
+        public async Task<byte[]> GenerateOrdersReportAsync(OrderSearchDto filter)
+        {
+            filter.PageSize = 10000;
+            var orders = await SearchOrdersAsync(filter);
+
+            if (orders.Total > filter.PageSize)
+                throw new JCTOValidationException($"There are more than {filter.PageSize}. Order report can only handle maximum of {filter.PageSize} records. Please adjust your filter and gerenate the report again.");
+
+            var productName = "*";
+            var customerName = "*";
+
+            if (filter.ProductId != null)
+            {
+                var product = await _dataContext.Products.FindAsync(filter.ProductId);
+                productName = product.Code;
+            }
+
+            if (filter.CustomerId != null)
+            {
+                var customer = await _dataContext.Customers.FindAsync(filter.CustomerId);
+                customerName = customer.Name;
+            }
+
+            var reportData = new OrderReportDto
+            {
+                Filter = new ReportFilter
+                {
+                    Product = productName,
+                    Customer = customerName,
+                    BuyerName = filter.Buyer,
+                    BuyerType = filter.BuyerType?.ToString("g") ?? "*",
+                    DateRange = $"{filter.From?.ToString(DateFormats.SHORT_DATE) ?? "*"} - {filter.To?.ToString(DateFormats.SHORT_DATE) ?? "*"}",
+                    Status = filter.Status?.ToString("g") ?? "*",
+                    TotalQuantity = orders.Items.Where(o => o.Status != OrderStatus.Cancelled).Sum(o => o.DeliveredQuantity ?? o.Quantity),
+                    TotalUndeliveredQuantity = orders.Items.Where(o => o.Status == OrderStatus.Undelivered).Sum(o => o.Quantity),
+                    TotalCancelledQuantity = orders.Items.Where(o => o.Status == OrderStatus.Cancelled).Sum(o => o.Quantity)
+                },
+                Orders = orders.Items.Select(o => new OrderDetails
+                {
+                    OrderDate = o.OrderDate.ToString(DateFormats.SHORT_DATE),
+                    OrderNo = o.OrderNo,
+                    Quantity = o.DeliveredQuantity ?? o.Quantity,
+                    BuyerType = o.BuyerType.ToString("g"),
+                    BuyerName = o.Buyer,
+                    Customer = o.Customer,
+                    Product = o.Product,
+                    Status = o.Status.ToString("g"),
+                    IssueCommencedTime = o.IssueStartTime?.ToString(DateFormats.DATE_AND_TIME),
+                    IssueCompletedTime = o.IssueEndTime?.ToString(DateFormats.DATE_AND_TIME),
+                }).ToList()
+            };
+
+            return await OrderReport.GenerateAsync(reportData);
+        }
+
         private void ValidateOrder(OrderDto order)
         {
             var errors = new List<string>();
@@ -390,11 +447,6 @@ namespace JCTO.Services
                     e.EntryNo,
                     e.CustomerId,
                     e.ProductId,
-                    RemainingQuantity = e.RemainingQuantity +
-                        (update ? e.Transactions
-                                      .Where(t => t.OrderId == order.Id)
-                                      .Select(e => e.DeliveredQuantity ?? e.Quantity)
-                                      .Sum() * -1 : 0),
                     e.InitialQualtity,
                     e.Status,
                     RemApprovedQtys = e.Transactions
@@ -404,9 +456,9 @@ namespace JCTO.Services
                             Id = t.Id,
                             ApprovalType = t.ApprovalType.Value,
                             t.ApprovalRef,
-                            RemainingQty = t.Quantity + t.Deliveries
+                            RemainingQty = t.Quantity + Math.Round(t.Deliveries
                                                         .Where(d => !update || d.OrderId != order.Id)
-                                                        .Sum(d => d.Order.Status == OrderStatus.Delivered ? d.DeliveredQuantity.Value : d.Quantity)
+                                                        .Sum(d => d.Order.Status == OrderStatus.Delivered ? d.DeliveredQuantity.Value : d.Quantity), 3)
                         }).ToList(),
                 })
                 .ToListAsync();

@@ -20,14 +20,14 @@ namespace JCTO.Reports
                 sheet.Cells["B3"].Value = data.Filter.Product;
                 sheet.Cells["B4"].Value = data.Filter.BuyerType;
                 sheet.Cells["B5"].Value = data.Filter.DateRange;
-                sheet.Cells["B6"].Value = data.Filter.TotalQuantity;
-                sheet.Cells["G3"].Value = data.Filter.Customer;
-                sheet.Cells["G4"].Value = data.Filter.BuyerName;
-                sheet.Cells["G6"].Value = data.Filter.TotalUndeliveredQuantity;
-                sheet.Cells["J5"].Value = data.Filter.Status;
-                sheet.Cells["J6"].Value = data.Filter.TotalCancelledQuantity;
+                sheet.Cells["F3"].Value = data.Filter.Customer;
+                sheet.Cells["F4"].Value = data.Filter.BuyerName;
+                sheet.Cells["F5"].Value = data.Filter.Status;
+                sheet.Cells["J3"].Value = data.Filter.TotalQuantity;
+                sheet.Cells["J4"].Value = data.Filter.TotalUndeliveredQuantity;
+                sheet.Cells["J5"].Value = data.Filter.TotalCancelledQuantity;
 
-                var row = 10;
+                var row = 9;
                 foreach (var order in data.Orders)
                 {
                     sheet.Cells[row, 1].Value = order.OrderDate;

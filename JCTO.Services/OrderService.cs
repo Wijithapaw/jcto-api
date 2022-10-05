@@ -305,6 +305,8 @@ namespace JCTO.Services
 
         public async Task<byte[]> GenerateOrdersReportAsync(OrderSearchDto filter)
         {
+            var buyerName = string.IsNullOrEmpty(filter.Buyer) ? "*" : filter.Buyer;
+
             filter.PageSize = 10000;
             var orders = await SearchOrdersAsync(filter);
 
@@ -332,7 +334,7 @@ namespace JCTO.Services
                 {
                     Product = productName,
                     Customer = customerName,
-                    BuyerName = filter.Buyer,
+                    BuyerName = buyerName,
                     BuyerType = filter.BuyerType?.ToString("g") ?? "*",
                     DateRange = $"{filter.From?.ToString(DateFormats.SHORT_DATE) ?? "*"} - {filter.To?.ToString(DateFormats.SHORT_DATE) ?? "*"}",
                     Status = filter.Status?.ToString("g") ?? "*",

@@ -217,7 +217,11 @@ namespace JCTO.Services
                         Capacity = b.Capacity,
                         Count = b.Count
                     }).OrderByDescending(b => b.Capacity).ToList(),
-                    ConcurrencyKey = o.ConcurrencyKey
+                    ConcurrencyKey = o.ConcurrencyKey,
+                    CreatedBy = $"{o.CreatedBy.FirstName} {o.CreatedBy.LastName}",
+                    LastUpdatedBy = $"{o.LastUpdatedBy.FirstName} {o.LastUpdatedBy.LastName}",
+                    CreatedDateUtc = o.CreatedDateUtc,
+                    LastUpdatedDateUtc = o.LastUpdatedDateUtc,
                 }).FirstOrDefaultAsync();
 
             return order;

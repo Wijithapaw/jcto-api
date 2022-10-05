@@ -107,7 +107,11 @@ namespace JCTO.Services
                     EntryDate = e.EntryDate,
                     InitialQuantity = e.InitialQualtity,
                     Status = e.Status,
-                    ConcurrencyKey = e.ConcurrencyKey
+                    ConcurrencyKey = e.ConcurrencyKey,
+                    CreatedBy = $"{e.CreatedBy.FirstName} {e.CreatedBy.LastName}",
+                    LastUpdatedBy = $"{e.LastUpdatedBy.FirstName} {e.LastUpdatedBy.LastName}",
+                    CreatedDateUtc = e.CreatedDateUtc,
+                    LastUpdatedDateUtc = e.LastUpdatedDateUtc,
                 }).FirstOrDefaultAsync();
 
             return entry;

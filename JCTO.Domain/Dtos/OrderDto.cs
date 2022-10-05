@@ -3,7 +3,7 @@ using JCTO.Domain.Enums;
 
 namespace JCTO.Domain.Dtos
 {
-    public class OrderDto : ConcurrencyHandledDto
+    public class OrderDto : AuditedEntityDto
     {
         public Guid Id { get; set; }
         public Guid CustomerId { get; set; }

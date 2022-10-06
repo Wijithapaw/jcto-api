@@ -13,6 +13,7 @@ namespace JCTO.Domain.Services
         Task<OrderDto> GetOrderAsync(Guid id);
         Task<byte[]> GenerateStockReleaseAsync(Guid orderId);
         Task<byte[]> GenerateOrdersReportAsync(OrderSearchDto filter);
+        Task<byte[]> GeneratePDDocumentAsync(Guid orderId);
         Task<int> GetNextOrderNoAsync(DateTime date);
     }
 }

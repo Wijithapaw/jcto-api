@@ -364,6 +364,29 @@ namespace JCTO.Services
             return await OrderReport.GenerateAsync(reportData);
         }
 
+        public async Task<byte[]> GeneratePDDocumentAsync(Guid orderId)
+        {
+            var reportData = await _dataContext.Orders
+                .Where(o => o.Id == orderId)
+                .Select(o => new PDDocumentDto
+                {
+                    Customer = o.Customer.Name,
+                    Product = o.Product.Code,
+                    Buyer = o.Buyer,
+                    EntryNo = string.Join(",", o.Transactions
+                        .Where(t => t.Type == EntryTransactionType.Out)
+                        .Select(t => $"{t.Entry.EntryNo}{(!string.IsNullOrEmpty(t.ApprovalTransaction.ApprovalRef) ? "/" + t.ApprovalTransaction.ApprovalRef : "")}")),
+                    ObRef = o.ObRefPrefix + "/" + string.Join(", ", o.Transactions.Where(t => t.Type == EntryTransactionType.Out).Select(t => t.ObRef)),
+                    BowserList = o.BowserEntries.Select(b => new PDBowserDetails
+                    {
+                        Capacity = b.Capacity,
+                        Count = b.Count
+                    }).ToList()
+                }).SingleOrDefaultAsync();
+
+            return await PDDocument.GenerateAsync(reportData);
+        }
+
         private void ValidateOrder(OrderDto order)
         {
             var errors = new List<string>();

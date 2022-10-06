@@ -7,11 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="ReportTemplates\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="EPPlus" Version="6.0.7" />
+    <PackageReference Include="NumericWordsConversion" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,6 +18,9 @@
   <ItemGroup>
     <None Update="ReportTemplates\OrdersReport.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ReportTemplates\PDDocument.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="ReportTemplates\StockRelease.xls">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -63,6 +63,14 @@ namespace JCTO.Api.Controllers
             return File(bytes, ReportContentTypes.XLSX, "StockRelease.xlsx");
         }
 
+        [HttpGet("{orderId}/PDDocument")]
+        public async Task<ActionResult> DownloadPDDocument(Guid orderId)
+        {
+            var bytes = await _orderService.GeneratePDDocumentAsync(orderId);
+
+            return File(bytes, ReportContentTypes.XLSX, "PDDocument.xlsx");
+        }
+
         [HttpGet("Report")]
         public async Task<ActionResult> DownloadOrderReport([FromQuery] OrderSearchDto filter)
         {

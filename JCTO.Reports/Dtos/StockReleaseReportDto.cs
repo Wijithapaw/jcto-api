@@ -4,7 +4,7 @@
     {
         public string Customer { get; set; }
         public string Product { get; set; }
-        public double Quantity { get; set; }
+        public decimal Quantity { get; set; }
         public string OrderDate { get; set; }
         public int OrderNo { get; set; }
         public string TankNo { get; set; }

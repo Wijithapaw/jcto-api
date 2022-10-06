@@ -21,7 +21,7 @@ namespace JCTO.Tests.Helpers
             };
         }
 
-        internal static EntryDto CreateEntryDto(Guid customerId, Guid productId, string entryNo, DateTime entryDate, EntryStatus entryStatus, double initialQuantity)
+        internal static EntryDto CreateEntryDto(Guid customerId, Guid productId, string entryNo, DateTime entryDate, EntryStatus entryStatus, decimal initialQuantity)
         {
             return new EntryDto
             {
@@ -35,7 +35,7 @@ namespace JCTO.Tests.Helpers
         }
 
         internal static OrderDto CreateOrderDto(Guid id, Guid customerId, Guid productId, int orderNo, DateTime orderDate,
-            double quantity, double? deliveredQuantity, string buyer, OrderStatus status, string obPrefix, string tankNo, BuyerType buyerType,
+            decimal quantity, decimal? deliveredQuantity, string buyer, OrderStatus status, string obPrefix, string tankNo, BuyerType buyerType,
             string remarks, List<OrderStockReleaseEntryDto> releaseEntries, List<BowserEntryDto> bowserEntries, Guid concurrencyKey)
         {
             return new OrderDto
@@ -60,7 +60,7 @@ namespace JCTO.Tests.Helpers
         }
 
         internal static EntryApprovalDto CreateEntryApprovalDto(Guid entryId, ApprovalType approvalType,
-            string approvalRef, DateTime date, double qty)
+            string approvalRef, DateTime date, decimal qty)
         {
             return new EntryApprovalDto
             {

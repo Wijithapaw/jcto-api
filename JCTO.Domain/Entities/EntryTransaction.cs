@@ -17,8 +17,8 @@ namespace JCTO.Domain.Entities
         public DateTime TransactionDate { get; set; }
         [MaxLength(50)]
         public string ObRef { get; set; }
-        public double Quantity { get; set; }
-        public double? DeliveredQuantity { get; set; }
+        public decimal Quantity { get; set; }
+        public decimal? DeliveredQuantity { get; set; }
         public Guid? OrderId { get; set; }
         public Guid? ApprovalTransactionId { get; set; }
 

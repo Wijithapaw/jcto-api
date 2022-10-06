@@ -56,10 +56,10 @@ namespace JCTO.Tests.Helpers
         {
             internal static async Task<List<Entry>> GetEntriesAsync(IDataContext dbContext, Guid customerId1, Guid productId1, Guid customerId2, Guid productId2, Guid orderId1, Guid orderId2, Guid orderId3)
             {
-                var e1 = EntityHelper.CreateEntry("1001", customerId1, productId1, 1000.250, 1000.250, new DateTime(2022, 8, 20), EntryStatus.Active);
+                var e1 = EntityHelper.CreateEntry("1001", customerId1, productId1, 1000.250m, 1000.250m, new DateTime(2022, 8, 20), EntryStatus.Active);
                 var e1Txns = new List<EntryTransaction>
                 {
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Approval, new DateTime(2022, 8, 21), string.Empty, 1000.250, null, ApprovalType.Rebond, "50000"),
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Approval, new DateTime(2022, 8, 21), string.Empty, 1000.250m, null, ApprovalType.Rebond, "50000"),
                 };
                 e1.Transactions = e1Txns;
 
@@ -68,7 +68,7 @@ namespace JCTO.Tests.Helpers
                 var e2Txns = new List<EntryTransaction>
                 {
                     e2Approval1,
-                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, new DateTime(2022, 8, 27), "ref-10", -189.500, -180, ApprovalType.XBond, null, e2Approval1, orderId1),
+                    EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, new DateTime(2022, 8, 27), "ref-10", -189.500m, -180, ApprovalType.XBond, null, e2Approval1, orderId1),
                     EntityHelper.CreateEntryTransaction(EntryTransactionType.Out, new DateTime(2022, 8, 28), "ref-11", -100, null, ApprovalType.XBond, null, e2Approval1, orderId2)
                 };
                 e2.Transactions = e2Txns;
@@ -118,7 +118,7 @@ namespace JCTO.Tests.Helpers
             {
                 var orders = new List<Order>()
                 {
-                    EntityHelper.CreateOrder(customerId1, productId2, new DateTime(2022, 8, 27), 1501, "Exex", BuyerType.Bowser, "110", "OB/2022", OrderStatus.Delivered, 199.5, 190, "Test 123", new List<BowserEntry> {EntityHelper.CreateBowserEntry(13600, 2)}),
+                    EntityHelper.CreateOrder(customerId1, productId2, new DateTime(2022, 8, 27), 1501, "Exex", BuyerType.Bowser, "110", "OB/2022", OrderStatus.Delivered, 199.5m, 190, "Test 123", new List<BowserEntry> {EntityHelper.CreateBowserEntry(13600, 2)}),
                     EntityHelper.CreateOrder(customerId1, productId2, new DateTime(2022, 8, 28), 1502, "Samagi", BuyerType.Barge, "110", "OB/2022", OrderStatus.Undelivered, 100, null, "Test", new List<BowserEntry>()),
                     EntityHelper.CreateOrder(customerId2, productId2, new DateTime(2022, 8, 29), 1503, "Ins", BuyerType.Barge, "120", "OB/2022", OrderStatus.Undelivered, 500, null, "Test", new List<BowserEntry>())
                 };

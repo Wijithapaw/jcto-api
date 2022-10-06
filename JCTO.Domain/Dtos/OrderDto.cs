@@ -12,8 +12,8 @@ namespace JCTO.Domain.Dtos
         public int OrderNo { get; set; }
         public string Buyer { get; set; }
         public OrderStatus Status { get; set; }
-        public double Quantity { get; set; }
-        public double? DeliveredQuantity { get; set; }
+        public decimal Quantity { get; set; }
+        public decimal? DeliveredQuantity { get; set; }
         public string ObRefPrefix { get; set; }
         public string TankNo { get; set; }
         public BuyerType BuyerType { get; set; }
@@ -31,15 +31,15 @@ namespace JCTO.Domain.Dtos
         public Guid Id { get; set; }
         public string EntryNo { get; set; }
         public string ObRef { get; set; }
-        public double Quantity { get; set; }
-        public double? DeliveredQuantity { get; set; }
+        public decimal Quantity { get; set; }
+        public decimal? DeliveredQuantity { get; set; }
         public Guid ApprovalId { get; set; }
     }
 
     public class BowserEntryDto
     {
         public Guid Id { get; set; }
-        public double Capacity { get; set; }
-        public double Count { get; set; }
+        public int Capacity { get; set; }
+        public int Count { get; set; }
     }
 }

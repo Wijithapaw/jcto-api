@@ -40,7 +40,7 @@ namespace JCTO.Tests.Helpers
             };
         }
 
-        public static Entry CreateEntry(string entryNo, Guid customerId, Guid productId, double initialQuantity, double remainingQuantity, DateTime entryDate, EntryStatus entryStatus)
+        public static Entry CreateEntry(string entryNo, Guid customerId, Guid productId, decimal initialQuantity, decimal remainingQuantity, DateTime entryDate, EntryStatus entryStatus)
         {
             return new Entry
             {
@@ -55,7 +55,7 @@ namespace JCTO.Tests.Helpers
         }
 
         public static EntryTransaction CreateEntryTransaction(EntryTransactionType type, DateTime txnDate, string obRef,
-            double quantity, double? deliveredQuantity, ApprovalType approvalType, string approvalRef = null, EntryTransaction approvalTxn = null, Guid? orderId = null)
+            decimal quantity, decimal? deliveredQuantity, ApprovalType approvalType, string approvalRef = null, EntryTransaction approvalTxn = null, Guid? orderId = null)
         {
             return new EntryTransaction
             {
@@ -72,7 +72,7 @@ namespace JCTO.Tests.Helpers
         }
 
         public static Order CreateOrder(Guid customerId, Guid productId, DateTime orderDate, int orderNo,
-            string buyer, BuyerType buyerType, string tankNo, string obPrefix, OrderStatus status, double quantity, double? deliveredQty,
+            string buyer, BuyerType buyerType, string tankNo, string obPrefix, OrderStatus status, decimal quantity, decimal? deliveredQty,
             string remarks, List<BowserEntry> bowserEntries)
         {
             return new Order
@@ -92,7 +92,7 @@ namespace JCTO.Tests.Helpers
             };
         }
 
-        public static BowserEntry CreateBowserEntry(double capacity, double count)
+        public static BowserEntry CreateBowserEntry(int capacity, int count)
         {
             return new BowserEntry
             {

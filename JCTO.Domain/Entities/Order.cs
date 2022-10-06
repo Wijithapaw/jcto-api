@@ -18,8 +18,8 @@ namespace JCTO.Domain.Entities
         [MaxLength(200)]
         public string Buyer { get; set; }
         public OrderStatus Status { get; set; }
-        public double Quantity { get; set; }
-        public double? DeliveredQuantity { get; set; }
+        public decimal Quantity { get; set; }
+        public decimal? DeliveredQuantity { get; set; }
         [Required]
         [MaxLength(50)]
         public string ObRefPrefix { get; set; }
@@ -43,8 +43,8 @@ namespace JCTO.Domain.Entities
     public class BowserEntry : BaseEntity
     {
         public Guid OrderId { get; set; }
-        public double Capacity { get; set; }
-        public double Count { get; set; }
+        public int Capacity { get; set; }
+        public int Count { get; set; }
 
         public virtual Order Order { get; set; }
     }

@@ -6,7 +6,7 @@ namespace JCTO.Services
     public static class EntryTransactionService
     {
         public static EntryTransaction GetEntryTransaction(EntryTransactionType type, Guid id, Entry entry, Order order, DateTime transactionDate,
-            ApprovalType? approvalType, string approvalRef, Guid? approvalId, string obRef, double quantity, double? deliveredQuantity)
+            ApprovalType? approvalType, string approvalRef, Guid? approvalId, string obRef, decimal quantity, decimal? deliveredQuantity)
         {
             var txn = new EntryTransaction
             {
@@ -26,7 +26,7 @@ namespace JCTO.Services
             return txn;
         }
 
-        private static double SignAmount(EntryTransactionType type, double amount)
+        private static decimal SignAmount(EntryTransactionType type, decimal amount)
         {
             var amountAbs = Math.Abs(amount);
             var signedAmount = amountAbs * GetSign(type);

@@ -4,10 +4,10 @@
     {
         public Guid Id { get; set; }
         public string EntryNo { get; set; }
-        public double RemainingQty { get; set; }
-        public double InitialQty { get; set; }
-        public double Rebond { get; set; }
-        public double Xbond { get; set; }
-        public double Letter { get; set; }
+        public decimal RemainingQty { get; set; }
+        public decimal InitialQty { get; set; }
+        public decimal Rebond { get; set; }
+        public decimal Xbond { get; set; }
+        public decimal Letter { get; set; }
     }
 }

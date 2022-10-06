@@ -10,7 +10,7 @@
     public class ProductStockDto
     {
         public Guid ProductId { get; set; }
-        public double RemainingStock { get; set; }
-        public double UndeliveredStock { get; set; }
+        public decimal RemainingStock { get; set; }
+        public decimal UndeliveredStock { get; set; }
     }
 }

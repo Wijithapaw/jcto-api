@@ -462,9 +462,9 @@ namespace JCTO.Services
                             Id = t.Id,
                             ApprovalType = t.ApprovalType.Value,
                             t.ApprovalRef,
-                            RemainingQty = t.Quantity + Math.Round(t.Deliveries
+                            RemainingQty = t.Quantity + t.Deliveries
                                                         .Where(d => !update || d.OrderId != order.Id)
-                                                        .Sum(d => d.Order.Status == OrderStatus.Delivered ? d.DeliveredQuantity.Value : d.Quantity), 3)
+                                                        .Sum(d => d.Order.Status == OrderStatus.Delivered ? d.DeliveredQuantity.Value : d.Quantity)
                         }).ToList(),
                 })
                 .ToListAsync();

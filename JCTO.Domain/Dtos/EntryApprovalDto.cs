@@ -8,7 +8,7 @@ namespace JCTO.Domain.Dtos
         public Guid EntryId { get; set; }
         public ApprovalType Type { get; set; }
         public string ApprovalRef { get; set; }
-        public double Quantity { get; set; }
+        public decimal Quantity { get; set; }
         public DateTime ApprovalDate { get; set; }
     }
 }

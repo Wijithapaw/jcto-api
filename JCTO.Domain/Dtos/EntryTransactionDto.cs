@@ -13,8 +13,8 @@ namespace JCTO.Domain.Dtos
         public string ApprovalRef { get; set; }
         public int? OrderNo { get; set; }
         public string ObRef { get; set; }
-        public double Quantity { get; set; }
-        public double? DeliveredQuantity { get; set; }
+        public decimal Quantity { get; set; }
+        public decimal? DeliveredQuantity { get; set; }
         public OrderStatus? OrderStatus { get; set; }
         public string RebondedTo { get; set; }
     }

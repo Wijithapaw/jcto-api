@@ -33,7 +33,7 @@ namespace JCTO.Tests
                   {
                       var entrySvc = CreateService(dbContext);
 
-                      var entryDto = DtoHelper.CreateEntryDto(customerId, productId, "10001", new DateTime(2022, 8, 20), EntryStatus.Active, 50.1234);
+                      var entryDto = DtoHelper.CreateEntryDto(customerId, productId, "10001", new DateTime(2022, 8, 20), EntryStatus.Active, 50.1234m);
 
                       var entry = await entrySvc.CreateAsync(entryDto);
 
@@ -52,7 +52,7 @@ namespace JCTO.Tests
                       Assert.Equal(id, newEntry.Id);
                       Assert.Equal(customerId, newEntry.CustomerId);
                       Assert.Equal(productId, newEntry.ProductId);
-                      Assert.Equal(50.1234, newEntry.InitialQualtity);
+                      Assert.Equal(50.1234m, newEntry.InitialQualtity);
                       Assert.Equal("10001", newEntry.EntryNo);
                       Assert.Equal(new DateTime(2022, 8, 20), newEntry.EntryDate);
                       Assert.Equal(EntryStatus.Active, newEntry.Status);
@@ -114,7 +114,7 @@ namespace JCTO.Tests
 
                       var tr1 = entry.Transactions.First(t => t.ObRef == "ref-10");
 
-                      Assert.Equal(-189.5, tr1.Quantity);
+                      Assert.Equal(-189.5m, tr1.Quantity);
                       Assert.Equal(-180, tr1.DeliveredQuantity);
                       Assert.Equal(new DateTime(2022, 8, 27), tr1.TransactionDate);
                       Assert.Equal(1501, tr1.OrderNo);
@@ -128,7 +128,7 @@ namespace JCTO.Tests
             [InlineData(ApprovalType.Rebond, null, "2022-8-31", 100, "Approval Ref. is required for Xbond and Rebond approvals")]
             [InlineData(ApprovalType.Rebond, "50010", "2022-8-31", 200, "Approving quantity (200) is greater than remaining quantity (150) to approve")]
             [InlineData(ApprovalType.Rebond, null, "2022-8-31", 200, "Approval Ref. is required for Xbond and Rebond approvals, Approving quantity (200) is greater than remaining quantity (150) to approve")]
-            public async Task WhenNoFilters_ReturnAll(ApprovalType approvalType, string approvalRef, DateTime date, double qty, string expectedError)
+            public async Task WhenNoFilters_ReturnAll(ApprovalType approvalType, string approvalRef, DateTime date, decimal qty, string expectedError)
             {
                 var entryId = Guid.Empty;
 
@@ -179,7 +179,7 @@ namespace JCTO.Tests
                           var approvalData = expectedApproval.Split(":", StringSplitOptions.RemoveEmptyEntries);
                           var aprType = Enum.Parse(typeof(ApprovalType), approvalData[0]);
                           var aprRef = approvalData[1];
-                          var remAmount = double.Parse(approvalData[2]);
+                          var remAmount = decimal.Parse(approvalData[2]);
 
                           var actual = approvals.Find(a => a.ApprovalRef == aprRef);
 

@@ -3,6 +3,7 @@ using System;
 using JCTO.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JCTO.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20221006105455_Alter_Tables_AlterDataTypeToDecimal")]
+    partial class Alter_Tables_AlterDataTypeToDecimal
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,7 +64,7 @@ namespace JCTO.Data.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("BowserEntries", (string)null);
+                    b.ToTable("BowserEntries");
                 });
 
             modelBuilder.Entity("JCTO.Domain.Entities.Customer", b =>
@@ -106,7 +108,7 @@ namespace JCTO.Data.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Customers", (string)null);
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("JCTO.Domain.Entities.Entry", b =>
@@ -180,7 +182,7 @@ namespace JCTO.Data.Migrations
                     b.HasIndex("RebondFromEntryTxnId")
                         .IsUnique();
 
-                    b.ToTable("Entries", (string)null);
+                    b.ToTable("Entries");
                 });
 
             modelBuilder.Entity("JCTO.Domain.Entities.EntryTransaction", b =>
@@ -254,7 +256,7 @@ namespace JCTO.Data.Migrations
                         .IsUnique()
                         .HasFilter("\"Type\" = 1");
 
-                    b.ToTable("EntryTransactions", (string)null);
+                    b.ToTable("EntryTransactions");
                 });
 
             modelBuilder.Entity("JCTO.Domain.Entities.Order", b =>
@@ -343,7 +345,7 @@ namespace JCTO.Data.Migrations
                     b.HasIndex("OrderDate", "OrderNo")
                         .IsUnique();
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("JCTO.Domain.Entities.Product", b =>
@@ -387,7 +389,7 @@ namespace JCTO.Data.Migrations
 
                     b.HasIndex("LastUpdatedById");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("JCTO.Domain.Entities.User", b =>
@@ -435,7 +437,7 @@ namespace JCTO.Data.Migrations
 
                     b.HasIndex("LastUpdatedById");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("JCTO.Domain.Entities.BowserEntry", b =>

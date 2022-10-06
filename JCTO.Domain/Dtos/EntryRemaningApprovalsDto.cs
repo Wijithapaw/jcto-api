@@ -8,6 +8,6 @@ namespace JCTO.Domain.Dtos
         public string EntryNo { get; set; }
         public ApprovalType ApprovalType { get; set; }
         public string ApprovalRef { get; set; }
-        public double RemainingQty { get; set; }
+        public decimal RemainingQty { get; set; }
     }
 }

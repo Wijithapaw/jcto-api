@@ -46,6 +46,13 @@ namespace JCTO.Data
             }
         }
 
+        protected override void ConfigureConventions(ModelConfigurationBuilder builder)
+        {
+            //To overcome the issue, SQLite doesn't suport sum over decimal fields.
+            if (!Database.IsNpgsql())
+                builder.Properties<decimal>().HaveConversion<double>();
+        }
+
         public DbSet<User> Users { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Product> Products { get; set; }

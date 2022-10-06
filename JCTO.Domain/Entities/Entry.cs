@@ -15,8 +15,8 @@ namespace JCTO.Domain.Entities
         [MaxLength(50)]
         public string EntryNo { get; set; }
         public int Index { get; set; }
-        public double InitialQualtity { get; set; }
-        public double RemainingQuantity { get; set; }
+        public decimal InitialQualtity { get; set; }
+        public decimal RemainingQuantity { get; set; }
         public DateTime EntryDate { get; set; }
         public EntryStatus Status { get; set; }
         [ForeignKey("RebondFromEntryTxn")]

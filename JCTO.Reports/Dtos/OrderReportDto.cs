@@ -10,9 +10,9 @@
     {
         public string Customer { get; set; }
         public string Product { get; set; }
-        public double TotalQuantity { get; set; }
-        public double TotalUndeliveredQuantity { get; set; }
-        public double TotalCancelledQuantity { get; set; }
+        public decimal TotalQuantity { get; set; }
+        public decimal TotalUndeliveredQuantity { get; set; }
+        public decimal TotalCancelledQuantity { get; set; }
         public string DateRange { get; set; }
         public string BuyerType { get; set; }
         public string BuyerName { get; set; }
@@ -23,7 +23,7 @@
     {
         public string Customer { get; set; }
         public string Product { get; set; }
-        public double Quantity { get; set; }
+        public decimal Quantity { get; set; }
         public string OrderDate { get; set; }
         public int OrderNo { get; set; }
         public string BuyerType { get; set; }

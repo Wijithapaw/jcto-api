@@ -237,7 +237,7 @@ namespace JCTO.Tests
 
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
 
-                      Assert.Equal("Remaining quantity (1000.25) of Rebond-50000 is not sufficient to deliver 1500", ex.Message);
+                      Assert.Equal("Remaining quantity (1000.25) of entry: 1001 is not sufficient to deliver: 1500, Remaining quantity (1000.25) of Rebond-50000 is not sufficient to deliver 1500", ex.Message);
                   });
             }
 
@@ -311,7 +311,7 @@ namespace JCTO.Tests
 
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.CreateAsync(dto));
 
-                      Assert.Equal("Invalid entries: 2001|3001, Product miss-matching entries: 1001, Customer miss-matching entries: 1001, Remaining quantity (1000.25) of Rebond-50000 is not sufficient to deliver 1500", ex.Message);
+                      Assert.Equal("Invalid entries: 2001|3001, Product miss-matching entries: 1001, Customer miss-matching entries: 1001, Remaining quantity (1000.25) of entry: 1001 is not sufficient to deliver: 1500, Remaining quantity (1000.25) of Rebond-50000 is not sufficient to deliver 1500", ex.Message);
                   });
             }
 
@@ -1060,7 +1060,7 @@ namespace JCTO.Tests
 
                       var ex = await Assert.ThrowsAsync<JCTOValidationException>(() => orderSvc.UpdateAsync(order.Id, dto));
 
-                      Assert.Equal("Remaining quantity (170) of XBond-60000 is not sufficient to deliver 321", ex.Message);
+                      Assert.Equal("Remaining quantity (320) of entry: 1002 is not sufficient to deliver: 321, Remaining quantity (170) of XBond-60000 is not sufficient to deliver 321", ex.Message);
                   });
             }
         }

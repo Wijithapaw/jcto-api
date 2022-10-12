@@ -478,6 +478,10 @@ namespace JCTO.Services
                     e.ProductId,
                     e.InitialQualtity,
                     e.Status,
+                    RemainingQuantity = e.InitialQualtity + e.Transactions
+                        .Where(t => (!update || t.OrderId != order.Id)
+                            && t.Type != EntryTransactionType.Approval)
+                        .Sum(d => d.Order.Status == OrderStatus.Delivered ? d.DeliveredQuantity.Value : d.Quantity),
                     RemApprovedQtys = e.Transactions
                         .Where(t => t.Type == EntryTransactionType.Approval)
                         .Select(t => new
@@ -524,6 +528,23 @@ namespace JCTO.Services
 
             if (customerMismatchs.Any())
                 errors.Add($"Customer miss-matching entries: {string.Join("|", customerMismatchs)}");
+
+            var entryTotals = order.ReleaseEntries
+                .Where(r => !completedEntries.Union(invalidEntries).Contains(r.EntryNo))
+                .GroupBy(e => e.EntryNo)
+                .Select(g => new
+                {
+                    EntryNo = g.Key,
+                    OutQuantity = g.Sum(g => g.Quantity)
+                }).ToList();
+
+            foreach (var entryTotal in entryTotals)
+            {
+                var entry = entries.First(e => e.EntryNo == entryTotal.EntryNo);
+
+                if (entry.RemainingQuantity < entryTotal.OutQuantity)
+                    errors.Add($"Remaining quantity ({entry.RemainingQuantity}) of entry: {entry.EntryNo} is not sufficient to deliver: {entryTotal.OutQuantity}");
+            }
 
             foreach (var reqBondQty in order.ReleaseEntries.Where(r => !completedEntries.Union(invalidEntries).Contains(r.EntryNo)))
             {

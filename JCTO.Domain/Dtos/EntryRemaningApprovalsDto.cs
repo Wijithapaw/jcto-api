@@ -9,5 +9,6 @@ namespace JCTO.Domain.Dtos
         public ApprovalType ApprovalType { get; set; }
         public string ApprovalRef { get; set; }
         public decimal RemainingQty { get; set; }
+        public bool IsOfUpdatingOrder { get; set; }
     }
 }

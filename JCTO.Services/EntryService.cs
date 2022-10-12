@@ -85,13 +85,9 @@ namespace JCTO.Services
                 throw new JCTOValidationException("Can't rebond to the same customer");
             }
 
-            var approvedQty = entry.Transactions.Where(t => t.Type == EntryTransactionType.Approval).Sum(t => t.Quantity);
-            var rebondedToQty = entry.Transactions.Where(t => t.Type == EntryTransactionType.RebondTo).Sum(t => t.Quantity) * -1;
-            var remQtyToRebond = entry.InitialQualtity - rebondedToQty - approvedQty;
-
-            if (rebondTo.Quantity > remQtyToRebond)
+            if (rebondTo.Quantity > entry.RemainingQuantity)
             {
-                throw new JCTOValidationException($"Remaining quantity ({remQtyToRebond}) not sufficient to rebond: {rebondTo.Quantity}");
+                throw new JCTOValidationException($"Remaining quantity ({entry.RemainingQuantity}) not sufficient to rebond: {rebondTo.Quantity}");
             }
         }
 
@@ -334,17 +330,27 @@ namespace JCTO.Services
         {
             var remApprovals = await _dataContext.EntryTransactions
                 .Where(t => t.Entry.EntryNo == entryNo && t.Type == EntryTransactionType.Approval)
-                .Select(t => new EntryRemaningApprovalsDto
+                .Select(t => new
                 {
                     Id = t.Id,
                     ApprovalType = t.ApprovalType.Value,
                     ApprovalRef = t.ApprovalRef,
                     EntryNo = t.Entry.EntryNo,
-                    RemainingQty = t.Quantity + t.Deliveries
-                        .Where(d => excludeOrderId == null || d.OrderId != excludeOrderId)
-                        .Sum(d => d.Order.Status == OrderStatus.Delivered ? d.DeliveredQuantity.Value : d.Quantity)
+                    ApprovalRemainingQty = t.Quantity + t.Deliveries
+                        .Sum(d => d.Order.Status == OrderStatus.Delivered ? d.DeliveredQuantity.Value : d.Quantity),
+                    EntryRemainingQty = t.Entry.RemainingQuantity,
+                    IsOfUpdatingOrder = t.Deliveries.Any(d => excludeOrderId != null && d.OrderId == excludeOrderId)
                 })
-                .Where(a => a.RemainingQty > 0)
+                .Select(t => new EntryRemaningApprovalsDto
+                {
+                    Id = t.Id,
+                    ApprovalType = t.ApprovalType,
+                    ApprovalRef = t.ApprovalRef,
+                    EntryNo = t.EntryNo,
+                    RemainingQty = (t.ApprovalRemainingQty > t.EntryRemainingQty ? t.EntryRemainingQty : t.ApprovalRemainingQty),
+                    IsOfUpdatingOrder = t.IsOfUpdatingOrder
+                })
+                .Where(a => a.RemainingQty > 0 || a.IsOfUpdatingOrder)
                 .ToListAsync();
             return remApprovals;
         }

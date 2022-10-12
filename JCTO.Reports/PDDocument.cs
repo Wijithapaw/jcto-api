@@ -32,6 +32,8 @@ namespace JCTO.Reports
                     {
                         var sheet = package.Workbook.Worksheets[sheetIndex++];
 
+                        //sheet.Cells.Clear();
+
                         sheet.Cells["E8"].Value = data.Customer;
                         sheet.Cells["E10"].Value = data.Buyer;
 

@@ -20,12 +20,12 @@ namespace JCTO.Reports
                 sheet.Cells["B3"].Value = data.Filter.Product;
                 sheet.Cells["B4"].Value = data.Filter.BuyerType;
                 sheet.Cells["B5"].Value = data.Filter.DateRange;
-                sheet.Cells["F3"].Value = data.Filter.Customer;
-                sheet.Cells["F4"].Value = data.Filter.BuyerName;
-                sheet.Cells["F5"].Value = data.Filter.Status;
-                sheet.Cells["J3"].Value = data.Filter.TotalQuantity;
-                sheet.Cells["J4"].Value = data.Filter.TotalUndeliveredQuantity;
-                sheet.Cells["J5"].Value = data.Filter.TotalCancelledQuantity;
+                sheet.Cells["G3"].Value = data.Filter.Customer;
+                sheet.Cells["G4"].Value = data.Filter.BuyerName;
+                sheet.Cells["G5"].Value = data.Filter.Status;
+                sheet.Cells["K3"].Value = data.Filter.TotalQuantity;
+                sheet.Cells["K4"].Value = data.Filter.TotalUndeliveredQuantity;
+                sheet.Cells["K5"].Value = data.Filter.TotalCancelledQuantity;
 
                 var row = 9;
                 foreach (var order in data.Orders)
@@ -37,9 +37,10 @@ namespace JCTO.Reports
                     sheet.Cells[row, 5].Value = order.Status;
                     sheet.Cells[row, 6].Value = order.BuyerType;
                     sheet.Cells[row, 7].Value = order.BuyerName;
-                    sheet.Cells[row, 8].Value = order.Quantity;
-                    sheet.Cells[row, 9].Value = order.IssueCommencedTime;
-                    sheet.Cells[row, 10].Value = order.IssueCompletedTime;
+                    sheet.Cells[row, 8].Value = order.BowserDetails;
+                    sheet.Cells[row, 9].Value = order.Quantity;
+                    sheet.Cells[row, 10].Value = order.IssueCommencedTime;
+                    sheet.Cells[row, 11].Value = order.IssueCompletedTime;
 
                     row++;
                 }

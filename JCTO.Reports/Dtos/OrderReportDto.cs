@@ -31,6 +31,7 @@
         public string Status { get; set; }
         public string IssueCommencedTime { get; set; }
         public string IssueCompletedTime { get; set; }
+        public string BowserDetails { get; set; }
     }
 }
 

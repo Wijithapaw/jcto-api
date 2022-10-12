@@ -257,6 +257,12 @@ namespace JCTO.Services
                     TaxPaid = o.TaxPaid,
                     IssueStartTime = o.IssueStartTime,
                     IssueEndTime = o.IssueEndTime,
+                    BowserEntries = filter.IncludeBowserEntries ? o.BowserEntries.Select(b => new BowserEntryDto
+                    {
+                        Id = b.Id,
+                        Capacity = b.Capacity,
+                        Count = b.Count
+                    }).ToList() : null
                 }).GetPagedListAsync(filter);
 
             return orders;
@@ -311,6 +317,7 @@ namespace JCTO.Services
         {
             var buyerName = string.IsNullOrEmpty(filter.Buyer) ? "*" : filter.Buyer;
 
+            filter.IncludeBowserEntries = true;
             filter.PageSize = 10000;
             var orders = await SearchOrdersAsync(filter);
 
@@ -358,6 +365,7 @@ namespace JCTO.Services
                     Status = o.Status.ToString("g"),
                     IssueCommencedTime = o.IssueStartTime?.ToString(DateFormats.DATE_AND_TIME),
                     IssueCompletedTime = o.IssueEndTime?.ToString(DateFormats.DATE_AND_TIME),
+                    BowserDetails = string.Join(" + ", o.BowserEntries.OrderBy(b => b.Capacity).Select(b => $"{b.Capacity}x{b.Count}"))
                 }).ToList()
             };
 

@@ -17,5 +17,6 @@ namespace JCTO.Domain.Dtos
         public bool TaxPaid { get; set; }
         public DateTime? IssueStartTime { get; set; }
         public DateTime? IssueEndTime { get; set; }
+        public List<BowserEntryDto> BowserEntries { get; set; }
     }
 }

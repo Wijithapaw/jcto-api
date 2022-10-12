@@ -18,5 +18,6 @@ namespace JCTO.Domain.Dtos
         public OrderStatus? Status { get; set; }
         public BuyerType? BuyerType { get; set; }
         public int? OrderNo { get; set; }
+        public bool IncludeBowserEntries { get; set; }
     }
 }
